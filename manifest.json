@@ -1,0 +1,19 @@
+{
+  "name": "HTB Ankerprüfung",
+  "short_name": "Ankerprüfung",
+  "description": "Verpreßanker Eignungsprüfung gem. EN ISO 22477-5 (Verfahren 1) – HTB Baugesellschaft m.b.H.",
+  "start_url": "/Ankerpruefung/",
+  "scope": "/Ankerpruefung/",
+  "display": "standalone",
+  "background_color": "#0d2f4f",
+  "theme_color": "#0d2f4f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/Ankerpruefung/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
