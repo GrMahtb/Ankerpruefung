@@ -1,4 +1,5 @@
 'use strict';
+const BASE_PATH = '/Ankerpruefung/';
 console.log('HTB Ankerprüfung app.js v1 loaded');
 
 const STORAGE_DRAFT='htb-anker-draft-v1';
@@ -14,7 +15,38 @@ const FILIALEN={
   Wels:{adresse:'A-4600 Wels, Hans-Sachs-Straße 103',tel:'+43 7242 / 601 600',email:'office.wels@htb-bau.at'},
   Klagenfurt:{adresse:'A-9020 Klagenfurt, Josef-Sablatnig-Straße 251',tel:'+43 463 / 33 533 700',email:'office.klagenfurt@htb-bau.at'}
 };
+/* ── UPDATE BANNER ── */
+function showUpdateBanner() {
+  // Verhindert doppeltes Einfügen
+  if (document.getElementById('updateBanner')) return;
 
+  const banner = document.createElement('div');
+  banner.id = 'updateBanner';
+  banner.style.cssText = [
+    'position:fixed', 'bottom:70px', 'left:50%', 'transform:translateX(-50%)',
+    'background:#173f66', 'color:#fff', 'border:2px solid #f08a1c',
+    'border-radius:10px', 'padding:10px 16px', 'z-index:999',
+    'display:flex', 'align-items:center', 'gap:10px',
+    'box-shadow:0 4px 12px rgba(0,0,0,.4)', 'font-size:14px', 'font-weight:700'
+  ].join(';');
+
+  banner.innerHTML = `
+    <span> Update verfügbar</span>
+    <button
+      onclick="navigator.serviceWorker.getRegistration().then(r=>r?.waiting?.postMessage({action:'skipWaiting'}));this.closest('#updateBanner').remove();"
+      style="background:#f08a1c;color:#fff;border:0;border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:700;font-size:13px"
+    >Jetzt laden</button>
+    <button
+      onclick="this.closest('#updateBanner').remove();"
+      style="background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:6px;padding:6px 10px;cursor:pointer;font-size:12px"
+    >Später</button>
+  `;
+
+  document.body.appendChild(banner);
+
+  // Auto-dismiss nach 12 Sekunden
+  setTimeout(() => banner.remove(), 12000);
+}
 /* ────────── DEFAULT-INTERVALLE ────────── */
 // Standardisierte Intervalle pro Zyklus laut EN ISO 22477-5 / Excel-Vorlage
 const STD_INTERVALS_15=[0,1,2,3,4,5,7,10,15];
@@ -764,7 +796,32 @@ function init(){
   // PWA Install
   let deferredPrompt=null;
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('btnInstall').hidden=false;});
-  $('btnInstall').addEventListener('click',async()=>{if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$('btnInstall').hidden=true;}});
+  $('btnInstall').addEventListener('click',async()=>{if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$('btnInstall').hidden=true;}
+                                                      // ── SERVICE WORKER ──
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+      .register(`${BASE_PATH}sw.js?v=1`)
+      .then(reg => {
+        console.log('[Anker] SW registriert, scope:', reg.scope);
+
+        // Zeige "Update verfügbar"-Banner wenn neue SW-Version wartet
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          newWorker?.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              showUpdateBanner();
+            }
+          });
+        });
+      })
+      .catch(err => console.error('[Anker] SW Fehler:', err));
+
+    // Seite neu laden wenn neuer SW aktiv wird
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) { refreshing = true; location.reload(); }
+    });
+  }});
 }
 
 document.addEventListener('DOMContentLoaded',init);
