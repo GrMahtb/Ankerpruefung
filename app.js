@@ -69,6 +69,11 @@ function uid(){try{return crypto.randomUUID();}catch{return 'id_'+Date.now()+'_'
 function clone(v){return JSON.parse(JSON.stringify(v));}
 function clamp(n,lo,hi){return Math.max(lo,Math.min(hi,n));}
 function fmt(v,d=2){const n=Number(v);return Number.isFinite(n)?n.toFixed(d).replace('.',','):'—';}
+function formatInputNumber(n,d=1){
+  if(!Number.isFinite(n)) return '';
+  const s=n.toFixed(d);
+  return s.replace(/\.0+$/,'').replace(/(\.\d*[1-9])0+$/,'$1');
+}
 function formatTimeHHMMSS(d=new Date()){return`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;}
 function formatElapsed(ms){const t=Math.max(0,Math.floor(ms/1000)),hh=Math.floor(t/3600),mm=Math.floor((t%3600)/60),ss=t%60;return hh>0?`${hh}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`:`${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;}
 function dateTag(d=new Date()){return`${String(d.getDate()).padStart(2,'0')}${String(d.getMonth()+1).padStart(2,'0')}${d.getFullYear()}`;}
@@ -162,13 +167,147 @@ function collectVorgabeFromUi(){
   VOR_FIELDS.forEach(k=>{const el=$('vor-'+k);if(el)state.vorgabe[k]=el.value||'';});
   state.vorgabe.bodenart=$('boden-bindig').checked?'bindig':'nichtbindig';
 }
+function getMeasuredLappForDisplay(){
+  const zs=[...state.zyklen].sort((a,b)=>b.nr-a.nr);
+  for(const z of zs){
+    const k=getZyklusKpis(z);
+    if(Number.isFinite(k.Lapp)){
+      return { Lapp:k.Lapp, zyklus:z.nr, dS:k.dS };
+    }
+  }
+  return { Lapp:NaN, zyklus:null, dS:NaN };
+}
 
+function computeVorgabeAuto(){
+  const Ltf=Number(state.vorgabe.Ltf);
+  const Ltb=Number(state.vorgabe.Ltb);
+  const Le =Number(state.vorgabe.Le);
+  const Et =Number(state.vorgabe.Et);
+  const At =Number(state.vorgabe.At);
+  const Pa =Number(state.vorgabe.Pa);
+  const Pp =Number(state.vorgabe.Pp);
+  const Pd =Number(state.vorgabe.Pd);
+  const gamma=Number(state.vorgabe.gamma);
+
+  const minLapp=(Number.isFinite(Ltf)&&Number.isFinite(Le))
+    ? (0.8*Ltf + Le)
+    : NaN;
+
+  const maxLapp=(Number.isFinite(Ltf)&&Number.isFinite(Le)&&Number.isFinite(Ltb))
+    ? (Ltf + Le + 0.5*Ltb)
+    : NaN;
+
+  const deltaF=Pp-Pa;
+
+  const sGrenzB=(
+    Number.isFinite(minLapp) &&
+    Number.isFinite(deltaF) && deltaF>0 &&
+    Number.isFinite(Et) && Et>0 &&
+    Number.isFinite(At) && At>0
+  ) ? (minLapp*deltaF*1000)/(Et*At) : NaN;
+
+  const sGrenzA=(
+    Number.isFinite(maxLapp) &&
+    Number.isFinite(deltaF) && deltaF>0 &&
+    Number.isFinite(Et) && Et>0 &&
+    Number.isFinite(At) && At>0
+  ) ? (maxLapp*deltaF*1000)/(Et*At) : NaN;
+
+  const PpFromPd=(Number.isFinite(Pd)&&Number.isFinite(gamma)&&gamma>0)
+    ? (Pd*gamma)
+    : NaN;
+
+  const PdFromPp=(Number.isFinite(Pp)&&Number.isFinite(gamma)&&gamma>0)
+    ? (Pp/gamma)
+    : NaN;
+
+  const measured=getMeasuredLappForDisplay();
+
+  return {
+    minLapp,
+    maxLapp,
+    sGrenzB,
+    sGrenzA,
+    PpFromPd,
+    PdFromPp,
+    measuredLapp: measured.Lapp,
+    measuredZyklus: measured.zyklus
+  };
+}
+
+function maybeAutofillVorgabe(changedKey){
+  const a=computeVorgabeAuto();
+
+  if(
+    (changedKey==='Pd' || changedKey==='gamma') &&
+    (!state.vorgabe.Pp || String(state.vorgabe.Pp).trim()==='') &&
+    Number.isFinite(a.PpFromPd)
+  ){
+    state.vorgabe.Pp=formatInputNumber(a.PpFromPd,1);
+    if($('vor-Pp')) $('vor-Pp').value=state.vorgabe.Pp;
+  }
+
+  if(
+    (changedKey==='Pp' || changedKey==='gamma') &&
+    (!state.vorgabe.Pd || String(state.vorgabe.Pd).trim()==='') &&
+    Number.isFinite(a.PdFromPp)
+  ){
+    state.vorgabe.Pd=formatInputNumber(a.PdFromPp,1);
+    if($('vor-Pd')) $('vor-Pd').value=state.vorgabe.Pd;
+  }
+}
 function updateLappPreview(){
-  const Ltf=Number(state.vorgabe.Ltf),Ltb=Number(state.vorgabe.Ltb),Le=Number(state.vorgabe.Le);
-  const minL=(Number.isFinite(Ltf)&&Number.isFinite(Le))?(0.8*Ltf+Le):NaN;
-  const maxL=(Number.isFinite(Ltf)&&Number.isFinite(Le)&&Number.isFinite(Ltb))?(Ltf+Le+0.5*Ltb):NaN;
-  $('calc-minLapp').textContent=Number.isFinite(minL)?fmt(minL,2):'—';
-  $('calc-maxLapp').textContent=Number.isFinite(maxL)?fmt(maxL,2):'—';
+  const a=computeVorgabeAuto();
+
+  const put=(id,val,unit='',digits=2)=>{
+    const el=$(id);
+    if(!el) return;
+    el.textContent=Number.isFinite(val) ? `${fmt(val,digits)}${unit}` : '—';
+  };
+
+  put('calc-minLapp', a.minLapp, ' m', 2);
+  put('calc-maxLapp', a.maxLapp, ' m', 2);
+  put('calc-sGrenzB', a.sGrenzB, ' mm', 2);
+  put('calc-sGrenzA', a.sGrenzA, ' mm', 2);
+  put('calc-PpFromPd', a.PpFromPd, ' kN', 1);
+  put('calc-PdFromPp', a.PdFromPp, ' kN', 1);
+
+  const hintPp=$('hint-vor-Pp');
+  if(hintPp){
+    hintPp.textContent=Number.isFinite(a.PpFromPd)
+      ? `Auto aus Pd·γa: ${fmt(a.PpFromPd,1)} kN`
+      : '';
+  }
+
+  const hintPd=$('hint-vor-Pd');
+  if(hintPd){
+    hintPd.textContent=Number.isFinite(a.PdFromPp)
+      ? `Auto aus Pp/γa: ${fmt(a.PdFromPp,1)} kN`
+      : '';
+  }
+
+  const lappEl=$('calc-LappMeasured');
+  if(lappEl){
+    lappEl.textContent=Number.isFinite(a.measuredLapp)
+      ? `${fmt(a.measuredLapp,2)} m${a.measuredZyklus ? ` (Zyklus ${a.measuredZyklus})` : ''}`
+      : '—';
+  }
+
+  const checkEl=$('calc-LappCheck');
+  if(checkEl){
+    if(
+      Number.isFinite(a.measuredLapp) &&
+      Number.isFinite(a.minLapp) &&
+      Number.isFinite(a.maxLapp)
+    ){
+      const ok = a.measuredLapp >= a.minLapp && a.measuredLapp <= a.maxLapp;
+      checkEl.textContent = ok ? 'OK' : 'nicht OK';
+      checkEl.className = `inline-badge ${ok ? 'inline-badge--good' : 'inline-badge--bad'}`;
+    }else{
+      checkEl.textContent = '—';
+      checkEl.className = 'inline-badge';
+    }
+  }
 }
 
 /* ────────── AUDIO / ALARM (analog Pumpversuch) ────────── */
@@ -429,6 +568,7 @@ function renderZyklen(){
   host.innerHTML=state.zyklen.map(buildZyklusHtml).join('');
   document.querySelectorAll('.zyklus-card').forEach(card=>{const z=getZyklusById(card.dataset.zid);if(z)updateTimerUi(card,z);});
   updateFloatingTimerWidget();
+  updateLappPreview();
 }
 
 function hookZyklenDelegation(){
@@ -440,10 +580,31 @@ function hookZyklenDelegation(){
     const role=el.dataset.role,idx=Number(el.dataset.row),lsIdx=Number(el.dataset.idx);
     if(role==='ls-druck'){if(z.laststufen[lsIdx])z.laststufen[lsIdx].druck=el.value;saveDraftDebounced();return;}
     if(role==='intervalle'){z.intervalleStr=el.value;reconcileMessungen(z);renderZyklen();saveDraftDebounced();return;}
-    if(role==='m-min'){if(z.messungen[idx])z.messungen[idx].min=el.value;saveDraftDebounced();return;}
-    if(role==='m-druck'){if(z.messungen[idx])z.messungen[idx].druck=el.value;saveDraftDebounced();return;}
-    if(role==='m-ablesung'){if(z.messungen[idx])z.messungen[idx].ablesung=el.value;saveDraftDebounced();return;}
-    if(role==='m-versch'){if(z.messungen[idx])z.messungen[idx].versch=el.value;saveDraftDebounced();return;}
+   if(role==='m-min'){
+  if(z.messungen[idx]) z.messungen[idx].min=el.value;
+  updateLappPreview();
+  saveDraftDebounced();
+  return;
+}
+if(role==='m-druck'){
+  if(z.messungen[idx]) z.messungen[idx].druck=el.value;
+  updateLappPreview();
+  saveDraftDebounced();
+  return;
+}
+if(role==='m-ablesung'){
+  if(z.messungen[idx]) z.messungen[idx].ablesung=el.value;
+  updateLappPreview();
+  saveDraftDebounced();
+  return;
+}
+if(role==='m-versch'){
+  if(z.messungen[idx]) z.messungen[idx].versch=el.value;
+  updateLappPreview();
+  if(!$('tab-auswertung').hidden) renderAuswertung();
+  saveDraftDebounced();
+  return;
+}
   });
   host.addEventListener('click',e=>{
     const el=e.target.closest('[data-role]');if(!el)return;
@@ -751,7 +912,19 @@ function init(){
   // Stammdaten
   META_FIELDS.forEach(([id,k])=>{const el=$(id);if(el)el.addEventListener('input',()=>{state.meta[k]=el.value;saveDraftDebounced();});});
   // Vorgabe
-  VOR_FIELDS.forEach(k=>{const el=$('vor-'+k);if(el)el.addEventListener('input',()=>{state.vorgabe[k]=el.value;updateLappPreview();saveDraftDebounced();});});
+  VOR_FIELDS.forEach(k=>{
+  const el=$('vor-'+k);
+  if(!el) return;
+
+  el.addEventListener('input',()=>{
+    state.vorgabe[k]=el.value || '';
+    maybeAutofillVorgabe(k);
+    updateLappPreview();
+    renderZyklen();
+    if(!$('tab-auswertung').hidden) renderAuswertung();
+    saveDraftDebounced();
+  });
+});
   $('boden-bindig').addEventListener('change',()=>{state.vorgabe.bodenart='bindig';saveDraftDebounced();});
   $('boden-nichtbindig').addEventListener('change',()=>{state.vorgabe.bodenart='nichtbindig';saveDraftDebounced();});
   // Zyklus hinzufügen
