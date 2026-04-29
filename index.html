@@ -112,45 +112,84 @@
   </details>
 
   <!-- VORGABE -->
-  <details class="card card--collapsible" open>
-    <summary class="card__title">Vorgabe Anker</summary>
-    <div class="card__body">
+ <details class="card card--collapsible" open>
+  <summary class="card__title">Vorgabe Anker</summary>
+  <div class="card__body">
 
-      <div class="select-grid">
-        <label class="select-card">
-          <input type="radio" name="bodenart" id="boden-nichtbindig" value="nichtbindig" checked />
-          <span><b>Nicht bindig / Fels</b><br><small>Beobachtung Pp: 60 min</small></span>
-        </label>
-        <label class="select-card">
-          <input type="radio" name="bodenart" id="boden-bindig" value="bindig" />
-          <span><b>Bindig</b><br><small>Beobachtung Pp: 180 min</small></span>
-        </label>
+    <div class="select-grid">
+      <label class="select-card">
+        <input type="radio" name="bodenart" id="boden-nichtbindig" value="nichtbindig" checked />
+        <span><b>Nicht bindig / Fels</b><br><small>Beobachtung Pp: 60 min</small></span>
+      </label>
+      <label class="select-card">
+        <input type="radio" name="bodenart" id="boden-bindig" value="bindig" />
+        <span><b>Bindig</b><br><small>Beobachtung Pp: 180 min</small></span>
+      </label>
+    </div>
+
+    <div class="form-grid" style="margin-top:12px">
+      <label class="field"><span class="field__label">Ankertyp</span><input id="vor-ankertyp" class="field__input" type="text" /></label>
+      <label class="field"><span class="field__label">Ankerlänge L<sub>A</sub> [m]</span><input id="vor-LA" class="field__input" type="number" step="0.01" /></label>
+      <label class="field"><span class="field__label">Verank.länge L<sub>tb</sub> [m]</span><input id="vor-Ltb" class="field__input" type="number" step="0.01" /></label>
+      <label class="field"><span class="field__label">Freie Länge L<sub>tf</sub> [m]</span><input id="vor-Ltf" class="field__input" type="number" step="0.01" /></label>
+      <label class="field"><span class="field__label">Spannüberstand L<sub>e</sub> [m]</span><input id="vor-Le" class="field__input" type="number" step="0.01" /></label>
+      <label class="field"><span class="field__label">E-Modul E<sub>t</sub> [kN/mm²]</span><input id="vor-Et" class="field__input" type="number" step="0.1" value="195" /></label>
+      <label class="field"><span class="field__label">Querschnitt A<sub>t</sub> [mm²]</span><input id="vor-At" class="field__input" type="number" step="0.1" /></label>
+      <label class="field"><span class="field__label">Festlegekraft P<sub>0</sub> [kN]</span><input id="vor-P0" class="field__input" type="number" step="0.1" /></label>
+      <label class="field"><span class="field__label">Vorbelastung P<sub>a</sub> [kN]</span><input id="vor-Pa" class="field__input" type="number" step="0.1" value="0" /></label>
+
+      <label class="field">
+        <span class="field__label">Prüfkraft P<sub>p</sub> [kN]</span>
+        <input id="vor-Pp" class="field__input" type="number" step="0.1" />
+        <small id="hint-vor-Pp" class="field__hint"></small>
+      </label>
+
+      <label class="field"><span class="field__label">0,1%-Dehngrenze P<sub>t0,1k</sub> [kN]</span><input id="vor-Pt01k" class="field__input" type="number" step="0.1" /></label>
+
+      <label class="field">
+        <span class="field__label">Bemessung P<sub>d</sub> [kN]</span>
+        <input id="vor-Pd" class="field__input" type="number" step="0.1" />
+        <small id="hint-vor-Pd" class="field__hint"></small>
+      </label>
+
+      <label class="field"><span class="field__label">Teilsicherheit γ<sub>a</sub> [-]</span><input id="vor-gamma" class="field__input" type="number" step="0.01" value="1.1" /></label>
+    </div>
+
+    <div class="auto-grid">
+      <div class="auto-card">
+        <div class="auto-card__label">Pp aus Pd · γa</div>
+        <div id="calc-PpFromPd" class="auto-card__value">—</div>
       </div>
-
-      <div class="form-grid" style="margin-top:12px">
-        <label class="field"><span class="field__label">Ankertyp</span><input id="vor-ankertyp" class="field__input" type="text" /></label>
-        <label class="field"><span class="field__label">Ankerlänge L<sub>A</sub> [m]</span><input id="vor-LA" class="field__input" type="number" step="0.01" /></label>
-        <label class="field"><span class="field__label">Verank.länge L<sub>tb</sub> [m]</span><input id="vor-Ltb" class="field__input" type="number" step="0.01" /></label>
-        <label class="field"><span class="field__label">Freie Länge L<sub>tf</sub> [m]</span><input id="vor-Ltf" class="field__input" type="number" step="0.01" /></label>
-        <label class="field"><span class="field__label">Spannüberstand L<sub>e</sub> [m]</span><input id="vor-Le" class="field__input" type="number" step="0.01" /></label>
-        <label class="field"><span class="field__label">E-Modul E<sub>t</sub> [kN/mm²]</span><input id="vor-Et" class="field__input" type="number" step="0.1" value="195" /></label>
-        <label class="field"><span class="field__label">Querschnitt A<sub>t</sub> [mm²]</span><input id="vor-At" class="field__input" type="number" step="0.1" /></label>
-        <label class="field"><span class="field__label">Festlegekraft P<sub>0</sub> [kN]</span><input id="vor-P0" class="field__input" type="number" step="0.1" /></label>
-        <label class="field"><span class="field__label">Vorbelastung P<sub>a</sub> [kN]</span><input id="vor-Pa" class="field__input" type="number" step="0.1" value="0" /></label>
-        <label class="field"><span class="field__label">Prüfkraft P<sub>p</sub> [kN]</span><input id="vor-Pp" class="field__input" type="number" step="0.1" /></label>
-        <label class="field"><span class="field__label">0,1%-Dehngrenze P<sub>t0,1k</sub> [kN]</span><input id="vor-Pt01k" class="field__input" type="number" step="0.1" /></label>
-        <label class="field"><span class="field__label">Bemessung P<sub>d</sub> [kN]</span><input id="vor-Pd" class="field__input" type="number" step="0.1" /></label>
-        <label class="field"><span class="field__label">Teilsicherheit γ<sub>a</sub> [-]</span><input id="vor-gamma" class="field__input" type="number" step="0.01" value="1.1" /></label>
+      <div class="auto-card">
+        <div class="auto-card__label">Pd aus Pp / γa</div>
+        <div id="calc-PdFromPp" class="auto-card__value">—</div>
       </div>
-
-      <div class="info-box">
-        <b>Berechnete Grenzwerte freie Stahllänge L<sub>app</sub>:</b><br>
-        min L<sub>app</sub> = 0,8 × L<sub>tf</sub> + L<sub>e</sub> = <b id="calc-minLapp">—</b> m<br>
-        max L<sub>app</sub> = L<sub>tf</sub> + L<sub>e</sub> + 0,5 × L<sub>tb</sub> = <b id="calc-maxLapp">—</b> m
+      <div class="auto-card">
+        <div class="auto-card__label">min. Lapp</div>
+        <div id="calc-minLapp" class="auto-card__value">—</div>
+      </div>
+      <div class="auto-card">
+        <div class="auto-card__label">max. Lapp</div>
+        <div id="calc-maxLapp" class="auto-card__value">—</div>
+      </div>
+      <div class="auto-card">
+        <div class="auto-card__label">s Grenzlinie b (Pp)</div>
+        <div id="calc-sGrenzB" class="auto-card__value">—</div>
+      </div>
+      <div class="auto-card">
+        <div class="auto-card__label">s Grenzlinie a (Pp)</div>
+        <div id="calc-sGrenzA" class="auto-card__value">—</div>
       </div>
     </div>
-  </details>
 
+    <div class="info-box">
+      <b>Automatisch berechnet</b><br>
+      Tatsächlich rechnerische freie Stahllänge L<sub>app</sub>: <b id="calc-LappMeasured">—</b><br>
+      Grenzwerte freie Stahllänge eingehalten: <span id="calc-LappCheck" class="inline-badge">—</span>
+    </div>
+
+  </div>
+</details>
   <!-- LASTZYKLEN -->
   <section class="card">
     <div class="card__title">Lastzyklen Eignungsprüfung</div>
