@@ -74,45 +74,173 @@
 <!-- ========== FORMULAR ========== -->
 <main id="tab-formular" class="pane is-active" role="tabpanel">
 
-  <!-- STAMMDATEN -->
-  <details class="card card--collapsible" open>
-    <summary class="card__title">Stammdaten</summary>
-    <div class="card__body">
-      <div class="form-grid">
-        <label class="field">
-          <span class="field__label">Filiale *</span>
-          <select id="meta-filiale" class="field__select" required>
-            <option value="">Bitte wählen</option>
-            <option value="Arzl">Arzl</option>
-            <option value="Nüziders">Nüziders</option>
-            <option value="Zirl">Zirl</option>
-            <option value="Schwoich">Schwoich</option>
-            <option value="Fusch">Fusch</option>
-            <option value="Wels">Wels</option>
-            <option value="Klagenfurt">Klagenfurt</option>
-          </select>
-        </label>
-        <label class="field field--full">
-          <span class="field__label">Bauvorhaben</span>
-          <input id="meta-bauvorhaben" class="field__input" type="text" />
-        </label>
-        <label class="field"><span class="field__label">Bauherr</span><input id="meta-bauherr" class="field__input" type="text" /></label>
-        <label class="field"><span class="field__label">Bauleitung</span><input id="meta-bauleitung" class="field__input" type="text" /></label>
-        <label class="field"><span class="field__label">Ankerlage</span><input id="meta-ankerlage" class="field__input" type="text" /></label>
-        <label class="field"><span class="field__label">Anker Nr.</span><input id="meta-ankerNr" class="field__input" type="text" /></label>
-        <label class="field"><span class="field__label">Blatt Nr.</span><input id="meta-blattNr" class="field__input" type="text" /></label>
-        <label class="field"><span class="field__label">Prüfdatum</span><input id="meta-pruefdatum" class="field__input" type="date" /></label>
-        <label class="field"><span class="field__label">Presse Nr.</span><input id="meta-presseNr" class="field__input" type="text" /></label>
-        <label class="field"><span class="field__label">Presse Typ</span><input id="meta-presseTyp" class="field__input" type="text" /></label>
-        <label class="field"><span class="field__label">Manometer Nr.</span><input id="meta-manometerNr" class="field__input" type="text" /></label>
-        <label class="field"><span class="field__label">Hydraulikpumpe Nr.</span><input id="meta-pumpeNr" class="field__input" type="text" /></label>
-        <label class="field field--full"><span class="field__label">Anmerkung</span><textarea id="meta-anmerkung" class="field__input field__textarea" rows="2"></textarea></label>
+<!-- ════════════════════════════════════════
+     STAMMDATEN  (ohne Pressenparameter)
+════════════════════════════════════════ -->
+<details class="card card--collapsible" open>
+  <summary class="card__title">Stammdaten</summary>
+  <div class="card__body">
+    <div class="form-grid">
+
+      <label class="field">
+        <span class="field__label">Filiale *</span>
+        <select id="meta-filiale" class="field__select" required>
+          <option value="">Bitte wählen</option>
+          <option value="Arzl">Arzl</option>
+          <option value="Nüziders">Nüziders</option>
+          <option value="Zirl">Zirl</option>
+          <option value="Schwoich">Schwoich</option>
+          <option value="Fusch">Fusch</option>
+          <option value="Wels">Wels</option>
+          <option value="Klagenfurt">Klagenfurt</option>
+        </select>
+      </label>
+
+      <label class="field field--full">
+        <span class="field__label">Bauvorhaben</span>
+        <input id="meta-bauvorhaben" class="field__input" type="text" />
+      </label>
+
+      <label class="field">
+        <span class="field__label">Bauherr</span>
+        <input id="meta-bauherr" class="field__input" type="text" />
+      </label>
+
+      <label class="field">
+        <span class="field__label">Bauleitung</span>
+        <input id="meta-bauleitung" class="field__input" type="text" />
+      </label>
+
+      <label class="field">
+        <span class="field__label">Ankerlage</span>
+        <input id="meta-ankerlage" class="field__input" type="text" />
+      </label>
+
+      <label class="field">
+        <span class="field__label">Anker Nr.</span>
+        <input id="meta-ankerNr" class="field__input" type="text" />
+      </label>
+
+      <label class="field">
+        <span class="field__label">Blatt Nr.</span>
+        <input id="meta-blattNr" class="field__input" type="text" />
+      </label>
+
+      <label class="field">
+        <span class="field__label">Prüfdatum</span>
+        <input id="meta-pruefdatum" class="field__input" type="date" />
+      </label>
+
+      <label class="field field--full">
+        <span class="field__label">Anmerkung</span>
+        <textarea id="meta-anmerkung" class="field__input field__textarea" rows="2"></textarea>
+      </label>
+
+    </div>
+  </div>
+</details>
+
+<!-- ════════════════════════════════════════
+     PRESSE & KALIBRIERUNG
+════════════════════════════════════════ -->
+<details class="card card--collapsible" open>
+  <summary class="card__title">Spannpresse &amp; Kalibrierung</summary>
+  <div class="card__body">
+
+    <!-- Pressenauswahl -->
+    <div class="presse-select-row">
+      <label class="field" style="flex:1">
+        <span class="field__label">Spannpresse wählen</span>
+        <select id="presseSelect" class="field__select">
+          <option value="">— keine ausgewählt —</option>
+        </select>
+      </label>
+      <div class="presse-import-btns">
+        <button id="btnKalibImport" class="btn btn--ghost btn--small" type="button">
+          📥 Kalibrierung importieren
+        </button>
+        <input id="kalibImportInput" type="file" accept=".json" style="display:none" />
+        <button id="btnKalibExport" class="btn btn--ghost btn--small" type="button">
+          📤 Exportieren
+        </button>
+        <button id="btnKalibDelete" class="btn btn--ghost btn--small btn--danger" type="button">
+          🗑 Löschen
+        </button>
       </div>
     </div>
-  </details>
 
-  <!-- VORGABE -->
- <details class="card card--collapsible" open>
+    <!-- Kalibrier-Infobox -->
+    <div id="kalibInfoBox" class="kalib-info" hidden>
+
+      <div class="kalib-info__header">
+        <div>
+          <div class="kalib-info__name" id="kalibName">—</div>
+          <div class="kalib-info__sub" id="kalibSub">—</div>
+        </div>
+        <div id="kalibValidBadge" class="kalib-badge kalib-badge--ok">Gültig</div>
+      </div>
+
+      <div class="kalib-info__grid">
+        <div class="kalib-info__item">
+          <div class="kalib-info__label">Presse Typ</div>
+          <div id="kInfo-presseTyp" class="kalib-info__val">—</div>
+        </div>
+        <div class="kalib-info__item">
+          <div class="kalib-info__label">Fabrik-Nr.</div>
+          <div id="kInfo-presseNr" class="kalib-info__val">—</div>
+        </div>
+        <div class="kalib-info__item">
+          <div class="kalib-info__label">Manometer Typ</div>
+          <div id="kInfo-manTyp" class="kalib-info__val">—</div>
+        </div>
+        <div class="kalib-info__item">
+          <div class="kalib-info__label">Manometer Nr.</div>
+          <div id="kInfo-manNr" class="kalib-info__val">—</div>
+        </div>
+        <div class="kalib-info__item">
+          <div class="kalib-info__label">Kalibriert am</div>
+          <div id="kInfo-kalibAm" class="kalib-info__val">—</div>
+        </div>
+        <div class="kalib-info__item">
+          <div class="kalib-info__label">Gültig bis</div>
+          <div id="kInfo-gueltigBis" class="kalib-info__val">—</div>
+        </div>
+        <div class="kalib-info__item">
+          <div class="kalib-info__label">Stützpunkte</div>
+          <div id="kInfo-punkte" class="kalib-info__val">—</div>
+        </div>
+        <div class="kalib-info__item">
+          <div class="kalib-info__label">Max. Kraft</div>
+          <div id="kInfo-maxKn" class="kalib-info__val">—</div>
+        </div>
+      </div>
+
+      <!-- Vorschau Druckwerte für aktuelle Vorgaben -->
+      <div class="kalib-preview" id="kalibPreview" hidden>
+        <div class="kalib-preview__title">Druckvorschau für aktuelle Vorgaben</div>
+        <div id="kalibPreviewTable" class="kalib-preview__table"></div>
+      </div>
+
+    </div>
+
+    <!-- Leerzustand wenn keine Presse gewählt -->
+    <div id="kalibEmptyHint" class="hint" style="margin-top:10px">
+      Noch keine Kalibrierung geladen. JSON importieren oder Presse aus Liste wählen.
+    </div>
+
+    <!-- Hydraulikpumpe (manuell, nicht kalibrierungsgebunden) -->
+    <label class="field" style="margin-top:12px">
+      <span class="field__label">Hydraulikpumpe Nr.</span>
+      <input id="meta-pumpeNr" class="field__input" type="text" />
+    </label>
+
+  </div>
+</details>
+
+<!-- ════════════════════════════════════════
+     VORGABE ANKER
+════════════════════════════════════════ -->
+<details class="card card--collapsible" open>
   <summary class="card__title">Vorgabe Anker</summary>
   <div class="card__body">
 
@@ -128,33 +256,41 @@
     </div>
 
     <div class="form-grid" style="margin-top:12px">
-      <label class="field"><span class="field__label">Ankertyp</span><input id="vor-ankertyp" class="field__input" type="text" /></label>
-      <label class="field"><span class="field__label">Ankerlänge L<sub>A</sub> [m]</span><input id="vor-LA" class="field__input" type="number" step="0.01" /></label>
-      <label class="field"><span class="field__label">Verank.länge L<sub>tb</sub> [m]</span><input id="vor-Ltb" class="field__input" type="number" step="0.01" /></label>
-      <label class="field"><span class="field__label">Freie Länge L<sub>tf</sub> [m]</span><input id="vor-Ltf" class="field__input" type="number" step="0.01" /></label>
-      <label class="field"><span class="field__label">Spannüberstand L<sub>e</sub> [m]</span><input id="vor-Le" class="field__input" type="number" step="0.01" /></label>
-      <label class="field"><span class="field__label">E-Modul E<sub>t</sub> [kN/mm²]</span><input id="vor-Et" class="field__input" type="number" step="0.1" value="195" /></label>
-      <label class="field"><span class="field__label">Querschnitt A<sub>t</sub> [mm²]</span><input id="vor-At" class="field__input" type="number" step="0.1" /></label>
-      <label class="field"><span class="field__label">Festlegekraft P<sub>0</sub> [kN]</span><input id="vor-P0" class="field__input" type="number" step="0.1" /></label>
-      <label class="field"><span class="field__label">Vorbelastung P<sub>a</sub> [kN]</span><input id="vor-Pa" class="field__input" type="number" step="0.1" value="0" /></label>
-
+      <label class="field"><span class="field__label">Ankertyp</span>
+        <input id="vor-ankertyp" class="field__input" type="text" /></label>
+      <label class="field"><span class="field__label">Ankerlänge L<sub>A</sub> [m]</span>
+        <input id="vor-LA" class="field__input" type="number" step="0.01" /></label>
+      <label class="field"><span class="field__label">Verank.länge L<sub>tb</sub> [m]</span>
+        <input id="vor-Ltb" class="field__input" type="number" step="0.01" /></label>
+      <label class="field"><span class="field__label">Freie Länge L<sub>tf</sub> [m]</span>
+        <input id="vor-Ltf" class="field__input" type="number" step="0.01" /></label>
+      <label class="field"><span class="field__label">Spannüberstand L<sub>e</sub> [m]</span>
+        <input id="vor-Le" class="field__input" type="number" step="0.01" /></label>
+      <label class="field"><span class="field__label">E-Modul E<sub>t</sub> [kN/mm²]</span>
+        <input id="vor-Et" class="field__input" type="number" step="0.1" value="195" /></label>
+      <label class="field"><span class="field__label">Querschnitt A<sub>t</sub> [mm²]</span>
+        <input id="vor-At" class="field__input" type="number" step="0.1" /></label>
+      <label class="field"><span class="field__label">Festlegekraft P<sub>0</sub> [kN]</span>
+        <input id="vor-P0" class="field__input" type="number" step="0.1" /></label>
+      <label class="field"><span class="field__label">Vorbelastung P<sub>a</sub> [kN]</span>
+        <input id="vor-Pa" class="field__input" type="number" step="0.1" value="0" /></label>
       <label class="field">
         <span class="field__label">Prüfkraft P<sub>p</sub> [kN]</span>
         <input id="vor-Pp" class="field__input" type="number" step="0.1" />
         <small id="hint-vor-Pp" class="field__hint"></small>
       </label>
-
-      <label class="field"><span class="field__label">0,1%-Dehngrenze P<sub>t0,1k</sub> [kN]</span><input id="vor-Pt01k" class="field__input" type="number" step="0.1" /></label>
-
+      <label class="field"><span class="field__label">0,1%-Dehngrenze P<sub>t0,1k</sub> [kN]</span>
+        <input id="vor-Pt01k" class="field__input" type="number" step="0.1" /></label>
       <label class="field">
         <span class="field__label">Bemessung P<sub>d</sub> [kN]</span>
         <input id="vor-Pd" class="field__input" type="number" step="0.1" />
         <small id="hint-vor-Pd" class="field__hint"></small>
       </label>
-
-      <label class="field"><span class="field__label">Teilsicherheit γ<sub>a</sub> [-]</span><input id="vor-gamma" class="field__input" type="number" step="0.01" value="1.1" /></label>
+      <label class="field"><span class="field__label">Teilsicherheit γ<sub>a</sub> [-]</span>
+        <input id="vor-gamma" class="field__input" type="number" step="0.01" value="1.1" /></label>
     </div>
 
+    <!-- Auto-berechnete Werte -->
     <div class="auto-grid">
       <div class="auto-card">
         <div class="auto-card__label">Pp aus Pd · γa</div>
@@ -182,10 +318,10 @@
       </div>
     </div>
 
-    <div class="info-box">
-      <b>Automatisch berechnet</b><br>
-      Tatsächlich rechnerische freie Stahllänge L<sub>app</sub>: <b id="calc-LappMeasured">—</b><br>
-      Grenzwerte freie Stahllänge eingehalten: <span id="calc-LappCheck" class="inline-badge">—</span>
+    <div class="info-box" style="margin-top:10px">
+      <b>Tatsächliche rechnerische freie Stahllänge L<sub>app</sub>:</b>
+      <b id="calc-LappMeasured">—</b> &nbsp;|&nbsp;
+      Grenzwerte eingehalten: <span id="calc-LappCheck" class="inline-badge">—</span>
     </div>
 
   </div>
