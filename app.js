@@ -872,11 +872,13 @@ function renderKalibPreview(){
  */
 function syncDruckFromKalib(){
   const kalib = findKalibById(state.meta.selectedKalibId);
+
+  // Keine Kalibrierung: alles wieder editierbar machen
   if(!kalib){
-    // Keine Kalibrierung: Druckfelder editierbar lassen, nichts überschreiben
     document.querySelectorAll('.mess-input--auto').forEach(el => {
       el.classList.remove('mess-input--auto');
       el.readOnly = false;
+      el.title = '';
     });
     return;
   }
@@ -885,53 +887,71 @@ function syncDruckFromKalib(){
   const Pa = Number(state.vorgabe.Pa);
   const P0 = Number(state.vorgabe.P0);
 
-  // kN pro Laststufen-Faktor berechnen
-  function kNfuerFaktor(mode, faktor){
-    if(mode === 'pa') return Pa;
-    if(mode === 'p0') return P0;
-    if(mode === 'pp') return Number.isFinite(Pp) ? Pp * faktor : NaN;
-    return NaN;
-  }
-
   state.zyklen.forEach(z => {
-    // Laststufen eindeutig gruppieren: für jede Stufe einen bar-Wert
-    const stufenBarMap = {};
-    z.laststufen?.forEach(ls => {
-      const kN  = kNfuerFaktor(ls.mode, ls.faktor);
+    const def = ZYKLUS_DEF[z.nr - 1] || ZYKLUS_DEF[0];
+
+    // ── 1) Laststufen-Druck berechnen und setzen ──
+    z.laststufen.forEach((ls, lsIdx) => {
+      const defLs = def.laststufen[lsIdx];
+      let kN = NaN;
+
+      if(ls.faktor === 0){
+        // Pa oder P0 unterscheiden anhand Label
+        kN = ls.label === 'P0' ? P0 : Pa;
+      }else{
+        kN = Number.isFinite(Pp) ? Pp * ls.faktor : NaN;
+      }
+
       const bar = kNtoBar(kN);
-      // Schlüssel = mode+faktor
-      const key = `${ls.mode}_${ls.faktor}`;
-      stufenBarMap[key] = bar !== null ? String(bar) : '';
+      ls.druck = bar !== null ? String(bar) : '';
     });
 
-    // Messzeilen: Druckspalte aus Stufe übernehmen
-    z.rows?.forEach(row => {
-      const key = `${row.mode}_${row.factor}`;
-      const barVal = stufenBarMap[key];
-      row.druckBar = barVal !== undefined ? barVal : '';
+    // ── 2) Messzeilen-Druck = Halt-Laststufe ──
+    const haltIdx = def.haltLaststufeIdx ?? (z.laststufen.length - 2);
+    const haltLs  = z.laststufen[haltIdx];
+    let haltKn = NaN;
+
+    if(haltLs){
+      haltKn = haltLs.faktor === 0
+        ? (haltLs.label === 'P0' ? P0 : Pa)
+        : (Number.isFinite(Pp) ? Pp * haltLs.faktor : NaN);
+    }
+
+    const haltBar    = kNtoBar(haltKn);
+    const haltBarStr = haltBar !== null ? String(haltBar) : '';
+
+    z.messungen.forEach(row => {
+      row.druck = haltBarStr;
     });
   });
 
-  // DOM aktualisieren: Druck-Inputs
-  document.querySelectorAll('.zyklus-card').forEach(card => {
-    const z = getZyklusById(card.dataset.zid);
-    if(!z) return;
-    z.rows?.forEach((row, idx) => {
-      const input = card.querySelector(
-        `[data-role="m-druck"][data-row="${idx}"]`
-      );
-      if(!input) return;
-      if(row.druckBar !== '' && row.druckBar !== undefined){
-        input.value   = row.druckBar;
-        input.readOnly= true;
-        input.classList.add('mess-input--auto');
-        input.title   = `Automatisch aus Kalibrierung berechnet`;
-      }else{
-        input.readOnly = false;
-        input.classList.remove('mess-input--auto');
-        input.title = '';
-      }
-    });
+  // ── 3) DOM aktualisieren ──
+  renderZyklen();
+
+  // Messzeilen-Druck-Inputs: readonly + orange markieren
+  document.querySelectorAll('[data-role="m-druck"]').forEach(input => {
+    if(input.value !== ''){
+      input.readOnly = true;
+      input.classList.add('mess-input--auto');
+      input.title = 'Automatisch aus Kalibrierung berechnet';
+    }
+  });
+
+  // Laststufen-Druck-Inputs: readonly + orange markieren
+  document.querySelectorAll('[data-role="ls-druck"]').forEach(input => {
+    const card = input.closest('.zyklus-card');
+    const z    = getZyklusById(card?.dataset.zid);
+    const idx  = Number(input.dataset.idx);
+    if(z?.laststufen[idx]?.druck){
+      input.value    = z.laststufen[idx].druck;
+      input.readOnly = true;
+      input.classList.add('mess-input--auto');
+      input.title = 'Automatisch aus Kalibrierung berechnet';
+    }else{
+      input.readOnly = false;
+      input.classList.remove('mess-input--auto');
+      input.title = '';
+    }
   });
 
   saveDraftDebounced();
@@ -1465,15 +1485,7 @@ function init(){
     });
   });
 
-  el.addEventListener('input',()=>{
-    state.vorgabe[k]=el.value || '';
-    maybeAutofillVorgabe(k);
-    updateLappPreview();
-    renderZyklen();
-    if(!$('tab-auswertung').hidden) renderAuswertung();
-    saveDraftDebounced();
-  });
-});
+ 
   $('boden-bindig').addEventListener('change',()=>{state.vorgabe.bodenart='bindig';saveDraftDebounced();});
   $('boden-nichtbindig').addEventListener('change',()=>{state.vorgabe.bodenart='nichtbindig';saveDraftDebounced();});
   // Zyklus hinzufügen
