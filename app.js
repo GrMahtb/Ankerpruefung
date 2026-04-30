@@ -8,12 +8,12 @@ const STORAGE_HISTORY = 'htb-anker-history-v1';
 const STORAGE_KALIB   = 'htb-anker-kalibrierungen-v1';
 const HISTORY_MAX     = 30;
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    EINGEBAUTE KALIBRIERUNGEN
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 const BUILTIN_KALIBRIERUNGEN = [
   {
-    id: 'builtin_nc41333832_2026_01_26',
+    id: 'NC41333832_2026-01-26',
     displayName: 'CFK Presse NC41333832',
     presseTyp: 'L-HK-DZ-140-250-105-HPR',
     presseNr: 'NC41333832',
@@ -98,236 +98,644 @@ const BUILTIN_KALIBRIERUNGEN = [
   }
 ];
 
-/* ──────────────────────────────────────────────────────
-   TECHNISCHE DATEN ANKERTYPEN
-   Quelle: Technische Daten.xlsx [1]
-────────────────────────────────────────────────────── */
-const ANKER_TYPEN = [
-  // GEWI [T]
-  { key:'GEWI_T_25',     group:'GEWI [T] 550/620', label:'GEWI [T] 25',     nenndurchmesser:25,  muffe:40,  streckZug:'550/620', At:491,  lastStreck:270,  lastStreck90:243,   bruchlast:304,  bruch80:243.2 },
-  { key:'GEWI_T_28',     group:'GEWI [T] 550/620', label:'GEWI [T] 28',     nenndurchmesser:28,  muffe:45,  streckZug:'550/620', At:616,  lastStreck:340,  lastStreck90:306,   bruchlast:382,  bruch80:305.6 },
-  { key:'GEWI_T_32',     group:'GEWI [T] 550/620', label:'GEWI [T] 32',     nenndurchmesser:32,  muffe:52,  streckZug:'550/620', At:804,  lastStreck:440,  lastStreck90:396,   bruchlast:499,  bruch80:399.2 },
-  { key:'GEWI_T_40',     group:'GEWI [T] 550/620', label:'GEWI [T] 40',     nenndurchmesser:40,  muffe:65,  streckZug:'550/620', At:1257, lastStreck:693,  lastStreck90:623.7, bruchlast:781,  bruch80:624.8 },
-  { key:'GEWI_T_50',     group:'GEWI [T] 550/620', label:'GEWI [T] 50',     nenndurchmesser:50,  muffe:80,  streckZug:'550/620', At:1963, lastStreck:1080, lastStreck90:972,   bruchlast:1215, bruch80:972 },
-  { key:'GEWI_T_57_5',   group:'GEWI [T] 555/700', label:'GEWI [T] 57,5',   nenndurchmesser:57.5,muffe:102, streckZug:'555/700', At:2597, lastStreck:1441, lastStreck90:1296.9,bruchlast:1818, bruch80:1454.4 },
+/* ═══════════════════════════════════════════════════════
+   FILIALEN
+═══════════════════════════════════════════════════════ */
+const FILIALEN = {
+  Arzl:       { adresse:'A-6471 Arzl im Pitztal, Gewerbepark Pitztal 16',        tel:'+43 5412 / 63975',      email:'office.arzl@htb-bau.at'      },
+  'Nüziders': { adresse:'A-6714 Nüziders, Landstraße 19',                        tel:'+43 5552 / 34 739',     email:'office.nueziders@htb-bau.at'  },
+  Zirl:       { adresse:'A-6170 Zirl, Neuraut 1',                                tel:'+43 5238 / 58 873 1',   email:'office.ibk@htb-bau.at'        },
+  Schwoich:   { adresse:'A-6334 Schwoich, Kufsteiner Wald 28',                   tel:'+43 5372 / 63 600',     email:'office.schwoich@htb-bau.at'   },
+  Fusch:      { adresse:'A-5672 Fusch a.d. Großglocknerstraße, Achenstraße 2',   tel:'+43 6546 / 40 116',     email:'office.fusch@htb-bau.at'      },
+  Wels:       { adresse:'A-4600 Wels, Hans-Sachs-Straße 103',                    tel:'+43 7242 / 601 600',    email:'office.wels@htb-bau.at'       },
+  Klagenfurt: { adresse:'A-9020 Klagenfurt, Josef-Sablatnig-Straße 251',         tel:'+43 463 / 33 533 700',  email:'office.klagenfurt@htb-bau.at' }
+};
 
-  // GEWI Plus [TR]
-  { key:'GEWI_TR_25',    group:'GEWI Plus [TR] 670/800', label:'GEWI Plus [TR] 25',   nenndurchmesser:25,  muffe:45,  streckZug:'670/800', At:491,  lastStreck:329,  lastStreck90:296.1, bruchlast:393,  bruch80:314.4 },
-  { key:'GEWI_TR_30',    group:'GEWI Plus [TR] 670/800', label:'GEWI Plus [TR] 30',   nenndurchmesser:30,  muffe:55,  streckZug:'670/800', At:707,  lastStreck:474,  lastStreck90:426.6, bruchlast:565,  bruch80:452 },
-  { key:'GEWI_TR_35',    group:'GEWI Plus [TR] 670/800', label:'GEWI Plus [TR] 35',   nenndurchmesser:35,  muffe:65,  streckZug:'670/800', At:962,  lastStreck:645,  lastStreck90:580.5, bruchlast:770,  bruch80:616 },
-  { key:'GEWI_TR_43',    group:'GEWI Plus [TR] 670/800', label:'GEWI Plus [TR] 43',   nenndurchmesser:43,  muffe:80,  streckZug:'670/800', At:1452, lastStreck:973,  lastStreck90:875.7, bruchlast:1162, bruch80:929.6 },
-  { key:'GEWI_TR_50',    group:'GEWI Plus [TR] 670/800', label:'GEWI Plus [TR] 50',   nenndurchmesser:50,  muffe:90,  streckZug:'670/800', At:1936, lastStreck:1315, lastStreck90:1183.5,bruchlast:1570, bruch80:1256 },
-  { key:'GEWI_TR_57_5',  group:'GEWI Plus [TR] 670/800', label:'GEWI Plus [TR] 57,5', nenndurchmesser:57.5,muffe:102, streckZug:'670/800', At:2597, lastStreck:1740, lastStreck90:1566,  bruchlast:2077, bruch80:1661.6 },
-
-  // GEWI hochfest [WR]
-  { key:'GEWI_WR_26_5',  group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 26,5', nenndurchmesser:26.5, muffe:50, streckZug:'950/1050', At:552,  lastStreck:525,  lastStreck90:472.5, bruchlast:580,  bruch80:464 },
-  { key:'GEWI_WR_32',    group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 32',   nenndurchmesser:32,   muffe:60, streckZug:'950/1050', At:804,  lastStreck:760,  lastStreck90:684,   bruchlast:845,  bruch80:676 },
-  { key:'GEWI_WR_36',    group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 36',   nenndurchmesser:36,   muffe:68, streckZug:'950/1050', At:1018, lastStreck:960,  lastStreck90:864,   bruchlast:1070, bruch80:856 },
-  { key:'GEWI_WR_40',    group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 40',   nenndurchmesser:40,   muffe:70, streckZug:'950/1050', At:1257, lastStreck:1190, lastStreck90:1071,  bruchlast:1320, bruch80:1056 },
-  { key:'GEWI_WR_47',    group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 47',   nenndurchmesser:47,   muffe:83, streckZug:'950/1050', At:1735, lastStreck:1650, lastStreck90:1485,  bruchlast:1820, bruch80:1456 },
-
-  // IBO
-  { key:'IBO_R32_280',   group:'IBO', label:'IBO R32-280 (R32N)', nenndurchmesser:42, muffe:null, streckZug:null, At:410,  lastStreck:220, lastStreck90:198, bruchlast:280, bruch80:224 },
-  { key:'IBO_R32_360',   group:'IBO', label:'IBO R32-360 (R32S)', nenndurchmesser:42, muffe:null, streckZug:null, At:510,  lastStreck:280, lastStreck90:252, bruchlast:360, bruch80:288 },
-  { key:'IBO_R38_500',   group:'IBO', label:'IBO R38-500 (R38N)', nenndurchmesser:51, muffe:null, streckZug:null, At:750,  lastStreck:400, lastStreck90:360, bruchlast:500, bruch80:400 },
-  { key:'IBO_R51_550',   group:'IBO', label:'IBO R51-550 (R51L)', nenndurchmesser:63, muffe:null, streckZug:null, At:890,  lastStreck:450, lastStreck90:405, bruchlast:550, bruch80:440 },
-  { key:'IBO_R51_800',   group:'IBO', label:'IBO R51-800 (R51N)', nenndurchmesser:63, muffe:null, streckZug:null, At:1150, lastStreck:640, lastStreck90:576, bruchlast:800, bruch80:640 },
-
-  // Ischebeck TITAN
-  { key:'TITAN_30_11',   group:'Ischebeck TITAN', label:'Ischebeck TITAN 30/11',  nenndurchmesser:29,   muffe:null, streckZug:'542', At:415,  lastStreck:null, lastStreck90:null, bruchlast:225,  bruch80:180 },
-  { key:'TITAN_40_20',   group:'Ischebeck TITAN', label:'Ischebeck TITAN 40/20',  nenndurchmesser:40.5, muffe:null, streckZug:'515', At:730,  lastStreck:null, lastStreck90:null, bruchlast:372,  bruch80:297.6 },
-  { key:'TITAN_40_16',   group:'Ischebeck TITAN', label:'Ischebeck TITAN 40/16',  nenndurchmesser:40.5, muffe:null, streckZug:'544', At:900,  lastStreck:null, lastStreck90:null, bruchlast:490,  bruch80:392 },
-  { key:'TITAN_52_26',   group:'Ischebeck TITAN', label:'Ischebeck TITAN 52/26',  nenndurchmesser:50.3, muffe:null, streckZug:'520', At:1250, lastStreck:null, lastStreck90:null, bruchlast:650,  bruch80:520 },
-  { key:'TITAN_73_53',   group:'Ischebeck TITAN', label:'Ischebeck TITAN 73/53',  nenndurchmesser:72.4, muffe:null, streckZug:'557', At:1615, lastStreck:null, lastStreck90:null, bruchlast:900,  bruch80:720 },
-  { key:'TITAN_73_45',   group:'Ischebeck TITAN', label:'Ischebeck TITAN 73/45',  nenndurchmesser:72.4, muffe:null, streckZug:'544', At:2240, lastStreck:null, lastStreck90:null, bruchlast:1218, bruch80:974.4 },
-  { key:'TITAN_73_35',   group:'Ischebeck TITAN', label:'Ischebeck TITAN 73/35',  nenndurchmesser:72.4, muffe:null, streckZug:'510', At:2710, lastStreck:null, lastStreck90:null, bruchlast:1386, bruch80:1108.8 },
-  { key:'TITAN_103_78',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 103/78', nenndurchmesser:101,  muffe:null, streckZug:'518', At:3140, lastStreck:null, lastStreck90:null, bruchlast:1626, bruch80:1300.8 },
-  { key:'TITAN_103_51',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 103/51', nenndurchmesser:101,  muffe:null, streckZug:'440', At:5680, lastStreck:null, lastStreck90:null, bruchlast:2500, bruch80:2000 }
-];
-
-function getAnkertypByKey(key){
-  return ANKER_TYPEN.find(t => t.key === key) || null;
-}
-
-/* ──────────────────────────────────────────────────────
-   UTIL HELPER
-────────────────────────────────────────────────────── */
-function slugify(v){
-  return String(v || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .toLowerCase();
-}
-
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    UPDATE-BANNER
-────────────────────────────────────────────────────── */
-function ensureUpdateBanner(){}
+═══════════════════════════════════════════════════════ */
+function showUpdateBanner() {
+  if (document.getElementById('updateBanner')) return;
 
-/* ──────────────────────────────────────────────────────
-   ANKERTYP UI
-────────────────────────────────────────────────────── */
-function initAnkertypSelect(){
-  const old = $('vor-ankertyp');
-  if(!old) return;
+  const banner = document.createElement('div');
+  banner.id = 'updateBanner';
+  banner.style.cssText = [
+    'position:fixed','bottom:70px','left:50%','transform:translateX(-50%)',
+    'background:#173f66','color:#fff','border:2px solid #f08a1c',
+    'border-radius:10px','padding:10px 16px','z-index:999',
+    'display:flex','align-items:center','gap:10px',
+    'box-shadow:0 4px 12px rgba(0,0,0,.4)','font-size:14px','font-weight:700'
+  ].join(';');
 
-  if(old.tagName === 'SELECT'){
-    fillAnkertypOptions(old);
-    return;
-  }
-
-  const select = document.createElement('select');
-  select.id = old.id;
-  select.className = old.className.replace('field__input', 'field__select');
-  fillAnkertypOptions(select);
-
-  const currentValue = old.value || state.vorgabe.ankertyp || '';
-  old.replaceWith(select);
-
-  if(currentValue){
-    const exists = ANKER_TYPEN.some(t => t.key === currentValue);
-    if(exists){
-      select.value = currentValue;
-    }else{
-      const opt = document.createElement('option');
-      opt.value = currentValue;
-      opt.textContent = currentValue;
-      select.appendChild(opt);
-      select.value = currentValue;
-    }
-  }
-}
-
-function fillAnkertypOptions(select){
-  const current = select.value || state.vorgabe.ankertyp || '';
-  select.innerHTML = `<option value="">Bitte wählen</option>`;
-
-  const groups = {};
-  ANKER_TYPEN.forEach(t => {
-    if(!groups[t.group]) groups[t.group] = [];
-    groups[t.group].push(t);
-  });
-
-  Object.entries(groups).forEach(([group, items]) => {
-    const og = document.createElement('optgroup');
-    og.label = group;
-    items.forEach(item => {
-      const opt = document.createElement('option');
-      opt.value = item.key;
-      opt.textContent = item.label;
-      og.appendChild(opt);
-    });
-    select.appendChild(og);
-  });
-
-  if(current){
-    const exists = ANKER_TYPEN.some(t => t.key === current);
-    if(exists){
-      select.value = current;
-    }
-  }
-}
-
-function ensureAnkertypInfoBox(){
-  const field = $('vor-ankertyp')?.closest('.field');
-  if(!field) return null;
-
-  let box = $('ankertypInfoBox');
-  if(box) return box;
-
-  box = document.createElement('div');
-  box.id = 'ankertypInfoBox';
-  box.className = 'info-box field--full';
-  box.style.marginTop = '12px';
-
-  const grid = field.parentElement;
-  if(grid) grid.appendChild(box);
-
-  return box;
-}
-
-function renderAnkertypInfo(){
-  const box = ensureAnkertypInfoBox();
-  if(!box) return;
-
-  const typ = getAnkertypByKey(state.vorgabe.ankertyp);
-  if(!typ){
-    box.hidden = true;
-    return;
-  }
-
-  const rows = [
-    ['Typ', typ.label],
-    ['Nenndurchmesser', typ.nenndurchmesser != null ? `${typ.nenndurchmesser} mm` : '—'],
-    ['Durchmesser über Muffe', typ.muffe != null ? `${typ.muffe} mm` : '—'],
-    ['Streckgrenze / Zugfestigkeit', typ.streckZug || '—'],
-    ['Querschnittsfläche At', typ.At != null ? `${fmt(typ.At,0)} mm²` : '—'],
-    ['Last an der Streckgrenze', typ.lastStreck != null ? `${fmt(typ.lastStreck,1)} kN` : '—'],
-    ['90% Streckgrenze', typ.lastStreck90 != null ? `${fmt(typ.lastStreck90,1)} kN` : '—'],
-    ['Bruchlast', typ.bruchlast != null ? `${fmt(typ.bruchlast,1)} kN` : '—'],
-    ['80% Bruchlast', typ.bruch80 != null ? `${fmt(typ.bruch80,1)} kN` : '—']
-  ];
-
-  box.hidden = false;
-  box.innerHTML = `
-    <b>Technische Daten Ankertyp</b><br>
-    ${rows.map(([k,v]) => `${h(k)}: <b>${h(v)}</b>`).join('<br>')}
+  banner.innerHTML = `
+    <span>Update verfügbar</span>
+    <button
+      onclick="navigator.serviceWorker.getRegistration().then(r=>r?.waiting?.postMessage({action:'skipWaiting'}));this.closest('#updateBanner').remove();"
+      style="background:#f08a1c;color:#fff;border:0;border-radius:6px;padding:6px 12px;cursor:pointer;font-weight:700;font-size:13px"
+    >Jetzt laden</button>
+    <button
+      onclick="this.closest('#updateBanner').remove();"
+      style="background:transparent;border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:6px;padding:6px 10px;cursor:pointer;font-size:12px"
+    >Später</button>
   `;
+
+  document.body.appendChild(banner);
+  setTimeout(() => banner.remove(), 12000);
 }
 
-function applyAnkertypPreset(key, { overwrite=true } = {}){
-  const typ = getAnkertypByKey(key);
-  state.vorgabe.ankertyp = key || '';
+/* ═══════════════════════════════════════════════════════
+   NORM / VORLAGE
+═══════════════════════════════════════════════════════ */
+const STD_INTERVALS_15  = [0,1,2,3,4,5,7,10,15];
+const STD_INTERVALS_30  = [0,1,2,3,4,5,7,10,15,20,30];
+const STD_INTERVALS_60  = [0,1,2,3,4,5,7,10,15,20,30,45,60];
+const STD_INTERVALS_180 = [0,1,2,3,4,5,7,10,15,20,30,45,60,90,120,150,180];
 
-  if(!typ){
-    renderAnkertypInfo();
-    return;
-  }
-
-  if(overwrite || !state.vorgabe.At || String(state.vorgabe.At).trim() === ''){
-    state.vorgabe.At = formatInputNumber(Number(typ.At), 0);
-    if($('vor-At')) $('vor-At').value = state.vorgabe.At;
-  }
-
-  if(typ.lastStreck != null && (overwrite || !state.vorgabe.Pt01k || String(state.vorgabe.Pt01k).trim() === '')){
-    state.vorgabe.Pt01k = formatInputNumber(Number(typ.lastStreck), 1);
-    if($('vor-Pt01k')) $('vor-Pt01k').value = state.vorgabe.Pt01k;
-  }
-
-  renderAnkertypInfo();
-  updateLappPreview();
-  if(!$('tab-auswertung')?.hidden) renderAuswertung();
-  saveDraftDebounced();
+function factorToLabel(f){
+  return `${formatInputNumber(Number(f), 2).replace('.', ',')}·Pp`;
 }
 
-/* ──────────────────────────────────────────────────────
-   TIMER DEFINITIONS / DEFAULTS
-────────────────────────────────────────────────────── */
-function defaultZyklus(nr){
-  const defs = getNormZyklusDefs(state.vorgabe.bodenart);
-  const def = defs[nr - 1] || defs[0];
+function makeLaststufe(kind='factor', factor=1, druck=''){
+  const k = kind === 'p0' ? 'p0' : kind === 'pa' ? 'pa' : 'factor';
+  const f = k === 'factor' && Number.isFinite(Number(factor)) ? Number(factor) : 0;
 
   return {
-    id: uid(),
-    nr,
-    haltMin: def.haltMin,
-    haltLaststufeIdx: def.haltLaststufeIdx,
-    intervalleStr: def.intervals.join(', '),
-    elapsedMs: 0,
-    startzeit: '',
-    laststufen: def.laststufen.map(ls => ({ ...ls })),
-    messungen: def.intervals.map(min => ({
-      min,
-      druck:'',
-      ablesung:'',
-      versch:'',
-      anm:''
-    }))
+    kind: k,
+    faktor: k === 'factor' ? f : 0,
+    label: k === 'p0' ? 'P0' : k === 'pa' ? 'Pa' : factorToLabel(f),
+    druck: String(druck || '')
   };
 }
 
+function normalizeLaststufe(ls){
+  if(!ls) return makeLaststufe('pa', 0, '');
+
+  const inferredKind =
+    ls.kind ||
+    (ls.label === 'P0'
+      ? 'p0'
+      : (Number(ls.faktor || 0) === 0 ? 'pa' : 'factor'));
+
+  return makeLaststufe(inferredKind, ls.faktor, ls.druck);
+}
+
+function normalizeLaststufenArray(arr){
+  return (arr || []).map(normalizeLaststufe);
+}
+
+function defaultHoldIdxFromLaststufen(laststufen){
+  const arr = normalizeLaststufenArray(laststufen);
+  let max = -Infinity;
+  let idx = 0;
+
+  arr.forEach((ls, i) => {
+    const value = ls.kind === 'factor' ? Number(ls.faktor || 0) : 0;
+    if(value > max){
+      max = value;
+      idx = i;
+    }
+  });
+
+  return idx;
+}
+
+function getNormZyklusDefs(bodenart='nichtbindig'){
+  const zyklus5Intervals = bodenart === 'bindig' ? STD_INTERVALS_180 : STD_INTERVALS_60;
+
+  return [
+    {
+      nr:1,
+      laststufen:[
+        makeLaststufe('pa'),
+        makeLaststufe('factor',0.4),
+        makeLaststufe('pa')
+      ],
+      haltLaststufeIdx:1,
+      haltMin:15,
+      intervals:STD_INTERVALS_15
+    },
+    {
+      nr:2,
+      laststufen:[
+        makeLaststufe('factor',0.4),
+        makeLaststufe('factor',0.55),
+        makeLaststufe('factor',0.4),
+        makeLaststufe('pa')
+      ],
+      haltLaststufeIdx:1,
+      haltMin:15,
+      intervals:STD_INTERVALS_15
+    },
+    {
+      nr:3,
+      laststufen:[
+        makeLaststufe('factor',0.4),
+        makeLaststufe('factor',0.55),
+        makeLaststufe('factor',0.7),
+        makeLaststufe('factor',0.55),
+        makeLaststufe('factor',0.4),
+        makeLaststufe('pa')
+      ],
+      haltLaststufeIdx:2,
+      haltMin:30,
+      intervals:STD_INTERVALS_30
+    },
+    {
+      nr:4,
+      laststufen:[
+        makeLaststufe('factor',0.4),
+        makeLaststufe('factor',0.55),
+        makeLaststufe('factor',0.7),
+        makeLaststufe('factor',0.85),
+        makeLaststufe('factor',0.7),
+        makeLaststufe('factor',0.55),
+        makeLaststufe('factor',0.4),
+        makeLaststufe('pa')
+      ],
+      haltLaststufeIdx:3,
+      haltMin:60,
+      intervals:STD_INTERVALS_60
+    },
+    {
+      nr:5,
+      laststufen:[
+        makeLaststufe('factor',0.4),
+        makeLaststufe('factor',0.55),
+        makeLaststufe('factor',0.7),
+        makeLaststufe('factor',0.85),
+        makeLaststufe('factor',1.0),
+        makeLaststufe('factor',0.85),
+        makeLaststufe('factor',0.7),
+        makeLaststufe('factor',0.55),
+        makeLaststufe('factor',0.4),
+        makeLaststufe('pa'),
+        makeLaststufe('p0')
+      ],
+      haltLaststufeIdx:4,
+      haltMin: zyklus5Intervals[zyklus5Intervals.length - 1],
+      intervals: zyklus5Intervals
+    }
+  ];
+}
+
+/* ═══════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+
+function h(v){
+  return String(v ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+function uid(){
+  try { return crypto.randomUUID(); }
+  catch { return 'id_' + Date.now() + '_' + Math.random().toString(16).slice(2); }
+}
+
+function clone(v){ return JSON.parse(JSON.stringify(v)); }
+function clamp(n,lo,hi){ return Math.max(lo, Math.min(hi, n)); }
+
+function fmt(v,d=2){
+  const n = Number(v);
+  return Number.isFinite(n) ? n.toFixed(d).replace('.',',') : '—';
+}
+
+function formatInputNumber(n,d=1){
+  if(!Number.isFinite(n)) return '';
+  const s=n.toFixed(d);
+  return s.replace(/\.0+$/,'').replace(/(\.\d*[1-9])0+$/,'$1');
+}
+
+function formatTimeHHMMSS(d=new Date()){
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+}
+
+function formatElapsed(ms){
+  const t = Math.max(0,Math.floor(ms/1000));
+  const hh = Math.floor(t/3600);
+  const mm = Math.floor((t%3600)/60);
+  const ss = t%60;
+  return hh>0
+    ? `${hh}:${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`
+    : `${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+}
+
+function dateTag(d=new Date()){
+  return `${String(d.getDate()).padStart(2,'0')}${String(d.getMonth()+1).padStart(2,'0')}${d.getFullYear()}`;
+}
+
+function dateDE(iso){
+  const s=String(iso||'').trim();
+  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m?`${m[3]}.${m[2]}.${m[1]}`:s;
+}
+
+function parseIntervalStr(str){
+  return [...new Set(
+    String(str||'')
+      .split(',')
+      .map(s=>Number(s.trim()))
+      .filter(n=>Number.isFinite(n)&&n>=0)
+  )].sort((a,b)=>a-b);
+}
+
+function toNumFlexible(v){
+  const s = String(v ?? '').trim();
+  if(!s) return NaN;
+  if(s.includes(',') && s.includes('.')){
+    return Number(s.replace(/\./g,'').replace(',', '.'));
+  }
+  if(s.includes(',')){
+    return Number(s.replace(',', '.'));
+  }
+  return Number(s);
+}
+
+function normalizeCsvDate(value){
+  const s = String(value || '').trim();
+  if(!s) return '';
+
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if(m){
+    return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
+  }
+
+  m = s.match(/^(\d{1,2})[./](\d{1,2})[./](\d{4})$/);
+  if(m){
+    return `${m[3]}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
+  }
+
+  m = s.match(/^(\d{1,2})[./](\d{1,2})[./](\d{2})$/);
+  if(m){
+    const yy = Number(m[3]);
+    const yyyy = yy >= 70 ? `19${m[3]}` : `20${m[3]}`;
+    return `${yyyy}-${String(m[2]).padStart(2,'0')}-${String(m[1]).padStart(2,'0')}`;
+  }
+
+  return s;
+}
+
+function downloadText(text, filename, type='text/plain;charset=utf-8'){
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CSV IMPORT / EXPORT
+═══════════════════════════════════════════════════════ */
+function kalibToCsv(kalib){
+  const lines = [
+    'displayName;'   + (kalib.displayName   || ''),
+    'presseTyp;'     + (kalib.presseTyp     || ''),
+    'presseNr;'      + (kalib.presseNr      || ''),
+    'manometerTyp;'  + (kalib.manometerTyp  || ''),
+    'manometerNr;'   + (kalib.manometerNr   || ''),
+    'kalibriertAm;'  + (kalib.kalibriertAm  || ''),
+    'gueltigMonate;' + (kalib.gueltigMonate || 12),
+    '',
+    'kN;bar'
+  ];
+
+  (kalib.punkte || []).forEach(p => {
+    lines.push(`${String(p.kN).replace('.',',')};${String(p.bar).replace('.',',')}`);
+  });
+
+  return lines.join('\n');
+}
+
+function buildKalibCsvTemplate(){
+  return [
+    'displayName;Neue Presse',
+    'presseTyp;z.B. L-HK-DZ-140-250-105-HPR',
+    'presseNr;z.B. NC00000000',
+    'manometerTyp;z.B. DSI 160/1000',
+    'manometerNr;z.B. 300000',
+    'kalibriertAm;2026-01-01',
+    'gueltigMonate;12',
+    '',
+    'kN;bar',
+    '5;3',
+    '10;5',
+    '50;26',
+    '100;51',
+    '200;102',
+    '400;204',
+    '600;306',
+    '800;407',
+    '1000;510',
+    '1400;712'
+  ].join('\n');
+}
+
+function parseKalibCsv(text){
+  const lines = String(text || '')
+    .replace(/^\uFEFF/, '')
+    .split(/\r?\n/)
+    .map(l => l.trim())
+    .filter(l => l !== '');
+
+  const meta = {};
+  const punkte = [];
+  let inPoints = false;
+
+  for(const line of lines){
+    const parts = line.split(';').map(s => s.trim());
+
+    if(!inPoints){
+      if(parts.length >= 2 && parts[0].toLowerCase() === 'kn' && parts[1].toLowerCase() === 'bar'){
+        inPoints = true;
+        continue;
+      }
+      if(parts.length >= 2){
+        meta[parts[0]] = parts.slice(1).join(';');
+      }
+    }else{
+      if(parts.length >= 2){
+        const kN = toNumFlexible(parts[0]);
+        const bar = toNumFlexible(parts[1]);
+        if(Number.isFinite(kN) && Number.isFinite(bar)){
+          punkte.push({ kN, bar });
+        }
+      }
+    }
+  }
+
+  punkte.sort((a,b) => a.kN - b.kN);
+
+  const displayName  = meta.displayName || meta.name || '';
+  const presseTyp    = meta.presseTyp || '';
+  const presseNr     = meta.presseNr || '';
+  const manometerTyp = meta.manometerTyp || '';
+  const manometerNr  = meta.manometerNr || '';
+  const kalibriertAm = normalizeCsvDate(meta.kalibriertAm || '');
+  const gueltigMonate = Number(meta.gueltigMonate || 12);
+
+  if(!displayName || !presseNr || !kalibriertAm || punkte.length < 2){
+    throw new Error('CSV unvollständig. Pflichtfelder: displayName, presseNr, kalibriertAm, mindestens 2 Punkte.');
+  }
+
+  return {
+    id: `${presseNr}_${kalibriertAm}`,
+    displayName,
+    presseTyp,
+    presseNr,
+    manometerTyp,
+    manometerNr,
+    kalibriertAm,
+    gueltigMonate: Number.isFinite(gueltigMonate) ? gueltigMonate : 12,
+    punkte
+  };
+}
+
+/* ═══════════════════════════════════════════════════════
+   KALIBRIERUNGS-MANAGEMENT
+═══════════════════════════════════════════════════════ */
+function loadAllKalibs(){
+  let local = [];
+  try{ local = JSON.parse(localStorage.getItem(STORAGE_KALIB) || '[]'); }catch{}
+  const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k => k.id));
+  return [
+    ...BUILTIN_KALIBRIERUNGEN,
+    ...local.filter(k => !builtinIds.has(k.id))
+  ];
+}
+
+function saveUserKalibs(kalibs){
+  const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k => k.id));
+  const userOnly = kalibs.filter(k => !builtinIds.has(k.id));
+  try{ localStorage.setItem(STORAGE_KALIB, JSON.stringify(userOnly)); }
+  catch(e){ console.warn(e); }
+}
+
+function findKalibById(id){
+  return loadAllKalibs().find(k => k.id === id) || null;
+}
+
+function kalibGueltigBis(k){
+  if(!k?.kalibriertAm) return null;
+  const iso = normalizeCsvDate(k.kalibriertAm);
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return null;
+  d.setMonth(d.getMonth() + Number(k.gueltigMonate || 12));
+  return d;
+}
+
+function kalibStatus(k){
+  const bis = kalibGueltigBis(k);
+  if(!bis) return 'ok';
+  const diffDays = Math.floor((bis - new Date()) / 86400000);
+  if(diffDays < 0) return 'expired';
+  if(diffDays < 30) return 'warn';
+  return 'ok';
+}
+
+async function handleKalibImport(file){
+  if(!file) return;
+
+  try{
+    const text = await file.text();
+    const kalib = parseKalibCsv(text);
+
+    const existing = loadAllKalibs();
+    const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k => k.id));
+    const userKalibs = existing.filter(k => !builtinIds.has(k.id));
+
+    const idx = userKalibs.findIndex(k => k.id === kalib.id);
+    if(idx >= 0) userKalibs[idx] = kalib;
+    else userKalibs.push(kalib);
+
+    saveUserKalibs(userKalibs);
+    state.meta.selectedKalibId = kalib.id;
+
+    renderPresseDropdown();
+    syncMetaToUi();
+    renderKalibInfo();
+    renderKalibPreview();
+    syncDruckFromKalib();
+    saveDraftDebounced();
+
+    alert(`CSV-Import erfolgreich:\n${kalib.displayName}`);
+  }catch(e){
+    console.error('Kalibrierungs-CSV-Importfehler:', e);
+    alert('CSV-Import fehlgeschlagen:\n' + e.message);
+  }
+}
+
+function handleKalibExport(){
+  const kalib = findKalibById(state.meta.selectedKalibId);
+  if(!kalib){
+    downloadText(buildKalibCsvTemplate(), 'HTB_Kalibrierung_Vorlage.csv', 'text/csv;charset=utf-8');
+    alert('Keine Presse ausgewählt.\nCSV-Vorlage wurde exportiert.');
+    return;
+  }
+  downloadText(kalibToCsv(kalib), `HTB_Kalib_${kalib.presseNr}_${kalib.kalibriertAm}.csv`, 'text/csv;charset=utf-8');
+}
+
+function handleKalibDelete(){
+  const id = state.meta.selectedKalibId;
+  if(!id){ alert('Bitte zuerst eine Presse auswählen.'); return; }
+
+  const kalib = findKalibById(id);
+  if(!kalib){ alert('Kalibrierung nicht gefunden.'); return; }
+
+  if(BUILTIN_KALIBRIERUNGEN.some(k => k.id === id)){
+    alert('Eingebaute Kalibrierungen können nicht gelöscht werden.');
+    return;
+  }
+
+  if(!confirm(`Kalibrierung "${kalib.displayName}" wirklich löschen?`)) return;
+
+  const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k => k.id));
+  saveUserKalibs(loadAllKalibs().filter(k => !builtinIds.has(k.id) && k.id !== id));
+
+  state.meta.selectedKalibId = '';
+  renderPresseDropdown();
+  syncMetaToUi();
+  renderKalibInfo();
+  renderKalibPreview();
+  syncDruckFromKalib();
+  saveDraftDebounced();
+
+  alert('Kalibrierung gelöscht.');
+}
+
+/* ═══════════════════════════════════════════════════════
+   INTERPOLATION kN → bar
+═══════════════════════════════════════════════════════ */
+function interpoliereBar(zielKn, punkte){
+  if(!Array.isArray(punkte) || punkte.length < 2) return { bar:null, oor:true };
+
+  const sorted = [...punkte]
+    .map(p => ({ kN:Number(p.kN), bar:Number(p.bar) }))
+    .filter(p => Number.isFinite(p.kN) && Number.isFinite(p.bar))
+    .sort((a,b) => a.kN - b.kN);
+
+  if(sorted.length < 2) return { bar:null, oor:true };
+
+  const minKn = sorted[0].kN;
+  const maxKn = sorted[sorted.length - 1].kN;
+
+  if(!Number.isFinite(zielKn) || zielKn < minKn || zielKn > maxKn){
+    return { bar:null, oor:true };
+  }
+
+  const exact = sorted.find(p => p.kN === zielKn);
+  if(exact) return { bar:exact.bar, oor:false };
+
+  let lo = sorted[0];
+  let hi = sorted[sorted.length - 1];
+
+  for(let i=0;i<sorted.length-1;i++){
+    if(sorted[i].kN <= zielKn && sorted[i+1].kN >= zielKn){
+      lo = sorted[i];
+      hi = sorted[i+1];
+      break;
+    }
+  }
+
+  const t = (zielKn - lo.kN) / (hi.kN - lo.kN);
+  const bar = lo.bar + t * (hi.bar - lo.bar);
+  return { bar:Math.round(bar * 10) / 10, oor:false };
+}
+
+function berechneDruckvorschau(){
+  const kalib = findKalibById(state.meta.selectedKalibId);
+  const Pp = Number(state.vorgabe.Pp);
+  const Pa = Number(state.vorgabe.Pa);
+  const P0 = Number(state.vorgabe.P0);
+
+  const stufen = [
+    { label:'Pa',        kN: Pa },
+    { label:'0,4 · Pp',  kN: Number.isFinite(Pp) ? Pp * 0.40 : NaN },
+    { label:'0,55 · Pp', kN: Number.isFinite(Pp) ? Pp * 0.55 : NaN },
+    { label:'0,7 · Pp',  kN: Number.isFinite(Pp) ? Pp * 0.70 : NaN },
+    { label:'0,85 · Pp', kN: Number.isFinite(Pp) ? Pp * 0.85 : NaN },
+    { label:'Pp',        kN: Pp },
+    { label:'P0',        kN: P0 }
+  ];
+
+  return stufen.map(s => {
+    if(!kalib || !Number.isFinite(s.kN) || s.kN < 0){
+      return { ...s, bar:null, oor:false, noKalib:!kalib };
+    }
+    const { bar, oor } = interpoliereBar(s.kN, kalib.punkte);
+    return { ...s, bar, oor };
+  });
+}
+
+function kNtoBar(kN){
+  const kalib = findKalibById(state.meta.selectedKalibId);
+  if(!kalib || !Number.isFinite(kN)) return null;
+  const { bar, oor } = interpoliereBar(kN, kalib.punkte);
+  return oor ? null : bar;
+}
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+function getInitialState(){
+  return {
+    meta:{
+      filiale:'',
+      bauvorhaben:'',
+      bauherr:'',
+      bauleitung:'',
+      ankerlage:'',
+      ankerNr:'',
+      blattNr:'',
+      pruefdatum:'',
+      pumpeNr:'',
+      anmerkung:'',
+      selectedKalibId:'',
+      activeZyklusId:''
+    },
+    vorgabe:{
+      bodenart:'nichtbindig',
+      ankertyp:'',
+      LA:'',
+      Ltb:'',
+      Ltf:'',
+      Le:'',
+      Et:'195',
+      At:'',
+      P0:'',
+      Pa:'0',
+      Pp:'',
+      Pt01k:'',
+      Pd:'',
+      gamma:'1.1'
+    },
+    zyklen:[],
+    settings:{
+      alarmDurationSec:4,
+      alarmSoundEnabled:true,
+      zyklenMode:'norm'
+    }
+  };
+}
+
+const state = getInitialState();
+const timerMap = {};
+let _saveT = null;
+let _audioCtx = null;
+let _alarmGain = null;
+let _alarmReady = false;
+let _floatingRaf = null;
+let _timeAdjustVid = null;
+
+/* ═══════════════════════════════════════════════════════
+   ZYKLEN / MODE
+═══════════════════════════════════════════════════════ */
 function makeZyklusFromDefinition(def, oldZ=null){
   const oldMap = Object.fromEntries((oldZ?.messungen || []).map(m => [Number(m.min), m]));
   const oldLaststufen = normalizeLaststufenArray(oldZ?.laststufen || []);
@@ -342,7 +750,9 @@ function makeZyklusFromDefinition(def, oldZ=null){
 
   const messungen = def.intervals.map(min => {
     const old = oldMap[min];
-    return old ? { ...old, min } : { min, druck:'', ablesung:'', versch:'', anm:'' };
+    return old
+      ? { ...old, min }
+      : { min, druck:'', ablesung:'', versch:'', anm:'' };
   });
 
   return {
@@ -370,10 +780,8 @@ function setZyklenMode(mode){
   if(next === state.settings.zyklenMode) return;
 
   if(next === 'norm'){
-    if(
-      state.settings.zyklenMode === 'frei' &&
-      !confirm('Auf Norm / Vorlage zurücksetzen?\nFreie Änderungen in den Lastzyklen werden überschrieben.')
-    ){
+    if(state.settings.zyklenMode === 'frei' &&
+      !confirm('Auf Norm / Vorlage zurücksetzen?\nFreie Änderungen in den Lastzyklen werden überschrieben.')){
       renderZyklen();
       return;
     }
@@ -462,9 +870,9 @@ function getZyklusById(id){
   return state.zyklen.find(z => z.id === id);
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    PERSISTENCE
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function saveDraftDebounced(){
   clearTimeout(_saveT);
   _saveT = setTimeout(() => {
@@ -516,13 +924,10 @@ function applySnapshot(snap, replace=true){
     state.zyklen = Array.isArray(snap.zyklen) ? clone(snap.zyklen) : [];
   }
 
-  initAnkertypSelect();
   ensureDefaultZyklen();
   recalcAllVerschiebungen();
-
   syncMetaToUi();
   syncVorgabeToUi();
-  renderAnkertypInfo();
   renderPresseDropdown();
   renderKalibInfo();
   renderKalibPreview();
@@ -548,9 +953,9 @@ function saveCurrentToHistory(){
   return true;
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    UI-SYNC
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 const META_FIELDS = [
   ['meta-filiale','filiale'],
   ['meta-bauvorhaben','bauvorhaben'],
@@ -594,8 +999,6 @@ function syncVorgabeToUi(){
 
   if($('boden-bindig')) $('boden-bindig').checked = state.vorgabe.bodenart === 'bindig';
   if($('boden-nichtbindig')) $('boden-nichtbindig').checked = state.vorgabe.bodenart !== 'bindig';
-
-  renderAnkertypInfo();
 }
 
 function collectVorgabeFromUi(){
@@ -607,9 +1010,9 @@ function collectVorgabeFromUi(){
   state.vorgabe.bodenart = $('boden-bindig')?.checked ? 'bindig' : 'nichtbindig';
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    VERSCHIEBUNG — RELATIV ZUM VORHERIGEN WERT
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function recalcVerschiebung(z){
   if(!z?.messungen) return;
 
@@ -650,9 +1053,10 @@ function updateComputedRowsForCard(card, z){
   });
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    AUTO-BERECHNUNG VORGABEN
-────────────────────────────────────────────────────── */
+   Pp nicht doppelt anzeigen
+═══════════════════════════════════════════════════════ */
 function getMeasuredLappForDisplay(){
   const zs = [...state.zyklen].sort((a,b) => b.nr - a.nr);
   for(const z of zs){
@@ -675,8 +1079,8 @@ function computeVorgabeAuto(){
   const Pd    = Number(state.vorgabe.Pd);
   const gamma = Number(state.vorgabe.gamma);
 
-  const minLapp = (Number.isFinite(Ltf) && Number.isFinite(Le)) ? (0.8 * Ltf + Le) : NaN;
-  const maxLapp = (Number.isFinite(Ltf) && Number.isFinite(Le) && Number.isFinite(Ltb)) ? (Ltf + Le + 0.5 * Ltb) : NaN;
+  const minLapp = (Number.isFinite(Ltf)&&Number.isFinite(Le)) ? (0.8*Ltf + Le) : NaN;
+  const maxLapp = (Number.isFinite(Ltf)&&Number.isFinite(Le)&&Number.isFinite(Ltb)) ? (Ltf + Le + 0.5*Ltb) : NaN;
   const deltaF = Pp - Pa;
 
   const sGrenzB = (
@@ -693,8 +1097,8 @@ function computeVorgabeAuto(){
     Number.isFinite(At) && At > 0
   ) ? (maxLapp * deltaF * 1000) / (Et * At) : NaN;
 
-  const PpFromPd = (Number.isFinite(Pd) && Number.isFinite(gamma) && gamma > 0) ? (Pd * gamma) : NaN;
-  const PdFromPp = (Number.isFinite(Pp) && Number.isFinite(gamma) && gamma > 0) ? (Pp / gamma) : NaN;
+  const PpFromPd = (Number.isFinite(Pd)&&Number.isFinite(gamma)&&gamma>0) ? (Pd * gamma) : NaN;
+  const PdFromPp = (Number.isFinite(Pp)&&Number.isFinite(gamma)&&gamma>0) ? (Pp / gamma) : NaN;
 
   const measured = getMeasuredLappForDisplay();
 
@@ -769,7 +1173,11 @@ function updateLappPreview(){
 
   const checkEl = $('calc-LappCheck');
   if(checkEl){
-    if(Number.isFinite(a.measuredLapp) && Number.isFinite(a.minLapp) && Number.isFinite(a.maxLapp)){
+    if(
+      Number.isFinite(a.measuredLapp) &&
+      Number.isFinite(a.minLapp) &&
+      Number.isFinite(a.maxLapp)
+    ){
       const ok = a.measuredLapp >= a.minLapp && a.measuredLapp <= a.maxLapp;
       checkEl.textContent = ok ? 'OK' : 'nicht OK';
       checkEl.className = `inline-badge ${ok ? 'inline-badge--good' : 'inline-badge--bad'}`;
@@ -780,9 +1188,9 @@ function updateLappPreview(){
   }
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    AUDIO / ALARM
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function getAlarmAudioContext(){
   if(!_audioCtx){
     try{
@@ -863,20 +1271,20 @@ async function playIntervalBeep(){
 
   try{
     const p = [120,90,120,90,120,360];
-    const tot = Math.max(1,Math.round(Number(state.settings.alarmDurationSec || 4) / 0.9));
+    const tot = Math.max(1,Math.round(Number(state.settings.alarmDurationSec||4)/0.9));
     const vib = [];
     for(let i=0;i<tot;i++) vib.push(...p);
     if(navigator.vibrate) navigator.vibrate(vib);
   }catch{}
 
-  const dur = clamp(Number(state.settings.alarmDurationSec || 4),1,30);
+  const dur = clamp(Number(state.settings.alarmDurationSec||4),1,30);
   const now = ctx.currentTime + 0.02;
   const cycle = 0.90;
 
   for(let t=0;t<dur;t+=cycle){
-    scheduleBeep(ctx, now+t,      0.10, 2350, 0.52);
-    scheduleBeep(ctx, now+t+0.20, 0.10, 2350, 0.52);
-    scheduleBeep(ctx, now+t+0.40, 0.12, 2550, 0.56);
+    scheduleBeep(ctx,now+t,      0.10,2350,0.52);
+    scheduleBeep(ctx,now+t+0.20, 0.10,2350,0.52);
+    scheduleBeep(ctx,now+t+0.40, 0.12,2550,0.56);
   }
 
   return true;
@@ -907,7 +1315,9 @@ function updateAlarmSoundButton(){
   if(status){
     status.textContent = active
       ? 'Alarmton ist aktiv.'
-      : (enabledPref ? 'Für iPhone: einmal hier aktivieren oder vor dem Start testen.' : 'Alarmton ist ausgeschaltet.');
+      : (enabledPref
+        ? 'Für iPhone: einmal hier aktivieren oder vor dem Start testen.'
+        : 'Alarmton ist ausgeschaltet.');
   }
 }
 
@@ -939,9 +1349,9 @@ async function toggleAlarmSoundByUserGesture(){
   }
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    TIMER (GLOBAL ÜBER ALLE ZYKLEN)
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function ensureTimer(zid,z){
   if(!timerMap[zid]){
     const min = Number(z?.elapsedMs || 0) / 60000;
@@ -1020,7 +1430,9 @@ function updateGlobalTimerUi(){
     btnStart.textContent = t.running ? 'Läuft' : (z.elapsedMs > 0 ? 'Weiter' : 'Start');
     btnStart.disabled = t.running;
   }
-  if(btnStop) btnStop.disabled = !t.running;
+  if(btnStop){
+    btnStop.disabled = !t.running;
+  }
 
   highlightActiveMeasurementRow(z);
 }
@@ -1154,9 +1566,9 @@ function resetActiveTimer(){
   }
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    FLOATING TIMER
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function getFirstRunningZyklus(){
   return state.zyklen.find(z => timerMap[z.id]?.running) || null;
 }
@@ -1188,7 +1600,6 @@ function updateFloatingTimerWidget(){
 
 function startFloatingLoop(){
   if(_floatingRaf) return;
-
   const loop = () => {
     updateFloatingTimerWidget();
     if(Object.values(timerMap).some(t => t.running)){
@@ -1197,7 +1608,6 @@ function startFloatingLoop(){
       _floatingRaf = null;
     }
   };
-
   _floatingRaf = requestAnimationFrame(loop);
 }
 
@@ -1208,9 +1618,9 @@ function stopFloatingLoopIfIdle(){
   }
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    TIME ADJUST MODAL
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function openTimeAdjustModal(zid){
   _timeAdjustVid = zid;
   if($('timeAdjustInput')) $('timeAdjustInput').value = '0';
@@ -1254,9 +1664,9 @@ function applyTimeAdjustment(){
   closeTimeAdjustModal();
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    PRESSE UI
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function renderPresseDropdown(){
   const sel = $('presseSelect');
   if(!sel) return;
@@ -1343,6 +1753,7 @@ function renderKalibPreview(){
   }
 
   wrap.hidden = false;
+
   const vorschau = berechneDruckvorschau();
 
   table.innerHTML = `
@@ -1367,9 +1778,9 @@ function renderKalibPreview(){
   `;
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    DRUCK AUS KALIBRIERUNG
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function syncDruckFromKalib(){
   const kalib = findKalibById(state.meta.selectedKalibId);
 
@@ -1463,9 +1874,9 @@ function syncDruckFromKalib(){
   saveDraftDebounced();
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    GLOBALER TIMER HTML
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function buildGlobalTimerHtml(){
   const z = getActiveZyklus();
   const display = z ? formatElapsed(getElapsedMs(z.id,z)) : '00:00';
@@ -1519,9 +1930,9 @@ function buildGlobalTimerHtml(){
   `;
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    ZYKLUS-RENDERING
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function buildLaststufenHtml(z){
   const isFree = state.settings.zyklenMode === 'frei';
   z.laststufen = normalizeLaststufenArray(z.laststufen);
@@ -1974,9 +2385,344 @@ function hookZyklenDelegation(){
   });
 }
 
-/* ──────────────────────────────────────────────────────
-   TEMPLATE / EXPORT / PDF HELPERS
-────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   BERECHNUNGEN / AUSWERTUNG
+═══════════════════════════════════════════════════════ */
+function calcLapp(deltaS_mm,Pp_kN,Pa_kN,Et_kNmm2,At_mm2){
+  const dF = Pp_kN - Pa_kN;
+  if(!Number.isFinite(deltaS_mm) || !Number.isFinite(dF) || dF <= 0 || !Number.isFinite(Et_kNmm2) || !Number.isFinite(At_mm2)) return NaN;
+  return (deltaS_mm * Et_kNmm2 * At_mm2) / (dF * 1000);
+}
+
+function calcKriechmass(points){
+  if(!Array.isArray(points) || points.length < 2) return NaN;
+
+  const sorted = points
+    .filter(p => Number.isFinite(p.min) && p.min > 0 && Number.isFinite(p.s_mm))
+    .sort((a,b) => a.min - b.min);
+
+  if(sorted.length < 2) return NaN;
+
+  const a = sorted[0];
+  const b = sorted[sorted.length - 1];
+  if(a.min === b.min) return NaN;
+
+  return (b.s_mm - a.s_mm) / (Math.log10(b.min) - Math.log10(a.min));
+}
+
+function getZyklusKpis(z){
+  const Pp = Number(state.vorgabe.Pp);
+  const Pa = Number(state.vorgabe.Pa);
+  const Et = Number(state.vorgabe.Et);
+  const At = Number(state.vorgabe.At);
+  const halt = z.haltMin;
+
+  const m0 = z.messungen.find(m => Number(m.min) === 0);
+  const mH = z.messungen.find(m => Number(m.min) === halt);
+
+  let dS = NaN;
+
+  if(m0 && mH){
+    const idx0 = z.messungen.findIndex(m => Number(m.min) === 0);
+    const idxH = z.messungen.findIndex(m => Number(m.min) === halt);
+
+    if(idx0 >= 0 && idxH >= idx0){
+      dS = z.messungen.slice(idx0, idxH + 1)
+        .map(m => Number(m.versch))
+        .filter(Number.isFinite)
+        .reduce((a,b) => a + b, 0);
+    }
+  }
+
+  z.laststufen = normalizeLaststufenArray(z.laststufen);
+
+  const haltIdx = Number.isInteger(z.haltLaststufeIdx)
+    ? Math.min(z.haltLaststufeIdx, z.laststufen.length - 1)
+    : defaultHoldIdxFromLaststufen(z.laststufen);
+
+  const haltLs = z.laststufen[haltIdx];
+
+  let lastKn = NaN;
+  if(haltLs){
+    if(haltLs.kind === 'pa'){
+      lastKn = Pa;
+    }else if(haltLs.kind === 'factor'){
+      lastKn = Number.isFinite(Pp) ? Pp * Number(haltLs.faktor || 0) : NaN;
+    }
+  }
+
+  const isPpHold = haltLs?.kind === 'factor' && Math.abs(Number(haltLs.faktor || 0) - 1) < 0.0001;
+  const Lapp = isPpHold ? calcLapp(dS,Pp,Pa,Et,At) : NaN;
+
+  const isB = state.vorgabe.bodenart === 'bindig';
+  const tMin = isB ? 60 : 20;
+  const tMax = isB ? 180 : 60;
+
+  let cum = 0;
+  const cumPts = z.messungen.map(m => {
+    const v = Number(m.versch);
+    if(Number.isFinite(v)) cum += v;
+    return { min:Number(m.min), s_mm: cum };
+  });
+
+  const krPts = cumPts.filter(m => Number(m.min) >= tMin && Number(m.min) <= tMax);
+  const ks = calcKriechmass(krPts);
+
+  return {
+    lastKn,
+    dS,
+    Lapp,
+    ks,
+    haltLabel: haltLs?.label || '—'
+  };
+}
+
+function buildLastVerschiebungSvg(z){
+  const Pp  = Number(state.vorgabe.Pp);
+  const Pa  = Number(state.vorgabe.Pa);
+  const Et  = Number(state.vorgabe.Et);
+  const At  = Number(state.vorgabe.At);
+  const Ltf = Number(state.vorgabe.Ltf);
+  const Le  = Number(state.vorgabe.Le);
+  const Ltb = Number(state.vorgabe.Ltb);
+
+  const minLapp = 0.8 * Ltf + Le;
+  const maxLapp = Ltf + Le + 0.5 * Ltb;
+
+  let cum = 0;
+  const cumulative = z.messungen.map(m => {
+    const v = Number(m.versch);
+    if(Number.isFinite(v)) cum += v;
+    return { min:Number(m.min), s:cum };
+  });
+
+  z.laststufen = normalizeLaststufenArray(z.laststufen);
+
+  const haltIdx = Number.isInteger(z.haltLaststufeIdx)
+    ? Math.min(z.haltLaststufeIdx, z.laststufen.length - 1)
+    : defaultHoldIdxFromLaststufen(z.laststufen);
+
+  const haltLs = z.laststufen[haltIdx];
+  const haltMs = cumulative[cumulative.length - 1];
+
+  let lastHalt = NaN;
+  if(haltLs?.kind === 'pa'){
+    lastHalt = Pa;
+  }else if(haltLs?.kind === 'factor'){
+    lastHalt = Pp * Number(haltLs.faktor || 0);
+  }
+
+  const sHalt = Number(haltMs?.s);
+
+  const W=520,H=300,ml=58,mr=20,mt=20,mb=46,pw=W-ml-mr,ph=H-mt-mb;
+  const xMax = Number.isFinite(Pp) ? Pp * 1.1 : 1;
+  const sMaxData = Math.max(...cumulative.map(m => Number(m.s)).filter(Number.isFinite),1);
+  const yMax = Math.max(sMaxData * 1.2, 5);
+
+  const tx = v => ml + (v / xMax) * pw;
+  const ty = v => mt + ph - (v / yMax) * ph;
+
+  function sFor(F,Lapp){
+    if(!Number.isFinite(F) || !Number.isFinite(Lapp) || !Number.isFinite(Et) || !Number.isFinite(At)) return NaN;
+    return (Lapp * (F - Pa) * 1000) / (Et * At);
+  }
+
+  const linePts = [];
+  for(let f=Pa;f<=xMax;f+=Math.max(0.1, xMax/40)) linePts.push(f);
+
+  const polyMin = linePts.map(f => {
+    const s = sFor(f,minLapp);
+    return Number.isFinite(s) ? `${tx(f)},${ty(Math.max(0,Math.min(yMax,s)))}` : null;
+  }).filter(Boolean).join(' ');
+
+  const polyMax = linePts.map(f => {
+    const s = sFor(f,maxLapp);
+    return Number.isFinite(s) ? `${tx(f)},${ty(Math.max(0,Math.min(yMax,s)))}` : null;
+  }).filter(Boolean).join(' ');
+
+  const xTicks = [0,0.25,0.5,0.75,1].map(p => p * xMax);
+  const yTicks = [0,0.25,0.5,0.75,1].map(p => p * yMax);
+
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="${W}" height="${H}" rx="8" fill="#0b1725"/>
+    ${yTicks.map(v=>`<line x1="${ml}" y1="${ty(v)}" x2="${W-mr}" y2="${ty(v)}" stroke="rgba(255,255,255,.08)"/><text x="${ml-6}" y="${ty(v)+4}" text-anchor="end" fill="rgba(220,240,255,.7)" font-size="10">${fmt(v,1)}</text>`).join('')}
+    ${xTicks.map(v=>`<line x1="${tx(v)}" y1="${mt}" x2="${tx(v)}" y2="${mt+ph}" stroke="rgba(255,255,255,.05)"/><text x="${tx(v)}" y="${H-22}" text-anchor="middle" fill="rgba(220,240,255,.7)" font-size="10">${fmt(v,0)}</text>`).join('')}
+    <rect x="${ml}" y="${mt}" width="${pw}" height="${ph}" fill="none" stroke="rgba(255,255,255,.18)"/>
+    ${polyMin?`<polyline points="${polyMin}" fill="none" stroke="#56b7ff" stroke-width="2" stroke-dasharray="6 4"/>`:''}
+    ${polyMax?`<polyline points="${polyMax}" fill="none" stroke="#ffb45a" stroke-width="2" stroke-dasharray="6 4"/>`:''}
+    ${Number.isFinite(lastHalt)&&Number.isFinite(sHalt)?`<circle cx="${tx(lastHalt)}" cy="${ty(sHalt)}" r="5" fill="#f08a1c" stroke="#fff" stroke-width="1.5"/>`:''}
+    <text x="${ml+pw/2}" y="${H-4}" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Last [kN]</text>
+    <text x="14" y="${mt+ph/2}" transform="rotate(-90 14 ${mt+ph/2})" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Verschiebung [mm]</text>
+  </svg>`;
+}
+
+function buildKriechSvg(z){
+  const W=520,H=260,ml=58,mr=20,mt=20,mb=42,pw=W-ml-mr,ph=H-mt-mb;
+
+  let cum = 0;
+  const pts = z.messungen
+    .filter(m => Number(m.min) > 0 && Number.isFinite(Number(m.versch)))
+    .map(m => {
+      cum += Number(m.versch);
+      return { t:Number(m.min), s:cum };
+    })
+    .sort((a,b) => a.t - b.t);
+
+  const tMax = Math.max(...pts.map(p => p.t), z.haltMin || 60);
+  const sMin = Math.min(...pts.map(p => p.s), 0);
+  const sMax = Math.max(...pts.map(p => p.s), sMin + 1);
+  const tMin = 1;
+
+  const tx = t => ml + ((Math.log10(Math.max(t,tMin)) - Math.log10(tMin)) / (Math.log10(tMax) - Math.log10(tMin) || 1)) * pw;
+  const ty = s => mt + ph - ((s - sMin) / ((sMax - sMin) || 1)) * ph;
+  const poly = pts.map(p => `${tx(p.t)},${ty(p.s)}`).join(' ');
+  const ticks = [1,2,5,10,20,30,60,120,180].filter(t => t <= tMax * 1.2);
+
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="${W}" height="${H}" rx="8" fill="#0b1725"/>
+    ${ticks.map(t=>`<line x1="${tx(t)}" y1="${mt}" x2="${tx(t)}" y2="${mt+ph}" stroke="rgba(255,255,255,.08)"/><text x="${tx(t)}" y="${H-20}" text-anchor="middle" fill="rgba(220,240,255,.7)" font-size="10">${t}</text>`).join('')}
+    <rect x="${ml}" y="${mt}" width="${pw}" height="${ph}" fill="none" stroke="rgba(255,255,255,.18)"/>
+    ${pts.length?`<polyline points="${poly}" fill="none" stroke="#f08a1c" stroke-width="2"/>`:''}
+    ${pts.map(p=>`<circle cx="${tx(p.t)}" cy="${ty(p.s)}" r="3" fill="#f08a1c"/>`).join('')}
+    <text x="${ml+pw/2}" y="${H-4}" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">log Zeit [min]</text>
+    <text x="14" y="${mt+ph/2}" transform="rotate(-90 14 ${mt+ph/2})" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Verschiebung [mm]</text>
+  </svg>`;
+}
+
+function renderAuswertung(){
+  const host = $('auswertungContainer');
+  if(!host) return;
+
+  collectVorgabeFromUi();
+
+  if(!state.zyklen.length){
+    host.innerHTML = `<div class="empty-state">Noch keine Lastzyklen vorhanden.</div>`;
+    return;
+  }
+
+  const isB = state.vorgabe.bodenart === 'bindig';
+  const ksLimit = 2;
+
+  host.innerHTML = state.zyklen.map(z => {
+    const k = getZyklusKpis(z);
+    const Ltf = Number(state.vorgabe.Ltf);
+    const Le  = Number(state.vorgabe.Le);
+    const Ltb = Number(state.vorgabe.Ltb);
+    const minL = 0.8 * Ltf + Le;
+    const maxL = Ltf + Le + 0.5 * Ltb;
+    const lappOk = Number.isFinite(k.Lapp) ? (k.Lapp >= minL && k.Lapp <= maxL) : null;
+    const ksOk = Number.isFinite(k.ks) ? k.ks <= ksLimit : null;
+
+    return `
+      <div class="auswertung-block">
+        <div class="auswertung-block__title">Zyklus ${z.nr} · Halt bei ${h(k.haltLabel)} (${z.haltMin} min · ${isB ? 'bindig' : 'nicht bindig'})</div>
+        <div class="kpi-grid">
+          <div class="kpi"><div class="kpi__label">Last bei Halt</div><div class="kpi__value">${fmt(k.lastKn,1)} kN</div></div>
+          <div class="kpi"><div class="kpi__label">Verschiebung Δs</div><div class="kpi__value">${fmt(k.dS,2)} mm</div></div>
+          <div class="kpi"><div class="kpi__label">Kriechmaß k<sub>s</sub></div><div class="kpi__value ${ksOk===true?'kpi__value--good':ksOk===false?'kpi__value--bad':''}">${fmt(k.ks,2)} mm</div></div>
+          <div class="kpi"><div class="kpi__label">L<sub>app</sub></div><div class="kpi__value ${lappOk===true?'kpi__value--good':lappOk===false?'kpi__value--bad':''}">${fmt(k.Lapp,2)} m</div></div>
+        </div>
+        <div class="diag-wrap">${buildLastVerschiebungSvg(z)}</div>
+        <div class="diag-wrap">${buildKriechSvg(z)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════
+   HISTORY
+═══════════════════════════════════════════════════════ */
+function renderHistoryList(){
+  const host = $('historyList');
+  if(!host) return;
+
+  const list = readHistory();
+  if(!list.length){
+    host.innerHTML = `<div class="empty-state">Noch keine Protokolle gespeichert.</div>`;
+    return;
+  }
+
+  host.innerHTML = list.map(e => {
+    const s = e.snapshot || {};
+    return `
+      <details class="historyItem" data-hid="${h(e.id)}">
+        <summary class="historyItem__head">
+          <span class="historyItem__chevron">▸</span>
+          <span class="historyItem__title">${h(e.title)}</span>
+          <span class="historyItem__date">${h(new Date(e.savedAt).toLocaleString('de-DE'))}</span>
+        </summary>
+        <div class="historyItem__body">
+          Bauvorhaben: <b>${h(s.meta?.bauvorhaben || '—')}</b><br>
+          Anker Nr.: <b>${h(s.meta?.ankerNr || '—')}</b><br>
+          Bodenart: <b>${h(s.vorgabe?.bodenart || '—')}</b><br>
+          Zyklen: <b>${(s.zyklen || []).length}</b>
+          <div class="historyBtns">
+            <button data-hact="load" data-id="${h(e.id)}">Laden</button>
+            <button data-hact="pdf" data-id="${h(e.id)}">PDF</button>
+            <button data-hact="export" data-id="${h(e.id)}">JSON Export</button>
+            <button data-hact="del" data-id="${h(e.id)}">Löschen</button>
+          </div>
+        </div>
+      </details>
+    `;
+  }).join('');
+}
+
+function hookHistoryDelegation(){
+  const host = $('historyList');
+  if(!host || host.dataset.bound === '1') return;
+  host.dataset.bound = '1';
+
+  host.addEventListener('click', async e => {
+    const btn = e.target.closest('[data-hact]');
+    if(!btn) return;
+
+    const id = btn.dataset.id;
+    const act = btn.dataset.hact;
+    const list = readHistory();
+    const entry = list.find(x => x.id === id);
+
+    if(!entry && act !== 'del') return;
+
+    if(act === 'del'){
+      if(!confirm('Eintrag löschen?')) return;
+      writeHistory(list.filter(x => x.id !== id));
+      renderHistoryList();
+      return;
+    }
+
+    if(act === 'load'){
+      applySnapshot(entry.snapshot, true);
+      saveDraftDebounced();
+      document.querySelector('.tab[data-tab="formular"]')?.click();
+      return;
+    }
+
+    if(act === 'pdf'){
+      await exportPdfFromSnapshot(entry.snapshot);
+      return;
+    }
+
+    if(act === 'export'){
+      downloadJson(entry.snapshot, `${dateTag()}_HTB_Anker_${(entry.snapshot.meta?.ankerNr || 'export').replace(/\s+/g,'_')}.json`);
+      return;
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   TEMPLATE / FULL EXPORT
+═══════════════════════════════════════════════════════ */
+function downloadJson(data, filename){
+  const blob = new Blob([JSON.stringify(data,null,2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
 function buildTemplateSnapshot(){
   const snap = collectSnapshot();
   snap.meta = {
@@ -2001,6 +2747,111 @@ function buildTemplateSnapshot(){
   return snap;
 }
 
+/* ═══════════════════════════════════════════════════════
+   PDF EXPORT
+═══════════════════════════════════════════════════════ */
+async function exportPdfFromSnapshot(snap){
+  if(!window.PDFLib){
+    alert('PDF-Bibliothek nicht geladen.');
+    return;
+  }
+
+  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const pdf = await PDFDocument.create();
+  const font = await pdf.embedFont(StandardFonts.Helvetica);
+  const fontB = await pdf.embedFont(StandardFonts.HelveticaBold);
+
+  let page = pdf.addPage([595.28, 841.89]);
+  const { width:W, height:H } = page.getSize();
+  let y = H - 50;
+
+  page.drawRectangle({ x:0, y:H-30, width:W, height:30, color:rgb(0.05,0.18,0.31) });
+  page.drawText('HTB Ankerprüfung – Verpreßanker Eignungsprüfung', {
+    x:30, y:H-20, size:11, font:fontB, color:rgb(1,1,1)
+  });
+
+  y = H - 60;
+  const meta = snap.meta || {};
+  const vor = snap.vorgabe || {};
+
+  const lines = [
+    ['Bauvorhaben',meta.bauvorhaben||''],
+    ['Bauherr',meta.bauherr||''],
+    ['Anker Nr.',meta.ankerNr||''],
+    ['Ankerlage',meta.ankerlage||''],
+    ['Prüfdatum',dateDE(meta.pruefdatum)],
+    ['Bodenart',vor.bodenart||''],
+    ['Ankertyp',vor.ankertyp||''],
+    ['LA / Ltb / Ltf / Le [m]',`${vor.LA||''} / ${vor.Ltb||''} / ${vor.Ltf||''} / ${vor.Le||''}`],
+    ['Pp / Pa [kN]',`${vor.Pp||''} / ${vor.Pa||''}`],
+    ['Et / At',`${vor.Et||''} kN/mm² / ${vor.At||''} mm²`]
+  ];
+
+  page.drawText('Stammdaten & Vorgabe',{ x:30, y, size:12, font:fontB, color:rgb(0,0,0) });
+  y -= 16;
+
+  lines.forEach(([k,v]) => {
+    page.drawText(`${k}:`,{ x:30, y, size:9, font:fontB });
+    page.drawText(String(v),{ x:160, y, size:9, font });
+    y -= 12;
+  });
+
+  y -= 10;
+  page.drawText('Lastzyklen',{ x:30, y, size:12, font:fontB });
+  y -= 14;
+
+  (snap.zyklen || []).forEach(z => {
+    if(y < 140){
+      page = pdf.addPage([595.28, 841.89]);
+      y = H - 50;
+    }
+
+    page.drawText(`Zyklus ${z.nr} · Halt ${z.haltMin} min`,{ x:30, y, size:10, font:fontB });
+    y -= 12;
+    page.drawText('Min   Druck   Mess.   Verschieb.   Anm.',{ x:30, y, size:8, font:fontB });
+    y -= 10;
+
+    z.messungen.forEach(m => {
+      if(y < 80){
+        page = pdf.addPage([595.28, 841.89]);
+        y = H - 50;
+      }
+
+      page.drawText(
+        `${String(m.min).padEnd(5)} ${String(m.druck || '').padEnd(7)} ${String(m.ablesung || '').padEnd(7)} ${String(m.versch || '').padEnd(11)} ${m.anm || ''}`,
+        { x:30, y, size:8, font }
+      );
+      y -= 10;
+    });
+
+    y -= 6;
+  });
+
+  const fil = FILIALEN[meta.filiale] || {};
+  pdf.getPages().forEach(p => {
+    p.drawRectangle({ x:0, y:0, width:W, height:30, color:rgb(0.05,0.18,0.31) });
+    p.drawText(`HTB Baugesellschaft m.b.H. – Filiale ${meta.filiale || '—'}`, {
+      x:30, y:18, size:8, font:fontB, color:rgb(1,1,1)
+    });
+    p.drawText(`${fil.adresse || ''} · ${fil.tel || ''} · ${fil.email || ''}`, {
+      x:30, y:8, size:7, font, color:rgb(.85,.9,1)
+    });
+  });
+
+  const bytes = await pdf.save();
+  const blob = new Blob([bytes], { type:'application/pdf' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${dateTag()}_HTB_Ankerpruefung_${(meta.ankerNr || 'export').replace(/\s+/g,'_')}.pdf`;
+  a.click();
+
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+/* ═══════════════════════════════════════════════════════
+   UI HELPERS
+═══════════════════════════════════════════════════════ */
 function normalizeBottomActionCards(){
   document.querySelectorAll('.card--actions-bottom').forEach(el => {
     el.style.position = 'static';
@@ -2011,21 +2862,31 @@ function normalizeBottomActionCards(){
 
 function normalizeKalibImportInput(){
   const inp = $('kalibImportInput');
-  if(inp) inp.setAttribute('accept', '.csv,text/csv');
+  if(inp){
+    inp.setAttribute('accept', '.csv,text/csv');
+  }
 }
 
-/* ──────────────────────────────────────────────────────
-   INIT
-────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   TABS / INIT
+═══════════════════════════════════════════════════════ */
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('is-active', t.dataset.tab === name));
+  document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'tab-' + name);
+
+  normalizeBottomActionCards();
+
+  if(name === 'auswertung') renderAuswertung();
+  if(name === 'verlauf') renderHistoryList();
+}
+
 function init(){
-  initAnkertypSelect();
   loadDraft();
   ensureDefaultZyklen();
   recalcAllVerschiebungen();
 
   syncMetaToUi();
   syncVorgabeToUi();
-  renderAnkertypInfo();
   renderPresseDropdown();
   syncMetaToUi();
   renderKalibInfo();
@@ -2057,14 +2918,8 @@ function init(){
     const el = $('vor-' + k);
     if(!el) return;
 
-    const evtName = el.tagName === 'SELECT' ? 'change' : 'input';
-    el.addEventListener(evtName, () => {
+    el.addEventListener('input', () => {
       state.vorgabe[k] = el.value || '';
-
-      if(k === 'ankertyp'){
-        applyAnkertypPreset(state.vorgabe.ankertyp, { overwrite:true });
-      }
-
       maybeAutofillVorgabe(k);
       updateLappPreview();
       renderKalibPreview();
@@ -2117,10 +2972,11 @@ function init(){
     const defs = getNormZyklusDefs(state.vorgabe.bodenart);
     const templateDef = defs[Math.min(state.zyklen.length, defs.length - 1)];
     const newNr = state.zyklen.length + 1;
-    const z = makeZyklusFromDefinition({ ...templateDef, nr:newNr }, null);
 
-    // WICHTIG: freie IDs / keine Überschreibung
-    z.id = uid();
+    const z = makeZyklusFromDefinition(
+      { ...templateDef, nr:newNr },
+      null
+    );
 
     state.zyklen.push(z);
     ensureActiveZyklus();
@@ -2158,13 +3014,11 @@ function init(){
       delete timerMap[k];
     });
 
-    initAnkertypSelect();
     ensureDefaultZyklen();
     recalcAllVerschiebungen();
 
     syncMetaToUi();
     syncVorgabeToUi();
-    renderAnkertypInfo();
     renderPresseDropdown();
     syncMetaToUi();
     renderKalibInfo();
@@ -2235,46 +3089,8 @@ function init(){
 
   $('btnKalibImport')?.addEventListener('click', () => $('kalibImportInput')?.click());
   $('kalibImportInput')?.addEventListener('change', async e => {
-    const file = e.target.files?.[0];
-    if(!file) return;
-
-    try{
-      const text = await file.text();
-      const kalib = parseKalibCsv(text);
-
-      // WICHTIG: neue Kalibrierung immer als eigener Datensatz, nichts überschreiben
-      const existing = loadAllKalibs();
-      const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k => k.id));
-      const userKalibs = existing.filter(k => !builtinIds.has(k.id));
-
-      const baseId = [slugify(kalib.displayName), slugify(kalib.presseNr), kalib.kalibriertAm].filter(Boolean).join('_') || uid();
-      let newId = baseId;
-      let counter = 2;
-      while(existing.some(k => k.id === newId) || userKalibs.some(k => k.id === newId)){
-        newId = `${baseId}_${counter++}`;
-      }
-
-      kalib.id = newId;
-      userKalibs.push(kalib);
-      saveUserKalibs(userKalibs);
-
-      // direkt die neu importierte auswählen
-      state.meta.selectedKalibId = kalib.id;
-
-      renderPresseDropdown();
-      syncMetaToUi();
-      renderKalibInfo();
-      renderKalibPreview();
-      syncDruckFromKalib();
-      saveDraftDebounced();
-
-      alert(`CSV-Import erfolgreich:\n${kalib.displayName}`);
-    }catch(err){
-      console.error('Kalibrierungs-CSV-Importfehler:', err);
-      alert('CSV-Import fehlgeschlagen:\n' + err.message);
-    }finally{
-      e.target.value = '';
-    }
+    await handleKalibImport(e.target.files?.[0]);
+    e.target.value = '';
   });
 
   $('btnKalibExport')?.addEventListener('click', handleKalibExport);
@@ -2326,6 +3142,7 @@ function init(){
       .register(`${BASE_PATH}sw.js?v=1`)
       .then(reg => {
         console.log('[Anker] SW registriert, scope:', reg.scope);
+
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           newWorker?.addEventListener('statechange', () => {
