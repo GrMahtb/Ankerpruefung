@@ -1222,9 +1222,6 @@ function renderKalibPreview(){
 }
 
 function syncDruckFromKalib(){
-  const kalib=findKalibById(state.meta.selectedKalibId);
-  if(!kalib){
-    document.querySelectorAll('[data-rolefunction syncDruckFromKalib(){
   const kalib = findKalibById(state.meta.selectedKalibId);
 
   if(!kalib){
