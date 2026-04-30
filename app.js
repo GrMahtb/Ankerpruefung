@@ -746,9 +746,9 @@ function applyTimeAdjustment(){
   const card=document.querySelector(`.zyklus-card[data-zid="${z.id}"]`);
   updateTimerUi(card,z);updateFloatingTimerWidget();saveDraftDebounced();closeTimeAdjustModal();
 }
- PRESSE UI
+/* ═══════════════════════════════════════════════════════
+   PRESSE UI
 ═══════════════════════════════════════════════════════ */
-
 /** Befüllt das Dropdown mit allen verfügbaren Kalibrierungen */
 function renderPresseDropdown(){
   const sel = $('presseSelect');
@@ -962,6 +962,7 @@ function syncDruckFromKalib(){
 
 async function handleKalibImport(file){
   if(!file) return;
+
   try{
     const text = await file.text();
     const raw  = JSON.parse(text);
@@ -969,23 +970,42 @@ async function handleKalibImport(file){
     // Einzeln oder Array
     const list = Array.isArray(raw) ? raw : [raw];
 
-    // Validierung
-    const valid = list.filter(k =>
-      k.id && k.displayName && k.presseNr &&
-      Array.isArray(k.punkte) && k.punkte.length >= 2
-    );
+    // Normalisieren + Validieren
+    const valid = list
+      .map(k => ({
+        ...k,
+        gueltigMonate: Number(k.gueltigMonate || 12),
+        punkte: Array.isArray(k.punkte)
+          ? k.punkte
+              .map(p => ({
+                kN: Number(p.kN),
+                bar: Number(p.bar)
+              }))
+              .filter(p => Number.isFinite(p.kN) && Number.isFinite(p.bar))
+              .sort((a,b) => a.kN - b.kN)
+          : []
+      }))
+      .filter(k =>
+        k.id &&
+        k.displayName &&
+        k.presseNr &&
+        Array.isArray(k.punkte) &&
+        k.punkte.length >= 2
+      );
 
     if(!valid.length){
       alert('Keine gültigen Kalibrierungen in der Datei gefunden.\n\nBitte JSON-Format prüfen.');
       return;
     }
 
-    // Mergen mit bestehenden User-Kalibs
-    const existing = loadAllKalibs();
-    const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k=>k.id));
+    const existing   = loadAllKalibs();
+    const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k => k.id));
     const userKalibs = existing.filter(k => !builtinIds.has(k.id));
 
-    let addedCount = 0, updatedCount = 0;
+    let addedCount = 0;
+    let updatedCount = 0;
+    let lastImportedId = '';
+
     valid.forEach(k => {
       const idx = userKalibs.findIndex(u => u.id === k.id);
       if(idx >= 0){
@@ -995,19 +1015,30 @@ async function handleKalibImport(file){
         userKalibs.push(k);
         addedCount++;
       }
+      lastImportedId = k.id;
     });
 
     saveUserKalibs(userKalibs);
+
+    // Neu importierte Kalibrierung direkt auswählen
+    if(lastImportedId){
+      state.meta.selectedKalibId = lastImportedId;
+    }
+
     renderPresseDropdown();
     renderKalibInfo();
+    renderKalibPreview();
+    syncDruckFromKalib();
+    saveDraftDebounced();
 
     const msg = [];
     if(addedCount)   msg.push(`${addedCount} neue Kalibrierung(en) hinzugefügt.`);
     if(updatedCount) msg.push(`${updatedCount} bestehende aktualisiert.`);
-    alert('Import erfolgreich!\n' + msg.join('\n'));
 
+    alert('Import erfolgreich!\n' + (msg.join('\n') || 'Kalibrierung geladen.'));
   }catch(e){
     alert('Import fehlgeschlagen: ' + e.message);
+    console.error('Kalibrierungs-Importfehler:', e);
   }
 }
 
@@ -1548,18 +1579,82 @@ function init(){
   $('timeAdjustModal').addEventListener('click',e=>{if(e.target.id==='timeAdjustModal')closeTimeAdjustModal();});
   $('floatingTimer').addEventListener('click',()=>{const z=getFirstRunningZyklus();if(z)openTimeAdjustModal(z.id);});
   hookHistoryDelegation();
+   // ── PRESSE & KALIBRIERUNG ──
+  renderPresseDropdown();
+  renderKalibInfo();
+
+  $('presseSelect')?.addEventListener('change', e => {
+    state.meta.selectedKalibId = e.target.value;
+    renderKalibInfo();
+    renderKalibPreview();
+    syncDruckFromKalib();
+    saveDraftDebounced();
+  });
+
+  $('btnKalibImport')?.addEventListener('click', () => {
+    $('kalibImportInput')?.click();
+  });
+
+  $('kalibImportInput')?.addEventListener('change', async e => {
+    await handleKalibImport(e.target.files?.[0]);
+    e.target.value = '';
+  });
+
+  $('btnKalibExport')?.addEventListener('click', handleKalibExport);
+  $('btnKalibDelete')?.addEventListener('click', handleKalibDelete);
+
+  // Audio
+  installAudioUnlock();
+  updateAlarmSoundButton();
+
+  // Time-Adjust Modal
+  $('timeAdjustInput')?.addEventListener('input',updateTimeAdjustPreview);
+  document.querySelectorAll('.modal-adj-btn').forEach(b =>
+    b.addEventListener('click',()=>{
+      $('timeAdjustInput').value = String(
+        Number($('timeAdjustInput').value || 0) + Number(b.dataset.adj || 0)
+      );
+      updateTimeAdjustPreview();
+    })
+  );
+
+  $('timeAdjustApply')?.addEventListener('click',applyTimeAdjustment);
+  $('timeAdjustCancel')?.addEventListener('click',closeTimeAdjustModal);
+  $('timeAdjustModal')?.addEventListener('click',e=>{
+    if(e.target.id==='timeAdjustModal') closeTimeAdjustModal();
+  });
+
+  $('floatingTimer')?.addEventListener('click',()=>{
+    const z=getFirstRunningZyklus();
+    if(z) openTimeAdjustModal(z.id);
+  });
+
+  hookHistoryDelegation();
+
   // PWA Install
-  let deferredPrompt=null;
-  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('btnInstall').hidden=false;});
-  $('btnInstall').addEventListener('click',async()=>{if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$('btnInstall').hidden=true;}
-                                                      // ── SERVICE WORKER ──
+  let deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if($('btnInstall')) $('btnInstall').hidden = false;
+  });
+
+  $('btnInstall')?.addEventListener('click', async () => {
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if($('btnInstall')) $('btnInstall').hidden = true;
+  });
+
+  // ── SERVICE WORKER ──
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker
       .register(`${BASE_PATH}sw.js?v=1`)
       .then(reg => {
         console.log('[Anker] SW registriert, scope:', reg.scope);
 
-        // Zeige "Update verfügbar"-Banner wenn neue SW-Version wartet
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           newWorker?.addEventListener('statechange', () => {
@@ -1571,12 +1666,13 @@ function init(){
       })
       .catch(err => console.error('[Anker] SW Fehler:', err));
 
-    // Seite neu laden wenn neuer SW aktiv wird
     let refreshing = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!refreshing) { refreshing = true; location.reload(); }
+      if (!refreshing) {
+        refreshing = true;
+        location.reload();
+      }
     });
-  }});
+  }
 }
-
-document.addEventListener('DOMContentLoaded',init);
+document.addEventListener('DOMContentLoaded', init);
