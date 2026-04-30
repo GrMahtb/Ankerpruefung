@@ -3,10 +3,10 @@
 const BASE_PATH = '/Ankerpruefung/';
 console.log('HTB Ankerprüfung app.js loaded');
 
-const STORAGE_DRAFT  = 'htb-anker-draft-v1';
-const STORAGE_HISTORY= 'htb-anker-history-v1';
-const STORAGE_KALIB  = 'htb-anker-kalibrierungen-v1';
-const HISTORY_MAX    = 30;
+const STORAGE_DRAFT   = 'htb-anker-draft-v1';
+const STORAGE_HISTORY = 'htb-anker-history-v1';
+const STORAGE_KALIB   = 'htb-anker-kalibrierungen-v1';
+const HISTORY_MAX     = 30;
 
 /* ═══════════════════════════════════════════════════════
    EINGEBAUTE KALIBRIERUNGEN
@@ -112,7 +112,7 @@ const FILIALEN = {
 };
 
 /* ═══════════════════════════════════════════════════════
-   UPDATE-BANNER
+   UPDATE BANNER
 ═══════════════════════════════════════════════════════ */
 function showUpdateBanner() {
   if (document.getElementById('updateBanner')) return;
@@ -155,7 +155,7 @@ function showUpdateBanner() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   STANDARD-INTERVALLE / ZYKLEN
+   DEFAULT-INTERVALLE / ZYKLEN
 ═══════════════════════════════════════════════════════ */
 const STD_INTERVALS_15  = [0,1,2,3,4,5,7,10,15];
 const STD_INTERVALS_30  = [0,1,2,3,4,5,7,10,15,20,30];
@@ -208,7 +208,7 @@ function formatTimeHHMMSS(d=new Date()){
 }
 
 function formatElapsed(ms){
-  const t  = Math.max(0, Math.floor(ms / 1000));
+  const t = Math.max(0, Math.floor(ms / 1000));
   const hh = Math.floor(t / 3600);
   const mm = Math.floor((t % 3600) / 60);
   const ss = t % 60;
@@ -234,6 +234,34 @@ function parseIntervalStr(str){
       .map(s => Number(s.trim()))
       .filter(n => Number.isFinite(n) && n >= 0)
   )].sort((a,b)=>a-b);
+}
+
+function toNumFlexible(v){
+  const s = String(v ?? '').trim();
+  if(!s) return NaN;
+
+  // deutsch / excel-freundlich
+  if(s.includes(';')) return NaN;
+
+  // 1.234,56 -> 1234.56
+  if(s.includes(',') && s.includes('.')){
+    return Number(s.replace(/\./g,'').replace(',', '.'));
+  }
+  // 123,45 -> 123.45
+  if(s.includes(',')){
+    return Number(s.replace(',', '.'));
+  }
+  return Number(s);
+}
+
+function downloadText(text, filename, type='text/plain;charset=utf-8'){
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -284,11 +312,201 @@ function kalibStatus(k){
 }
 
 /* ═══════════════════════════════════════════════════════
+   CSV IMPORT / EXPORT
+═══════════════════════════════════════════════════════ */
+function kalibToCsv(kalib){
+  const lines = [
+    'displayName;'   + (kalib.displayName   || ''),
+    'presseTyp;'     + (kalib.presseTyp     || ''),
+    'presseNr;'      + (kalib.presseNr      || ''),
+    'manometerTyp;'  + (kalib.manometerTyp  || ''),
+    'manometerNr;'   + (kalib.manometerNr   || ''),
+    'kalibriertAm;'  + (kalib.kalibriertAm  || ''),
+    'gueltigMonate;' + (kalib.gueltigMonate || 12),
+    '',
+    'kN;bar'
+  ];
+
+  (kalib.punkte || []).forEach(p => {
+    lines.push(`${String(p.kN).replace('.',',')};${String(p.bar).replace('.',',')}`);
+  });
+
+  return lines.join('\n');
+}
+
+function buildKalibCsvTemplate(){
+  return [
+    'displayName;Neue Presse',
+    'presseTyp;z.B. L-HK-DZ-140-250-105-HPR',
+    'presseNr;z.B. NC00000000',
+    'manometerTyp;z.B. DSI 160/1000',
+    'manometerNr;z.B. 300000',
+    'kalibriertAm;YYYY-MM-DD',
+    'gueltigMonate;12',
+    '',
+    'kN;bar',
+    '5;3',
+    '10;5',
+    '15;8',
+    '20;10'
+  ].join('\n');
+}
+
+function parseKalibCsv(text){
+  const lines = String(text || '')
+    .replace(/^\uFEFF/, '')
+    .split(/\r?\n/)
+    .map(l => l.trim())
+    .filter(l => l !== '');
+
+  const meta = {};
+  const punkte = [];
+  let inPoints = false;
+
+  for(const line of lines){
+    const parts = line.split(';').map(s => s.trim());
+
+    if(!inPoints){
+      if(parts.length >= 2 && parts[0].toLowerCase() === 'kn' && parts[1].toLowerCase() === 'bar'){
+        inPoints = true;
+        continue;
+      }
+
+      if(parts.length >= 2){
+        meta[parts[0]] = parts.slice(1).join(';');
+      }
+    }else{
+      if(parts.length >= 2){
+        const kN = toNumFlexible(parts[0]);
+        const bar = toNumFlexible(parts[1]);
+        if(Number.isFinite(kN) && Number.isFinite(bar)){
+          punkte.push({ kN, bar });
+        }
+      }
+    }
+  }
+
+  punkte.sort((a,b) => a.kN - b.kN);
+
+  const displayName = meta.displayName || meta.name || '';
+  const presseTyp = meta.presseTyp || '';
+  const presseNr = meta.presseNr || '';
+  const manometerTyp = meta.manometerTyp || '';
+  const manometerNr = meta.manometerNr || '';
+  const kalibriertAm = meta.kalibriertAm || '';
+  const gueltigMonate = Number(meta.gueltigMonate || 12);
+
+  if(!displayName || !presseNr || !kalibriertAm || punkte.length < 2){
+    throw new Error('CSV unvollständig. Pflichtfelder: displayName, presseNr, kalibriertAm, mindestens 2 Punkte.');
+  }
+
+  return {
+    id: `${presseNr}_${kalibriertAm}`,
+    displayName,
+    presseTyp,
+    presseNr,
+    manometerTyp,
+    manometerNr,
+    kalibriertAm,
+    gueltigMonate: Number.isFinite(gueltigMonate) ? gueltigMonate : 12,
+    punkte
+  };
+}
+
+async function handleKalibImport(file){
+  if(!file) return;
+
+  try{
+    const text = await file.text();
+    const kalib = parseKalibCsv(text);
+
+    const existing = loadAllKalibs();
+    const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k => k.id));
+    const userKalibs = existing.filter(k => !builtinIds.has(k.id));
+
+    const idx = userKalibs.findIndex(k => k.id === kalib.id);
+    if(idx >= 0) userKalibs[idx] = kalib;
+    else userKalibs.push(kalib);
+
+    saveUserKalibs(userKalibs);
+
+    state.meta.selectedKalibId = kalib.id;
+
+    renderPresseDropdown();
+    syncMetaToUi();
+    renderKalibInfo();
+    renderKalibPreview();
+    syncDruckFromKalib();
+    saveDraftDebounced();
+
+    alert(`CSV-Import erfolgreich:\n${kalib.displayName}`);
+  }catch(e){
+    console.error('Kalibrierungs-CSV-Importfehler:', e);
+    alert('CSV-Import fehlgeschlagen: ' + e.message);
+  }
+}
+
+function handleKalibExport(){
+  const id = state.meta.selectedKalibId;
+  const kalib = findKalibById(id);
+
+  if(!kalib){
+    downloadText(buildKalibCsvTemplate(), 'HTB_Kalibrierung_Vorlage.csv', 'text/csv;charset=utf-8');
+    alert('Keine Presse ausgewählt.\nEs wurde stattdessen die CSV-Vorlage exportiert.');
+    return;
+  }
+
+  downloadText(kalibToCsv(kalib), `HTB_Kalib_${kalib.presseNr}_${kalib.kalibriertAm}.csv`, 'text/csv;charset=utf-8');
+}
+
+function handleKalibDelete(){
+  const id = state.meta.selectedKalibId;
+  if(!id){
+    alert('Bitte zuerst eine Presse auswählen.');
+    return;
+  }
+
+  const kalib = findKalibById(id);
+  if(!kalib){
+    alert('Kalibrierung nicht gefunden.');
+    return;
+  }
+
+  const isBuiltin = BUILTIN_KALIBRIERUNGEN.some(k => k.id === id);
+  if(isBuiltin){
+    alert('Eingebaute Kalibrierungen können nicht gelöscht werden.');
+    return;
+  }
+
+  if(!confirm(`Kalibrierung "${kalib.displayName}" wirklich löschen?`)) return;
+
+  const existing = loadAllKalibs();
+  const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k => k.id));
+
+  const userKalibs = existing
+    .filter(k => !builtinIds.has(k.id))
+    .filter(k => k.id !== id);
+
+  saveUserKalibs(userKalibs);
+
+  state.meta.selectedKalibId = '';
+
+  renderPresseDropdown();
+  syncMetaToUi();
+  renderKalibInfo();
+  renderKalibPreview();
+  syncDruckFromKalib();
+  saveDraftDebounced();
+
+  alert('Kalibrierung gelöscht.');
+}
+
+/* ═══════════════════════════════════════════════════════
    INTERPOLATION kN → bar
 ═══════════════════════════════════════════════════════ */
 function interpoliereBar(zielKn, punkte){
   if(!Array.isArray(punkte) || punkte.length < 2){
-    return { bar: null, oor: true };
+    return { bar:null, oor:true };
   }
 
   const sorted = [...punkte]
@@ -297,18 +515,18 @@ function interpoliereBar(zielKn, punkte){
     .sort((a,b) => a.kN - b.kN);
 
   if(sorted.length < 2){
-    return { bar: null, oor: true };
+    return { bar:null, oor:true };
   }
 
   const minKn = sorted[0].kN;
   const maxKn = sorted[sorted.length - 1].kN;
 
   if(!Number.isFinite(zielKn) || zielKn < minKn || zielKn > maxKn){
-    return { bar: null, oor: true };
+    return { bar:null, oor:true };
   }
 
   const exact = sorted.find(p => p.kN === zielKn);
-  if(exact) return { bar: exact.bar, oor: false };
+  if(exact) return { bar:exact.bar, oor:false };
 
   let lo = sorted[0];
   let hi = sorted[sorted.length - 1];
@@ -324,7 +542,7 @@ function interpoliereBar(zielKn, punkte){
   const t = (zielKn - lo.kN) / (hi.kN - lo.kN);
   const bar = lo.bar + t * (hi.bar - lo.bar);
 
-  return { bar: Math.round(bar * 10) / 10, oor: false };
+  return { bar:Math.round(bar * 10) / 10, oor:false };
 }
 
 function berechneDruckvorschau(){
@@ -375,7 +593,8 @@ function getInitialState(){
       pruefdatum:'',
       pumpeNr:'',
       anmerkung:'',
-      selectedKalibId:''
+      selectedKalibId:'',
+      activeZyklusId:''
     },
     vorgabe:{
       bodenart:'nichtbindig',
@@ -411,7 +630,7 @@ let _floatingRaf = null;
 let _timeAdjustVid = null;
 
 /* ═══════════════════════════════════════════════════════
-   ZYKLUS-FACTORY
+   ZYKLUS / DEFAULTS
 ═══════════════════════════════════════════════════════ */
 function defaultZyklus(nr){
   const def = ZYKLUS_DEF[nr - 1] || ZYKLUS_DEF[0];
@@ -435,6 +654,34 @@ function defaultZyklus(nr){
       anm:''
     }))
   };
+}
+
+function ensureDefaultZyklen(){
+  if(!Array.isArray(state.zyklen)) state.zyklen = [];
+  if(state.zyklen.length === 0){
+    for(let i=1;i<=5;i++){
+      state.zyklen.push(defaultZyklus(i));
+    }
+  }
+  ensureActiveZyklus();
+}
+
+function ensureActiveZyklus(){
+  if(!state.zyklen.length){
+    state.meta.activeZyklusId = '';
+    return null;
+  }
+
+  let z = state.zyklen.find(x => x.id === state.meta.activeZyklusId) || null;
+  if(!z){
+    z = state.zyklen[0];
+    state.meta.activeZyklusId = z.id;
+  }
+  return z;
+}
+
+function getActiveZyklus(){
+  return ensureActiveZyklus();
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -500,14 +747,16 @@ function applySnapshot(snap, replace=true){
     state.zyklen = Array.isArray(snap.zyklen) ? clone(snap.zyklen) : [];
   }
 
+  ensureDefaultZyklen();
+  recalcAllVerschiebungen();
+
   syncMetaToUi();
   syncVorgabeToUi();
-  renderZyklen();
-  updateLappPreview();
   renderPresseDropdown();
-  syncMetaToUi();
   renderKalibInfo();
   renderKalibPreview();
+  renderZyklen();
+  updateLappPreview();
   syncDruckFromKalib();
 }
 
@@ -587,6 +836,51 @@ function collectVorgabeFromUi(){
   });
 
   state.vorgabe.bodenart = $('boden-bindig')?.checked ? 'bindig' : 'nichtbindig';
+}
+
+/* ═══════════════════════════════════════════════════════
+   VERSCHIEBUNG AUTOMATISCH AUS ABLESUNG
+═══════════════════════════════════════════════════════ */
+function recalcVerschiebung(z){
+  if(!z?.messungen) return;
+
+  const m0 = z.messungen.find(m =>
+    Number(m.min) === 0 && Number.isFinite(Number(m.ablesung))
+  );
+
+  const firstReadable = z.messungen.find(m =>
+    Number.isFinite(Number(m.ablesung))
+  );
+
+  const ref = m0
+    ? Number(m0.ablesung)
+    : (firstReadable ? Number(firstReadable.ablesung) : NaN);
+
+  z.messungen.forEach(m => {
+    const a = Number(m.ablesung);
+    if(Number.isFinite(a) && Number.isFinite(ref)){
+      m.versch = formatInputNumber(a - ref, 2);
+    }else{
+      m.versch = '';
+    }
+  });
+}
+
+function recalcAllVerschiebungen(){
+  state.zyklen.forEach(recalcVerschiebung);
+}
+
+function updateComputedRowsForCard(card,z){
+  if(!card || !z) return;
+  z.messungen.forEach((m,idx) => {
+    const verschInput = card.querySelector(`[data-role="m-versch"][data-row="${idx}"]`);
+    if(verschInput){
+      verschInput.value = m.versch || '';
+      verschInput.readOnly = true;
+      verschInput.classList.add('mess-input--auto');
+      verschInput.title = 'Automatisch aus Ablesung Messuhr berechnet';
+    }
+  });
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -810,6 +1104,7 @@ async function playIntervalBeep(){
   if(state.settings?.alarmSoundEnabled === false) return false;
   const ctx = getAlarmAudioContext();
   if(!ctx) return false;
+
   if(audioNeedsResume(ctx)){
     const ok = await unlockAlarmAudio();
     if(!ok) return false;
@@ -896,7 +1191,7 @@ async function toggleAlarmSoundByUserGesture(){
 }
 
 /* ═══════════════════════════════════════════════════════
-   TIMER
+   TIMER (GLOBAL ÜBER ALLE ZYKLEN)
 ═══════════════════════════════════════════════════════ */
 function getZyklusById(id){
   return state.zyklen.find(z => z.id === id);
@@ -923,61 +1218,76 @@ function getElapsedMs(zid,z){
   return t.running ? t.accumulatedMs + (Date.now() - t.startMs) : t.accumulatedMs;
 }
 
-function updateTimerUi(card,z){
-  if(!card || !z) return;
+function highlightActiveMeasurementRow(z){
+  document.querySelectorAll('.zyklus-card tbody tr').forEach(r => r.classList.remove('row-active'));
+  if(!z) return;
+
+  const card = document.querySelector(`.zyklus-card[data-zid="${z.id}"]`);
+  if(!card) return;
+
+  const ints = parseIntervalStr(z.intervalleStr);
+  const eMin = getElapsedMs(z.id,z) / 60000;
+  const passed = ints.filter(iv => eMin >= iv);
+  const last = passed.length ? passed[passed.length - 1] : ints[0];
+  const idx = z.messungen.findIndex(m => Number(m.min) === Number(last));
+
+  if(idx >= 0){
+    const row = card.querySelector(`tr[data-row="${idx}"]`);
+    if(row) row.classList.add('row-active');
+  }
+}
+
+function updateGlobalTimerUi(){
+  const z = getActiveZyklus();
+  const display = $('globalTimerDisplay');
+  const badge = $('activeZyklusBadge');
+  const select = $('activeZyklusSelect');
+  const startzeit = $('globalTimerStartzeit');
+  const nextEl = $('globalTimerNext');
+  const btnStart = $('btnGlobalTimerStart');
+  const btnStop = $('btnGlobalTimerStop');
+
+  if(!z){
+    if(display) display.textContent = '00:00';
+    return;
+  }
 
   const t = ensureTimer(z.id,z);
   const ms = getElapsedMs(z.id,z);
   z.elapsedMs = ms;
 
-  const el = card.querySelector('[data-role="elapsed"]');
-  const sb = card.querySelector('[data-role="timer-start"]');
-  const tb = card.querySelector('[data-role="timer-stop"]');
-  const sz = card.querySelector('[data-role="startzeit"]');
-  const nx = card.querySelector('[data-role="naechstes"]');
-
-  if(el) el.textContent = formatElapsed(ms);
-  if(sz) sz.textContent = z.startzeit ? `Startzeit: ${z.startzeit}` : 'Noch nicht gestartet';
-
-  if(sb){
-    sb.textContent = t.running ? 'Läuft' : (z.elapsedMs > 0 ? 'Weiter' : 'Start');
-    sb.disabled = t.running;
-  }
-  if(tb) tb.disabled = !t.running;
+  if(display) display.textContent = formatElapsed(ms);
+  if(badge) badge.textContent = `Zyklus ${z.nr}`;
+  if(select) select.value = z.id;
+  if(startzeit) startzeit.textContent = z.startzeit ? `Startzeit: ${z.startzeit}` : 'Noch nicht gestartet';
 
   const ints = parseIntervalStr(z.intervalleStr);
   const eMin = ms / 60000;
   const next = ints.filter(iv => iv > 0).find(iv => eMin < iv);
 
-  if(nx){
-    nx.textContent = next !== undefined
+  if(nextEl){
+    nextEl.textContent = next !== undefined
       ? `Nächste Messung: ${next} min (in ${Math.max(0,Math.ceil((next*60000-ms)/1000))}s)`
       : 'Alle Intervalle erreicht';
   }
 
-  card.querySelectorAll('tbody tr').forEach(r => r.classList.remove('row-active'));
-  const passed = ints.filter(iv => eMin >= iv);
-  const last = passed.length ? passed[passed.length - 1] : ints[0];
-  const idx = z.messungen.findIndex(m => Number(m.min) === Number(last));
-  if(idx >= 0){
-    const r = card.querySelector(`tr[data-row="${idx}"]`);
-    if(r) r.classList.add('row-active');
+  if(btnStart){
+    btnStart.textContent = t.running ? 'Läuft' : (z.elapsedMs > 0 ? 'Weiter' : 'Start');
+    btnStart.disabled = t.running;
   }
+  if(btnStop){
+    btnStop.disabled = !t.running;
+  }
+
+  highlightActiveMeasurementRow(z);
 }
 
 function triggerIntervalAlarm(zid){
-  const card = document.querySelector(`.zyklus-card[data-zid="${zid}"]`);
-  const display = card?.querySelector('[data-role="elapsed"]');
+  const display = $('globalTimerDisplay');
 
   document.body.classList.remove('screen-flash');
   void document.body.offsetWidth;
   document.body.classList.add('screen-flash');
-
-  if(card){
-    card.classList.remove('zyklus-card--alarm');
-    void card.offsetWidth;
-    card.classList.add('zyklus-card--alarm');
-  }
 
   if(display){
     display.classList.remove('timer-display--alarm');
@@ -989,7 +1299,6 @@ function triggerIntervalAlarm(zid){
 
   setTimeout(() => document.body.classList.remove('screen-flash'), 1800);
   setTimeout(() => {
-    if(card) card.classList.remove('zyklus-card--alarm');
     if(display) display.classList.remove('timer-display--alarm');
   }, Math.max(2400, Number(state.settings.alarmDurationSec || 4) * 1000 + 600));
 }
@@ -999,9 +1308,7 @@ function tickTimer(zid){
   const t = timerMap[zid];
   if(!z || !t || !t.running) return;
 
-  const card = document.querySelector(`.zyklus-card[data-zid="${zid}"]`);
   z.elapsedMs = getElapsedMs(zid,z);
-  if(card) updateTimerUi(card,z);
 
   const ints = parseIntervalStr(z.intervalleStr).filter(n => n > 0);
   const passed = ints.filter(iv => z.elapsedMs / 60000 >= iv).length;
@@ -1011,8 +1318,17 @@ function tickTimer(zid){
     triggerIntervalAlarm(zid);
   }
 
+  updateGlobalTimerUi();
   updateFloatingTimerWidget();
   t.raf = requestAnimationFrame(() => tickTimer(zid));
+}
+
+function stopAllOtherTimers(exceptZid){
+  Object.keys(timerMap).forEach(zid => {
+    if(zid !== exceptZid && timerMap[zid]?.running){
+      stopTimer(zid);
+    }
+  });
 }
 
 function startTimer(zid){
@@ -1020,6 +1336,8 @@ function startTimer(zid){
   if(!z) return;
 
   if(state.settings.alarmSoundEnabled !== false) void unlockAlarmAudio();
+
+  stopAllOtherTimers(zid);
 
   const t = ensureTimer(zid,z);
   if(t.running) return;
@@ -1031,8 +1349,7 @@ function startTimer(zid){
   t.running = true;
   t.startMs = Date.now();
 
-  const card = document.querySelector(`.zyklus-card[data-zid="${zid}"]`);
-  updateTimerUi(card,z);
+  updateGlobalTimerUi();
   tickTimer(zid);
   startFloatingLoop();
   saveDraftDebounced();
@@ -1050,8 +1367,7 @@ function stopTimer(zid){
   if(t.raf) cancelAnimationFrame(t.raf);
   t.raf = null;
 
-  const card = document.querySelector(`.zyklus-card[data-zid="${zid}"]`);
-  updateTimerUi(card,z);
+  updateGlobalTimerUi();
   updateFloatingTimerWidget();
   stopFloatingLoopIfIdle();
   saveDraftDebounced();
@@ -1073,11 +1389,27 @@ function resetTimer(zid){
   z.elapsedMs = 0;
   z.startzeit = '';
 
-  const card = document.querySelector(`.zyklus-card[data-zid="${z.id}"]`);
-  updateTimerUi(card,z);
+  updateGlobalTimerUi();
   updateFloatingTimerWidget();
   stopFloatingLoopIfIdle();
   saveDraftDebounced();
+}
+
+function startActiveTimer(){
+  const z = getActiveZyklus();
+  if(z) startTimer(z.id);
+}
+
+function stopActiveTimer(){
+  const z = getActiveZyklus();
+  if(z) stopTimer(z.id);
+}
+
+function resetActiveTimer(){
+  const z = getActiveZyklus();
+  if(z && confirm(`Timer für Zyklus ${z.nr} zurücksetzen?`)){
+    resetTimer(z.id);
+  }
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1107,8 +1439,7 @@ function updateFloatingTimerWidget(){
     return;
   }
 
-  const card = document.querySelector(`.zyklus-card[data-zid="${z.id}"]`);
-  const timerBox = card?.querySelector('.timer-box');
+  const timerBox = $('globalTimerBox');
 
   label.textContent = `Zyklus ${z.nr}`;
   display.textContent = formatElapsed(getElapsedMs(z.id,z));
@@ -1175,8 +1506,7 @@ function applyTimeAdjustment(){
   z.elapsedMs = next;
   if(!z.startzeit && next > 0) z.startzeit = formatTimeHHMMSS(new Date());
 
-  const card = document.querySelector(`.zyklus-card[data-zid="${z.id}"]`);
-  updateTimerUi(card,z);
+  updateGlobalTimerUi();
   updateFloatingTimerWidget();
   saveDraftDebounced();
   closeTimeAdjustModal();
@@ -1209,7 +1539,6 @@ function renderKalibInfo(){
   const box = $('kalibInfoBox');
   const emptyHint = $('kalibEmptyHint');
   const preview = $('kalibPreview');
-
   if(!box) return;
 
   const kalib = findKalibById(state.meta.selectedKalibId);
@@ -1388,143 +1717,46 @@ function syncDruckFromKalib(){
 }
 
 /* ═══════════════════════════════════════════════════════
-   KALIBRIERUNG IMPORT / EXPORT / DELETE
+   GLOBALER TIMER HTML
 ═══════════════════════════════════════════════════════ */
-async function handleKalibImport(file){
-  if(!file) return;
+function buildGlobalTimerHtml(){
+  const z = getActiveZyklus();
+  const display = z ? formatElapsed(getElapsedMs(z.id,z)) : '00:00';
+  const badge = z ? `Zyklus ${z.nr}` : '—';
 
-  try{
-    const text = await file.text();
-    const raw = JSON.parse(text);
-    const list = Array.isArray(raw) ? raw : [raw];
+  return `
+    <div id="globalTimerBox" class="timer-box" style="margin-bottom:12px">
+      <div class="global-timer-head" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <div class="zyklus-title" style="font-weight:800">Stoppuhr Eignungsprüfung</div>
+        <span id="activeZyklusBadge" class="zyklus-badge">${badge}</span>
+      </div>
 
-    const valid = list
-      .map(k => ({
-        ...k,
-        gueltigMonate: Number(k.gueltigMonate || 12),
-        punkte: Array.isArray(k.punkte)
-          ? k.punkte
-              .map(p => ({ kN:Number(p.kN), bar:Number(p.bar) }))
-              .filter(p => Number.isFinite(p.kN) && Number.isFinite(p.bar))
-              .sort((a,b) => a.kN - b.kN)
-          : []
-      }))
-      .filter(k =>
-        k.id &&
-        k.displayName &&
-        k.presseNr &&
-        Array.isArray(k.punkte) &&
-        k.punkte.length >= 2
-      );
+      <div class="timer-row">
+        <div class="timer-display" id="globalTimerDisplay" data-role="global-elapsed" title="Tippen zum Anpassen">${display}</div>
+        <span class="timer-edit-hint">tippen = anpassen</span>
 
-    if(!valid.length){
-      alert('Keine gültigen Kalibrierungen in der Datei gefunden.\n\nBitte JSON-Format prüfen.');
-      return;
-    }
+        <label class="field" style="min-width:160px; margin-left:auto">
+          <span class="field__label">Aktiver Zyklus</span>
+          <select id="activeZyklusSelect" data-role="global-active-select" class="field__select">
+            ${state.zyklen.map(zy => `
+              <option value="${h(zy.id)}" ${state.meta.activeZyklusId === zy.id ? 'selected' : ''}>
+                Zyklus ${zy.nr}
+              </option>
+            `).join('')}
+          </select>
+        </label>
 
-    const existing = loadAllKalibs();
-    const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k => k.id));
-    const userKalibs = existing.filter(k => !builtinIds.has(k.id));
+        <div class="timer-buttons">
+          <button id="btnGlobalTimerStart" class="timer-btn timer-btn--start" data-role="global-start" type="button">Start</button>
+          <button id="btnGlobalTimerStop" class="timer-btn timer-btn--stop" data-role="global-stop" type="button">Stop</button>
+          <button id="btnGlobalTimerReset" class="timer-btn timer-btn--ghost" data-role="global-reset" type="button">Reset</button>
+        </div>
+      </div>
 
-    let addedCount = 0;
-    let updatedCount = 0;
-    let lastImportedId = '';
-
-    valid.forEach(k => {
-      const idx = userKalibs.findIndex(u => u.id === k.id);
-      if(idx >= 0){
-        userKalibs[idx] = k;
-        updatedCount++;
-      }else{
-        userKalibs.push(k);
-        addedCount++;
-      }
-      lastImportedId = k.id;
-    });
-
-    saveUserKalibs(userKalibs);
-
-    if(lastImportedId){
-      state.meta.selectedKalibId = lastImportedId;
-    }
-
-    renderPresseDropdown();
-    syncMetaToUi();
-    renderKalibInfo();
-    renderKalibPreview();
-    syncDruckFromKalib();
-    if(!$('tab-auswertung')?.hidden) renderAuswertung();
-    saveDraftDebounced();
-
-    const msg = [];
-    if(addedCount) msg.push(`${addedCount} neue Kalibrierung(en) hinzugefügt.`);
-    if(updatedCount) msg.push(`${updatedCount} bestehende aktualisiert.`);
-
-    alert('Import erfolgreich!\n' + (msg.join('\n') || 'Kalibrierung geladen.'));
-  }catch(e){
-    alert('Import fehlgeschlagen: ' + e.message);
-    console.error('Kalibrierungs-Importfehler:', e);
-  }
-}
-
-function handleKalibExport(){
-  const id = state.meta.selectedKalibId;
-  if(!id){
-    alert('Bitte zuerst eine Presse auswählen.');
-    return;
-  }
-
-  const kalib = findKalibById(id);
-  if(!kalib){
-    alert('Kalibrierung nicht gefunden.');
-    return;
-  }
-
-  downloadJson(kalib, `HTB_Kalib_${kalib.presseNr}_${kalib.kalibriertAm}.json`);
-}
-
-function handleKalibDelete(){
-  const id = state.meta.selectedKalibId;
-  if(!id){
-    alert('Bitte zuerst eine Presse auswählen.');
-    return;
-  }
-
-  const kalib = findKalibById(id);
-  if(!kalib){
-    alert('Kalibrierung nicht gefunden.');
-    return;
-  }
-
-  const isBuiltin = BUILTIN_KALIBRIERUNGEN.some(k => k.id === id);
-  if(isBuiltin){
-    alert('Eingebaute Kalibrierungen können nicht gelöscht werden.');
-    return;
-  }
-
-  if(!confirm(`Kalibrierung "${kalib.displayName}" wirklich löschen?`)) return;
-
-  const existing = loadAllKalibs();
-  const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k => k.id));
-
-  const userKalibs = existing
-    .filter(k => !builtinIds.has(k.id))
-    .filter(k => k.id !== id);
-
-  saveUserKalibs(userKalibs);
-
-  if(state.meta.selectedKalibId === id){
-    state.meta.selectedKalibId = '';
-  }
-
-  renderPresseDropdown();
-  syncMetaToUi();
-  renderKalibInfo();
-  renderKalibPreview();
-  syncDruckFromKalib();
-  saveDraftDebounced();
-
-  alert('Kalibrierung gelöscht.');
+      <div class="timer-info" id="globalTimerStartzeit">Noch nicht gestartet</div>
+      <div class="timer-info timer-next" id="globalTimerNext">Nächste Messung: —</div>
+    </div>
+  `;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1568,7 +1800,7 @@ function buildTableRow(z,row,idx){
       </td>
       <td><input class="mess-input" data-role="m-druck" data-row="${idx}" type="number" step="0.1" inputmode="decimal" value="${h(row.druck)}"></td>
       <td><input class="mess-input" data-role="m-ablesung" data-row="${idx}" type="number" step="0.01" inputmode="decimal" value="${h(row.ablesung)}"></td>
-      <td><input class="mess-input" data-role="m-versch" data-row="${idx}" type="number" step="0.01" inputmode="decimal" value="${h(row.versch)}"></td>
+      <td><input class="mess-input mess-input--auto" data-role="m-versch" data-row="${idx}" type="number" step="0.01" inputmode="decimal" value="${h(row.versch)}" readonly title="Automatisch aus Ablesung Messuhr berechnet"></td>
       <td><button class="row-anm-btn ${row.anm ? 'has-anm' : ''}" data-role="m-anm-btn" data-row="${idx}" type="button" title="${h(row.anm || 'Anmerkung hinzufügen')}">+</button></td>
     </tr>
   `;
@@ -1591,20 +1823,6 @@ function buildZyklusHtml(z){
         <input class="field__input" data-role="intervalle" type="text" value="${h(z.intervalleStr)}">
       </div>
 
-      <div class="timer-box">
-        <div class="timer-row">
-          <div class="timer-display" data-role="elapsed" title="Tippen zum Anpassen">${formatElapsed(z.elapsedMs || 0)}</div>
-          <span class="timer-edit-hint">tippen = anpassen</span>
-          <div class="timer-buttons">
-            <button class="timer-btn timer-btn--start" data-role="timer-start" type="button">Start</button>
-            <button class="timer-btn timer-btn--stop" data-role="timer-stop" type="button">Stop</button>
-            <button class="timer-btn timer-btn--ghost" data-role="timer-reset" type="button">Reset</button>
-          </div>
-        </div>
-        <div class="timer-info" data-role="startzeit">${z.startzeit ? 'Startzeit: ' + h(z.startzeit) : 'Noch nicht gestartet'}</div>
-        <div class="timer-info timer-next" data-role="naechstes"></div>
-      </div>
-
       <div class="table-wrap">
         <table class="mess-table">
           <thead>
@@ -1623,27 +1841,44 @@ function buildZyklusHtml(z){
   `;
 }
 
+function updatePlusButtonVisibility(){
+  const plusWrap = document.querySelector('.plus-wrap');
+  if(!plusWrap) return;
+  plusWrap.style.display = state.zyklen.length >= 5 ? 'none' : '';
+}
+
 function renderZyklen(){
   const host = $('zyklenContainer');
   if(!host) return;
 
+  ensureActiveZyklus();
+  recalcAllVerschiebungen();
+
+  const globalTimerHtml = buildGlobalTimerHtml();
+
   if(!state.zyklen.length){
-    host.innerHTML = `<div class="empty-state">Noch kein Lastzyklus angelegt. Über den Plus-Button hinzufügen.</div>`;
+    host.innerHTML = globalTimerHtml + `<div class="empty-state">Noch kein Lastzyklus angelegt.</div>`;
+    updateGlobalTimerUi();
     updateFloatingTimerWidget();
     updateLappPreview();
     renderKalibPreview();
+    updatePlusButtonVisibility();
     return;
   }
 
-  host.innerHTML = state.zyklen.map(buildZyklusHtml).join('');
-  document.querySelectorAll('.zyklus-card').forEach(card => {
-    const z = getZyklusById(card.dataset.zid);
-    if(z) updateTimerUi(card,z);
-  });
-
+  host.innerHTML = globalTimerHtml + state.zyklen.map(buildZyklusHtml).join('');
+  updateGlobalTimerUi();
   updateFloatingTimerWidget();
   updateLappPreview();
   renderKalibPreview();
+  updatePlusButtonVisibility();
+
+  const active = getActiveZyklus();
+  if(active){
+    const card = document.querySelector(`.zyklus-card[data-zid="${active.id}"]`);
+    updateComputedRowsForCard(card, active);
+    highlightActiveMeasurementRow(active);
+  }
 }
 
 function hookZyklenDelegation(){
@@ -1651,9 +1886,32 @@ function hookZyklenDelegation(){
   if(!host || host.dataset.bound === '1') return;
   host.dataset.bound = '1';
 
+  host.addEventListener('change', e => {
+    const el = e.target.closest('[data-role]');
+    if(!el) return;
+
+    const role = el.dataset.role;
+
+    if(role === 'global-active-select'){
+      state.meta.activeZyklusId = el.value || '';
+      updateGlobalTimerUi();
+      saveDraftDebounced();
+      return;
+    }
+  });
+
   host.addEventListener('input', e => {
     const el = e.target.closest('[data-role]');
     if(!el) return;
+
+    const role = el.dataset.role;
+
+    if(role === 'global-active-select'){
+      state.meta.activeZyklusId = el.value || '';
+      updateGlobalTimerUi();
+      saveDraftDebounced();
+      return;
+    }
 
     const card = el.closest('.zyklus-card');
     if(!card) return;
@@ -1661,7 +1919,6 @@ function hookZyklenDelegation(){
     const z = getZyklusById(card.dataset.zid);
     if(!z) return;
 
-    const role = el.dataset.role;
     const idx = Number(el.dataset.row);
     const lsIdx = Number(el.dataset.idx);
 
@@ -1674,6 +1931,7 @@ function hookZyklenDelegation(){
     if(role === 'intervalle'){
       z.intervalleStr = el.value;
       reconcileMessungen(z);
+      recalcVerschiebung(z);
       if(findKalibById(state.meta.selectedKalibId)) syncDruckFromKalib();
       else renderZyklen();
       saveDraftDebounced();
@@ -1696,13 +1954,8 @@ function hookZyklenDelegation(){
 
     if(role === 'm-ablesung'){
       if(z.messungen[idx]) z.messungen[idx].ablesung = el.value;
-      updateLappPreview();
-      saveDraftDebounced();
-      return;
-    }
-
-    if(role === 'm-versch'){
-      if(z.messungen[idx]) z.messungen[idx].versch = el.value;
+      recalcVerschiebung(z);
+      updateComputedRowsForCard(card, z);
       updateLappPreview();
       if(!$('tab-auswertung')?.hidden) renderAuswertung();
       saveDraftDebounced();
@@ -1714,29 +1967,39 @@ function hookZyklenDelegation(){
     const el = e.target.closest('[data-role]');
     if(!el) return;
 
+    const role = el.dataset.role;
+
+    if(role === 'global-start'){
+      startActiveTimer();
+      return;
+    }
+    if(role === 'global-stop'){
+      stopActiveTimer();
+      return;
+    }
+    if(role === 'global-reset'){
+      resetActiveTimer();
+      return;
+    }
+    if(role === 'global-elapsed'){
+      const z = getActiveZyklus();
+      if(z) openTimeAdjustModal(z.id);
+      return;
+    }
+
     const card = el.closest('.zyklus-card');
     if(!card) return;
 
     const z = getZyklusById(card.dataset.zid);
     if(!z) return;
 
-    const role = el.dataset.role;
     const idx = Number(el.dataset.row);
-
-    if(role === 'timer-start') return startTimer(z.id);
-    if(role === 'timer-stop') return stopTimer(z.id);
-
-    if(role === 'timer-reset'){
-      if(confirm('Timer zurücksetzen?')) resetTimer(z.id);
-      return;
-    }
-
-    if(role === 'elapsed') return openTimeAdjustModal(z.id);
 
     if(role === 'zyklus-del'){
       if(confirm(`Zyklus ${z.nr} löschen?`)){
         state.zyklen = state.zyklen.filter(x => x.id !== z.id);
         delete timerMap[z.id];
+        ensureActiveZyklus();
         renderZyklen();
         saveDraftDebounced();
       }
@@ -1757,6 +2020,8 @@ function hookZyklenDelegation(){
       });
 
       z.intervalleStr = z.messungen.map(m => m.min).join(', ');
+
+      recalcVerschiebung(z);
 
       if(findKalibById(state.meta.selectedKalibId)) syncDruckFromKalib();
       else renderZyklen();
@@ -1836,12 +2101,16 @@ function getZyklusKpis(z){
   }
 
   const haltLs = z.laststufen[ZYKLUS_DEF[z.nr-1]?.haltLaststufeIdx ?? (z.laststufen.length - 2)];
-  const lastKn = Number.isFinite(Pp) ? Pp * (haltLs?.faktor || 0) : NaN;
+  const lastKn = Number.isFinite(Pp)
+    ? (haltLs?.faktor === 0 ? Pa : Pp * (haltLs?.faktor || 0))
+    : NaN;
+
   const Lapp = (haltLs?.faktor === 1.0) ? calcLapp(dS,Pp,Pa,Et,At) : NaN;
 
   const isB = state.vorgabe.bodenart === 'bindig';
   const tMin = isB ? 60 : 20;
   const tMax = isB ? 180 : 60;
+
   const krPts = z.messungen
     .filter(m => Number(m.min) >= tMin && Number(m.min) <= tMax)
     .map(m => ({ min:Number(m.min), s_mm:Number(m.versch) }));
@@ -1872,9 +2141,9 @@ function buildLastVerschiebungSvg(z){
   const minLapp = 0.8 * Ltf + Le;
   const maxLapp = Ltf + Le + 0.5 * Ltb;
 
-  const m0 = z.messungen.find(m => Number(m.min) === 0);
   const haltMs = z.messungen[z.messungen.length - 1];
-  const lastHalt = Pp * (z.laststufen[ZYKLUS_DEF[z.nr-1]?.haltLaststufeIdx ?? (z.laststufen.length-2)]?.faktor || 0);
+  const haltLs = z.laststufen[ZYKLUS_DEF[z.nr-1]?.haltLaststufeIdx ?? (z.laststufen.length - 2)];
+  const lastHalt = haltLs?.faktor === 0 ? Pa : Pp * (haltLs?.faktor || 0);
   const sHalt = Number(haltMs?.versch);
 
   const W=520,H=300,ml=58,mr=20,mt=20,mb=46,pw=W-ml-mr,ph=H-mt-mb;
@@ -1922,13 +2191,6 @@ function buildLastVerschiebungSvg(z){
     ${Number.isFinite(lastHalt)&&Number.isFinite(sHalt)?`<circle cx="${tx(lastHalt)}" cy="${ty(sHalt)}" r="5" fill="#f08a1c" stroke="#fff" stroke-width="1.5"/>`:''}
     <text x="${ml+pw/2}" y="${H-4}" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Last [kN]</text>
     <text x="14" y="${mt+ph/2}" transform="rotate(-90 14 ${mt+ph/2})" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Verschiebung [mm]</text>
-    <g font-size="10">
-      <rect x="${W-150}" y="${mt+6}" width="140" height="38" fill="rgba(0,0,0,.45)" stroke="rgba(255,255,255,.18)"/>
-      <line x1="${W-140}" y1="${mt+18}" x2="${W-118}" y2="${mt+18}" stroke="#56b7ff" stroke-width="2" stroke-dasharray="6 4"/>
-      <text x="${W-114}" y="${mt+22}" fill="#fff">min Lapp = ${fmt(minLapp,2)} m</text>
-      <line x1="${W-140}" y1="${mt+34}" x2="${W-118}" y2="${mt+34}" stroke="#ffb45a" stroke-width="2" stroke-dasharray="6 4"/>
-      <text x="${W-114}" y="${mt+38}" fill="#fff">max Lapp = ${fmt(maxLapp,2)} m</text>
-    </g>
   </svg>`;
 }
 
@@ -1937,7 +2199,7 @@ function buildKriechSvg(z){
   const pts = z.messungen
     .filter(m => Number(m.min) > 0 && Number.isFinite(Number(m.versch)))
     .map(m => ({ t:Number(m.min), s:Number(m.versch) }))
-    .sort((a,b) => a.t - b.t);
+    .sort((a,b)=>a.t-b.t);
 
   const tMax = Math.max(...pts.map(p => p.t), z.haltMin || 60);
   const sMin = Math.min(...pts.map(p => p.s), 0);
@@ -2227,11 +2489,31 @@ async function exportPdfFromSnapshot(snap){
 }
 
 /* ═══════════════════════════════════════════════════════
+   UI HELPERS
+═══════════════════════════════════════════════════════ */
+function normalizeBottomActionCards(){
+  document.querySelectorAll('.card--actions-bottom').forEach(el => {
+    el.style.position = 'static';
+    el.style.bottom = 'auto';
+    el.style.zIndex = 'auto';
+  });
+}
+
+function normalizeKalibImportInput(){
+  const inp = $('kalibImportInput');
+  if(inp){
+    inp.setAttribute('accept', '.csv,text/csv');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
    TABS / INIT
 ═══════════════════════════════════════════════════════ */
 function switchTab(name){
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('is-active', t.dataset.tab === name));
   document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'tab-' + name);
+
+  normalizeBottomActionCards();
 
   if(name === 'auswertung') renderAuswertung();
   if(name === 'verlauf') renderHistoryList();
@@ -2239,20 +2521,25 @@ function switchTab(name){
 
 function init(){
   loadDraft();
+  ensureDefaultZyklen();
+  recalcAllVerschiebungen();
 
   syncMetaToUi();
   syncVorgabeToUi();
-  renderZyklen();
-  updateLappPreview();
-  renderHistoryList();
   renderPresseDropdown();
   syncMetaToUi();
   renderKalibInfo();
   renderKalibPreview();
+  renderZyklen();
+  updateLappPreview();
+  renderHistoryList();
 
   if(state.meta.selectedKalibId){
     syncDruckFromKalib();
   }
+
+  normalizeBottomActionCards();
+  normalizeKalibImportInput();
 
   document.querySelectorAll('.tab').forEach(t =>
     t.addEventListener('click', () => switchTab(t.dataset.tab))
@@ -2300,8 +2587,13 @@ function init(){
   });
 
   $('btnAddZyklus')?.addEventListener('click', () => {
-    const nr = Math.min(5, state.zyklen.length + 1);
+    if(state.zyklen.length >= 5){
+      alert('Es sind bereits 5 Lastzyklen vorhanden.');
+      return;
+    }
+    const nr = state.zyklen.length + 1;
     state.zyklen.push(defaultZyklus(nr));
+    ensureActiveZyklus();
     if(findKalibById(state.meta.selectedKalibId)) syncDruckFromKalib();
     else renderZyklen();
     saveDraftDebounced();
@@ -2330,9 +2622,12 @@ function init(){
 
     Object.keys(timerMap).forEach(k => {
       const t = timerMap[k];
-      if(t.raf) cancelAnimationFrame(t.raf);
+      if(t?.raf) cancelAnimationFrame(t.raf);
       delete timerMap[k];
     });
+
+    ensureDefaultZyklen();
+    recalcAllVerschiebungen();
 
     syncMetaToUi();
     syncVorgabeToUi();
@@ -2438,7 +2733,7 @@ function init(){
   });
 
   $('floatingTimer')?.addEventListener('click', () => {
-    const z = getFirstRunningZyklus();
+    const z = getFirstRunningZyklus() || getActiveZyklus();
     if(z) openTimeAdjustModal(z.id);
   });
 
