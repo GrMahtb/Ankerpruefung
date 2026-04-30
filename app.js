@@ -144,6 +144,191 @@ function showUpdateBanner() {
 }
 
 /* ═══════════════════════════════════════════════════════
+   TECHNISCHE DATEN ANKERTYPEN
+═══════════════════════════════════════════════════════ */
+const ANKER_TYPEN = [
+  // GEWI [T] 550/620
+  { key:'GEWI_T_25',    group:'GEWI [T] 550/620',            label:'GEWI [T] 25',             nenndurchmesser:25,   muffe:40,  streckZug:'550/620', At:491,  lastStreck:270,  lastStreck90:243,    bruchlast:304,  bruch80:243.2  },
+  { key:'GEWI_T_28',    group:'GEWI [T] 550/620',            label:'GEWI [T] 28',             nenndurchmesser:28,   muffe:45,  streckZug:'550/620', At:616,  lastStreck:340,  lastStreck90:306,    bruchlast:382,  bruch80:305.6  },
+  { key:'GEWI_T_32',    group:'GEWI [T] 550/620',            label:'GEWI [T] 32',             nenndurchmesser:32,   muffe:52,  streckZug:'550/620', At:804,  lastStreck:440,  lastStreck90:396,    bruchlast:499,  bruch80:399.2  },
+  { key:'GEWI_T_40',    group:'GEWI [T] 550/620',            label:'GEWI [T] 40',             nenndurchmesser:40,   muffe:65,  streckZug:'550/620', At:1257, lastStreck:693,  lastStreck90:623.7,  bruchlast:781,  bruch80:624.8  },
+  { key:'GEWI_T_50',    group:'GEWI [T] 550/620',            label:'GEWI [T] 50',             nenndurchmesser:50,   muffe:80,  streckZug:'550/620', At:1963, lastStreck:1080, lastStreck90:972,    bruchlast:1215, bruch80:972    },
+  { key:'GEWI_T_57_5',  group:'GEWI [T] 555/700',            label:'GEWI [T] 57,5',           nenndurchmesser:57.5, muffe:102, streckZug:'555/700', At:2597, lastStreck:1441, lastStreck90:1296.9, bruchlast:1818, bruch80:1454.4 },
+  // GEWI Plus [TR] 670/800
+  { key:'GEWI_TR_25',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 25',       nenndurchmesser:25,   muffe:45,  streckZug:'670/800', At:491,  lastStreck:329,  lastStreck90:296.1,  bruchlast:393,  bruch80:314.4  },
+  { key:'GEWI_TR_30',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 30',       nenndurchmesser:30,   muffe:55,  streckZug:'670/800', At:707,  lastStreck:474,  lastStreck90:426.6,  bruchlast:565,  bruch80:452    },
+  { key:'GEWI_TR_35',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 35',       nenndurchmesser:35,   muffe:65,  streckZug:'670/800', At:962,  lastStreck:645,  lastStreck90:580.5,  bruchlast:770,  bruch80:616    },
+  { key:'GEWI_TR_43',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 43',       nenndurchmesser:43,   muffe:80,  streckZug:'670/800', At:1452, lastStreck:973,  lastStreck90:875.7,  bruchlast:1162, bruch80:929.6  },
+  { key:'GEWI_TR_50',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 50',       nenndurchmesser:50,   muffe:90,  streckZug:'670/800', At:1936, lastStreck:1315, lastStreck90:1183.5, bruchlast:1570, bruch80:1256   },
+  { key:'GEWI_TR_57_5', group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 57,5',     nenndurchmesser:57.5, muffe:102, streckZug:'670/800', At:2597, lastStreck:1740, lastStreck90:1566,   bruchlast:2077, bruch80:1661.6 },
+  // GEWI hochfest [WR] 950/1050
+  { key:'GEWI_WR_26_5', group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 26,5', nenndurchmesser:26.5, muffe:50,  streckZug:'950/1050', At:552,  lastStreck:525,  lastStreck90:472.5, bruchlast:580,  bruch80:464    },
+  { key:'GEWI_WR_32',   group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 32',   nenndurchmesser:32,   muffe:60,  streckZug:'950/1050', At:804,  lastStreck:760,  lastStreck90:684,   bruchlast:845,  bruch80:676    },
+  { key:'GEWI_WR_36',   group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 36',   nenndurchmesser:36,   muffe:68,  streckZug:'950/1050', At:1018, lastStreck:960,  lastStreck90:864,   bruchlast:1070, bruch80:856    },
+  { key:'GEWI_WR_40',   group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 40',   nenndurchmesser:40,   muffe:70,  streckZug:'950/1050', At:1257, lastStreck:1190, lastStreck90:1071,  bruchlast:1320, bruch80:1056   },
+  { key:'GEWI_WR_47',   group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 47',   nenndurchmesser:47,   muffe:83,  streckZug:'950/1050', At:1735, lastStreck:1650, lastStreck90:1485,  bruchlast:1820, bruch80:1456   },
+  // IBO
+  { key:'IBO_R32_280',  group:'IBO', label:'IBO R32-280 (R32N)', nenndurchmesser:42,   muffe:null, streckZug:null, At:410,  lastStreck:220, lastStreck90:198, bruchlast:280,  bruch80:224    },
+  { key:'IBO_R32_360',  group:'IBO', label:'IBO R32-360 (R32S)', nenndurchmesser:42,   muffe:null, streckZug:null, At:510,  lastStreck:280, lastStreck90:252, bruchlast:360,  bruch80:288    },
+  { key:'IBO_R38_500',  group:'IBO', label:'IBO R38-500 (R38N)', nenndurchmesser:51,   muffe:null, streckZug:null, At:750,  lastStreck:400, lastStreck90:360, bruchlast:500,  bruch80:400    },
+  { key:'IBO_R51_550',  group:'IBO', label:'IBO R51-550 (R51L)', nenndurchmesser:63,   muffe:null, streckZug:null, At:890,  lastStreck:450, lastStreck90:405, bruchlast:550,  bruch80:440    },
+  { key:'IBO_R51_800',  group:'IBO', label:'IBO R51-800 (R51N)', nenndurchmesser:63,   muffe:null, streckZug:null, At:1150, lastStreck:640, lastStreck90:576, bruchlast:800,  bruch80:640    },
+  // Ischebeck TITAN
+  { key:'TITAN_30_11',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 30/11',  nenndurchmesser:29,   muffe:null, streckZug:'542', At:415,  lastStreck:null, lastStreck90:null, bruchlast:225,  bruch80:180    },
+  { key:'TITAN_40_20',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 40/20',  nenndurchmesser:40.5, muffe:null, streckZug:'515', At:730,  lastStreck:null, lastStreck90:null, bruchlast:372,  bruch80:297.6  },
+  { key:'TITAN_40_16',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 40/16',  nenndurchmesser:40.5, muffe:null, streckZug:'544', At:900,  lastStreck:null, lastStreck90:null, bruchlast:490,  bruch80:392    },
+  { key:'TITAN_52_26',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 52/26',  nenndurchmesser:50.3, muffe:null, streckZug:'520', At:1250, lastStreck:null, lastStreck90:null, bruchlast:650,  bruch80:520    },
+  { key:'TITAN_73_53',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 73/53',  nenndurchmesser:72.4, muffe:null, streckZug:'557', At:1615, lastStreck:null, lastStreck90:null, bruchlast:900,  bruch80:720    },
+  { key:'TITAN_73_45',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 73/45',  nenndurchmesser:72.4, muffe:null, streckZug:'544', At:2240, lastStreck:null, lastStreck90:null, bruchlast:1218, bruch80:974.4  },
+  { key:'TITAN_73_35',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 73/35',  nenndurchmesser:72.4, muffe:null, streckZug:'510', At:2710, lastStreck:null, lastStreck90:null, bruchlast:1386, bruch80:1108.8 },
+  { key:'TITAN_103_78', group:'Ischebeck TITAN', label:'Ischebeck TITAN 103/78', nenndurchmesser:101,  muffe:null, streckZug:'518', At:3140, lastStreck:null, lastStreck90:null, bruchlast:1626, bruch80:1300.8 },
+  { key:'TITAN_103_51', group:'Ischebeck TITAN', label:'Ischebeck TITAN 103/51', nenndurchmesser:101,  muffe:null, streckZug:'440', At:5680, lastStreck:null, lastStreck90:null, bruchlast:2500, bruch80:2000   }
+];
+
+function getAnkertypByKey(key){
+  return ANKER_TYPEN.find(t => t.key === key) || null;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ANKERTYP UI
+═══════════════════════════════════════════════════════ */
+function slugify(v){
+  return String(v || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .toLowerCase();
+}
+
+function initAnkertypSelect(){
+  const old = $('vor-ankertyp');
+  if(!old) return;
+
+  if(old.tagName === 'SELECT'){
+    fillAnkertypOptions(old);
+    return;
+  }
+
+  const select = document.createElement('select');
+  select.id = old.id;
+  select.className = old.className.replace('field__input','field__select');
+  fillAnkertypOptions(select);
+
+  const currentValue = old.value || state.vorgabe.ankertyp || '';
+  old.replaceWith(select);
+
+  if(currentValue){
+    const exists = ANKER_TYPEN.some(t => t.key === currentValue);
+    if(exists){
+      select.value = currentValue;
+    }else{
+      const opt = document.createElement('option');
+      opt.value = currentValue;
+      opt.textContent = currentValue;
+      select.appendChild(opt);
+      select.value = currentValue;
+    }
+  }
+}
+
+function fillAnkertypOptions(select){
+  const current = select.value || state.vorgabe.ankertyp || '';
+  select.innerHTML = `<option value="">Bitte wählen</option>`;
+
+  const groups = {};
+  ANKER_TYPEN.forEach(t => {
+    if(!groups[t.group]) groups[t.group] = [];
+    groups[t.group].push(t);
+  });
+
+  Object.entries(groups).forEach(([group, items]) => {
+    const og = document.createElement('optgroup');
+    og.label = group;
+    items.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item.key;
+      opt.textContent = item.label;
+      og.appendChild(opt);
+    });
+    select.appendChild(og);
+  });
+
+  if(current && ANKER_TYPEN.some(t => t.key === current)){
+    select.value = current;
+  }
+}
+
+function ensureAnkertypInfoBox(){
+  let box = $('ankertypInfoBox');
+  if(box) return box;
+
+  const field = $('vor-ankertyp')?.closest('.field');
+  if(!field) return null;
+
+  box = document.createElement('div');
+  box.id = 'ankertypInfoBox';
+  box.className = 'info-box field--full';
+  box.style.cssText = 'margin-top:12px;padding:10px 14px;border-radius:8px;background:rgba(86,183,255,.08);border:1px solid rgba(86,183,255,.2);font-size:13px;line-height:1.7';
+
+  const grid = field.parentElement;
+  if(grid) grid.appendChild(box);
+
+  return box;
+}
+
+function renderAnkertypInfo(){
+  const box = ensureAnkertypInfoBox();
+  if(!box) return;
+
+  const typ = getAnkertypByKey(state.vorgabe.ankertyp);
+  if(!typ){
+    box.hidden = true;
+    return;
+  }
+
+  const rows = [
+    ['Typ',                        typ.label],
+    ['Nenndurchmesser',            typ.nenndurchmesser != null ? `${typ.nenndurchmesser} mm` : '—'],
+    ['Ø über Muffe',               typ.muffe != null ? `${typ.muffe} mm` : '—'],
+    ['Streckgrenze / Zugfestigkeit', typ.streckZug || '—'],
+    ['Querschnittsfläche At',      typ.At != null ? `${fmt(typ.At,0)} mm²` : '—'],
+    ['Last an der Streckgrenze',   typ.lastStreck != null ? `${fmt(typ.lastStreck,1)} kN` : '—'],
+    ['90 % Streckgrenze',          typ.lastStreck90 != null ? `${fmt(typ.lastStreck90,1)} kN` : '—'],
+    ['Bruchlast',                  typ.bruchlast != null ? `${fmt(typ.bruchlast,1)} kN` : '—'],
+    ['80 % Bruchlast',             typ.bruch80 != null ? `${fmt(typ.bruch80,1)} kN` : '—']
+  ];
+
+  box.hidden = false;
+  box.innerHTML = `<b style="display:block;margin-bottom:4px">Technische Daten</b>${rows.map(([k,v])=>`${h(k)}: <b>${h(v)}</b>`).join('<br>')}`;
+}
+
+function applyAnkertypPreset(key, { overwrite = true } = {}){
+  const typ = getAnkertypByKey(key);
+  state.vorgabe.ankertyp = key || '';
+
+  if(!typ){
+    renderAnkertypInfo();
+    return;
+  }
+
+  if(typ.At != null && (overwrite || !state.vorgabe.At || String(state.vorgabe.At).trim() === '')){
+    state.vorgabe.At = formatInputNumber(Number(typ.At), 0);
+    if($('vor-At')) $('vor-At').value = state.vorgabe.At;
+  }
+
+  if(typ.lastStreck != null && (overwrite || !state.vorgabe.Pt01k || String(state.vorgabe.Pt01k).trim() === '')){
+    state.vorgabe.Pt01k = formatInputNumber(Number(typ.lastStreck), 1);
+    if($('vor-Pt01k')) $('vor-Pt01k').value = state.vorgabe.Pt01k;
+  }
+
+  renderAnkertypInfo();
+  updateLappPreview();
+  if(!$('tab-auswertung')?.hidden) renderAuswertung();
+  saveDraftDebounced();
+}
+
+/* ═══════════════════════════════════════════════════════
    NORM / VORLAGE
 ═══════════════════════════════════════════════════════ */
 const STD_INTERVALS_15  = [0,1,2,3,4,5,7,10,15];
@@ -461,7 +646,7 @@ function parseKalibCsv(text){
       }
     }else{
       if(parts.length >= 2){
-        const kN = toNumFlexible(parts[0]);
+        const kN  = toNumFlexible(parts[0]);
         const bar = toNumFlexible(parts[1]);
         if(Number.isFinite(kN) && Number.isFinite(bar)){
           punkte.push({ kN, bar });
@@ -472,12 +657,12 @@ function parseKalibCsv(text){
 
   punkte.sort((a,b) => a.kN - b.kN);
 
-  const displayName  = meta.displayName || meta.name || '';
-  const presseTyp    = meta.presseTyp || '';
-  const presseNr     = meta.presseNr || '';
-  const manometerTyp = meta.manometerTyp || '';
-  const manometerNr  = meta.manometerNr || '';
-  const kalibriertAm = normalizeCsvDate(meta.kalibriertAm || '');
+  const displayName   = meta.displayName || meta.name || '';
+  const presseTyp     = meta.presseTyp || '';
+  const presseNr      = meta.presseNr || '';
+  const manometerTyp  = meta.manometerTyp || '';
+  const manometerNr   = meta.manometerNr || '';
+  const kalibriertAm  = normalizeCsvDate(meta.kalibriertAm || '');
   const gueltigMonate = Number(meta.gueltigMonate || 12);
 
   if(!displayName || !presseNr || !kalibriertAm || punkte.length < 2){
@@ -539,6 +724,8 @@ function kalibStatus(k){
   return 'ok';
 }
 
+/* NEU: handleKalibImport erzeugt immer eine eindeutige ID,
+   überschreibt nie eine bestehende Kalibrierung [1] */
 async function handleKalibImport(file){
   if(!file) return;
 
@@ -546,15 +733,28 @@ async function handleKalibImport(file){
     const text = await file.text();
     const kalib = parseKalibCsv(text);
 
-    const existing = loadAllKalibs();
+    const existing  = loadAllKalibs();
     const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k => k.id));
     const userKalibs = existing.filter(k => !builtinIds.has(k.id));
 
-    const idx = userKalibs.findIndex(k => k.id === kalib.id);
-    if(idx >= 0) userKalibs[idx] = kalib;
-    else userKalibs.push(kalib);
+    /* Eindeutige ID erzeugen — nie überschreiben */
+    const baseId = [
+      slugify(kalib.displayName),
+      slugify(kalib.presseNr),
+      kalib.kalibriertAm
+    ].filter(Boolean).join('_') || uid();
 
+    let newId = baseId;
+    let counter = 2;
+    while(existing.some(k => k.id === newId)){
+      newId = `${baseId}_${counter++}`;
+    }
+
+    kalib.id = newId;
+    userKalibs.push(kalib);
     saveUserKalibs(userKalibs);
+
+    /* Neu importierte Presse direkt auswählen */
     state.meta.selectedKalibId = kalib.id;
 
     renderPresseDropdown();
@@ -780,8 +980,10 @@ function setZyklenMode(mode){
   if(next === state.settings.zyklenMode) return;
 
   if(next === 'norm'){
-    if(state.settings.zyklenMode === 'frei' &&
-      !confirm('Auf Norm / Vorlage zurücksetzen?\nFreie Änderungen in den Lastzyklen werden überschrieben.')){
+    if(
+      state.settings.zyklenMode === 'frei' &&
+      !confirm('Auf Norm / Vorlage zurücksetzen?\nFreie Änderungen in den Lastzyklen werden überschrieben.')
+    ){
       renderZyklen();
       return;
     }
@@ -924,10 +1126,13 @@ function applySnapshot(snap, replace=true){
     state.zyklen = Array.isArray(snap.zyklen) ? clone(snap.zyklen) : [];
   }
 
+  initAnkertypSelect();
   ensureDefaultZyklen();
   recalcAllVerschiebungen();
+
   syncMetaToUi();
   syncVorgabeToUi();
+  renderAnkertypInfo();
   renderPresseDropdown();
   renderKalibInfo();
   renderKalibPreview();
@@ -999,6 +1204,8 @@ function syncVorgabeToUi(){
 
   if($('boden-bindig')) $('boden-bindig').checked = state.vorgabe.bodenart === 'bindig';
   if($('boden-nichtbindig')) $('boden-nichtbindig').checked = state.vorgabe.bodenart !== 'bindig';
+
+  renderAnkertypInfo();
 }
 
 function collectVorgabeFromUi(){
@@ -1173,11 +1380,7 @@ function updateLappPreview(){
 
   const checkEl = $('calc-LappCheck');
   if(checkEl){
-    if(
-      Number.isFinite(a.measuredLapp) &&
-      Number.isFinite(a.minLapp) &&
-      Number.isFinite(a.maxLapp)
-    ){
+    if(Number.isFinite(a.measuredLapp) && Number.isFinite(a.minLapp) && Number.isFinite(a.maxLapp)){
       const ok = a.measuredLapp >= a.minLapp && a.measuredLapp <= a.maxLapp;
       checkEl.textContent = ok ? 'OK' : 'nicht OK';
       checkEl.className = `inline-badge ${ok ? 'inline-badge--good' : 'inline-badge--bad'}`;
@@ -1188,9 +1391,9 @@ function updateLappPreview(){
   }
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────────────
    AUDIO / ALARM
-═══════════════════════════════════════════════════════ */
+────────────────────────────────────────────────────── */
 function getAlarmAudioContext(){
   if(!_audioCtx){
     try{
@@ -1271,20 +1474,20 @@ async function playIntervalBeep(){
 
   try{
     const p = [120,90,120,90,120,360];
-    const tot = Math.max(1,Math.round(Number(state.settings.alarmDurationSec||4)/0.9));
+    const tot = Math.max(1,Math.round(Number(state.settings.alarmDurationSec || 4) / 0.9));
     const vib = [];
     for(let i=0;i<tot;i++) vib.push(...p);
     if(navigator.vibrate) navigator.vibrate(vib);
   }catch{}
 
-  const dur = clamp(Number(state.settings.alarmDurationSec||4),1,30);
+  const dur = clamp(Number(state.settings.alarmDurationSec || 4),1,30);
   const now = ctx.currentTime + 0.02;
   const cycle = 0.90;
 
   for(let t=0;t<dur;t+=cycle){
-    scheduleBeep(ctx,now+t,      0.10,2350,0.52);
-    scheduleBeep(ctx,now+t+0.20, 0.10,2350,0.52);
-    scheduleBeep(ctx,now+t+0.40, 0.12,2550,0.56);
+    scheduleBeep(ctx, now+t,      0.10, 2350, 0.52);
+    scheduleBeep(ctx, now+t+0.20, 0.10, 2350, 0.52);
+    scheduleBeep(ctx, now+t+0.40, 0.12, 2550, 0.56);
   }
 
   return true;
@@ -1315,9 +1518,7 @@ function updateAlarmSoundButton(){
   if(status){
     status.textContent = active
       ? 'Alarmton ist aktiv.'
-      : (enabledPref
-        ? 'Für iPhone: einmal hier aktivieren oder vor dem Start testen.'
-        : 'Alarmton ist ausgeschaltet.');
+      : (enabledPref ? 'Für iPhone: einmal hier aktivieren oder vor dem Start testen.' : 'Alarmton ist ausgeschaltet.');
   }
 }
 
@@ -1349,9 +1550,9 @@ async function toggleAlarmSoundByUserGesture(){
   }
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────────────
    TIMER (GLOBAL ÜBER ALLE ZYKLEN)
-═══════════════════════════════════════════════════════ */
+────────────────────────────────────────────────────── */
 function ensureTimer(zid,z){
   if(!timerMap[zid]){
     const min = Number(z?.elapsedMs || 0) / 60000;
@@ -1430,9 +1631,7 @@ function updateGlobalTimerUi(){
     btnStart.textContent = t.running ? 'Läuft' : (z.elapsedMs > 0 ? 'Weiter' : 'Start');
     btnStart.disabled = t.running;
   }
-  if(btnStop){
-    btnStop.disabled = !t.running;
-  }
+  if(btnStop) btnStop.disabled = !t.running;
 
   highlightActiveMeasurementRow(z);
 }
@@ -1566,9 +1765,9 @@ function resetActiveTimer(){
   }
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────────────
    FLOATING TIMER
-═══════════════════════════════════════════════════════ */
+────────────────────────────────────────────────────── */
 function getFirstRunningZyklus(){
   return state.zyklen.find(z => timerMap[z.id]?.running) || null;
 }
@@ -1618,9 +1817,9 @@ function stopFloatingLoopIfIdle(){
   }
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────────────
    TIME ADJUST MODAL
-═══════════════════════════════════════════════════════ */
+────────────────────────────────────────────────────── */
 function openTimeAdjustModal(zid){
   _timeAdjustVid = zid;
   if($('timeAdjustInput')) $('timeAdjustInput').value = '0';
@@ -1664,9 +1863,9 @@ function applyTimeAdjustment(){
   closeTimeAdjustModal();
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────────────
    PRESSE UI
-═══════════════════════════════════════════════════════ */
+────────────────────────────────────────────────────── */
 function renderPresseDropdown(){
   const sel = $('presseSelect');
   if(!sel) return;
@@ -1753,7 +1952,6 @@ function renderKalibPreview(){
   }
 
   wrap.hidden = false;
-
   const vorschau = berechneDruckvorschau();
 
   table.innerHTML = `
@@ -1778,9 +1976,9 @@ function renderKalibPreview(){
   `;
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────────────
    DRUCK AUS KALIBRIERUNG
-═══════════════════════════════════════════════════════ */
+────────────────────────────────────────────────────── */
 function syncDruckFromKalib(){
   const kalib = findKalibById(state.meta.selectedKalibId);
 
@@ -1874,9 +2072,9 @@ function syncDruckFromKalib(){
   saveDraftDebounced();
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────────────
    GLOBALER TIMER HTML
-═══════════════════════════════════════════════════════ */
+────────────────────────────────────────────────────── */
 function buildGlobalTimerHtml(){
   const z = getActiveZyklus();
   const display = z ? formatElapsed(getElapsedMs(z.id,z)) : '00:00';
@@ -1930,9 +2128,9 @@ function buildGlobalTimerHtml(){
   `;
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────────────
    ZYKLUS-RENDERING
-═══════════════════════════════════════════════════════ */
+────────────────────────────────────────────────────── */
 function buildLaststufenHtml(z){
   const isFree = state.settings.zyklenMode === 'frei';
   z.laststufen = normalizeLaststufenArray(z.laststufen);
@@ -2385,9 +2583,9 @@ function hookZyklenDelegation(){
   });
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────────────
    BERECHNUNGEN / AUSWERTUNG
-═══════════════════════════════════════════════════════ */
+────────────────────────────────────────────────────── */
 function calcLapp(deltaS_mm,Pp_kN,Pa_kN,Et_kNmm2,At_mm2){
   const dF = Pp_kN - Pa_kN;
   if(!Number.isFinite(deltaS_mm) || !Number.isFinite(dF) || dF <= 0 || !Number.isFinite(Et_kNmm2) || !Number.isFinite(At_mm2)) return NaN;
@@ -2629,9 +2827,9 @@ function renderAuswertung(){
   }).join('');
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────────────
    HISTORY
-═══════════════════════════════════════════════════════ */
+────────────────────────────────────────────────────── */
 function renderHistoryList(){
   const host = $('historyList');
   if(!host) return;
@@ -2710,9 +2908,9 @@ function hookHistoryDelegation(){
   });
 }
 
-/* ═══════════════════════════════════════════════════════
-   TEMPLATE / FULL EXPORT
-═══════════════════════════════════════════════════════ */
+/* ──────────────────────────────────────────────────────
+   TEMPLATE / EXPORT / PDF HELPERS
+────────────────────────────────────────────────────── */
 function downloadJson(data, filename){
   const blob = new Blob([JSON.stringify(data,null,2)], { type:'application/json' });
   const url = URL.createObjectURL(blob);
@@ -2747,9 +2945,6 @@ function buildTemplateSnapshot(){
   return snap;
 }
 
-/* ═══════════════════════════════════════════════════════
-   PDF EXPORT
-═══════════════════════════════════════════════════════ */
 async function exportPdfFromSnapshot(snap){
   if(!window.PDFLib){
     alert('PDF-Bibliothek nicht geladen.');
@@ -2849,9 +3044,6 @@ async function exportPdfFromSnapshot(snap){
   setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
 
-/* ═══════════════════════════════════════════════════════
-   UI HELPERS
-═══════════════════════════════════════════════════════ */
 function normalizeBottomActionCards(){
   document.querySelectorAll('.card--actions-bottom').forEach(el => {
     el.style.position = 'static';
@@ -2867,9 +3059,9 @@ function normalizeKalibImportInput(){
   }
 }
 
-/* ═══════════════════════════════════════════════════════
+/* ──────────────────────────────────────────────────────
    TABS / INIT
-═══════════════════════════════════════════════════════ */
+────────────────────────────────────────────────────── */
 function switchTab(name){
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('is-active', t.dataset.tab === name));
   document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'tab-' + name);
@@ -2881,12 +3073,15 @@ function switchTab(name){
 }
 
 function init(){
+  initAnkertypSelect();
+
   loadDraft();
   ensureDefaultZyklen();
   recalcAllVerschiebungen();
 
   syncMetaToUi();
   syncVorgabeToUi();
+  renderAnkertypInfo();
   renderPresseDropdown();
   syncMetaToUi();
   renderKalibInfo();
@@ -2918,8 +3113,14 @@ function init(){
     const el = $('vor-' + k);
     if(!el) return;
 
-    el.addEventListener('input', () => {
+    const evtName = el.tagName === 'SELECT' ? 'change' : 'input';
+    el.addEventListener(evtName, () => {
       state.vorgabe[k] = el.value || '';
+
+      if(k === 'ankertyp'){
+        applyAnkertypPreset(state.vorgabe.ankertyp, { overwrite:true });
+      }
+
       maybeAutofillVorgabe(k);
       updateLappPreview();
       renderKalibPreview();
@@ -2973,10 +3174,8 @@ function init(){
     const templateDef = defs[Math.min(state.zyklen.length, defs.length - 1)];
     const newNr = state.zyklen.length + 1;
 
-    const z = makeZyklusFromDefinition(
-      { ...templateDef, nr:newNr },
-      null
-    );
+    const z = makeZyklusFromDefinition({ ...templateDef, nr:newNr }, null);
+    z.id = uid();
 
     state.zyklen.push(z);
     ensureActiveZyklus();
@@ -3014,11 +3213,13 @@ function init(){
       delete timerMap[k];
     });
 
+    initAnkertypSelect();
     ensureDefaultZyklen();
     recalcAllVerschiebungen();
 
     syncMetaToUi();
     syncVorgabeToUi();
+    renderAnkertypInfo();
     renderPresseDropdown();
     syncMetaToUi();
     renderKalibInfo();
@@ -3089,7 +3290,9 @@ function init(){
 
   $('btnKalibImport')?.addEventListener('click', () => $('kalibImportInput')?.click());
   $('kalibImportInput')?.addEventListener('change', async e => {
-    await handleKalibImport(e.target.files?.[0]);
+    const file = e.target.files?.[0];
+    if(!file) return;
+    await handleKalibImport(file);
     e.target.value = '';
   });
 
@@ -3142,7 +3345,6 @@ function init(){
       .register(`${BASE_PATH}sw.js?v=1`)
       .then(reg => {
         console.log('[Anker] SW registriert, scope:', reg.scope);
-
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           newWorker?.addEventListener('statechange', () => {
