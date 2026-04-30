@@ -5,7 +5,102 @@ console.log('HTB Ankerprüfung app.js v1 loaded');
 const STORAGE_DRAFT='htb-anker-draft-v1';
 const STORAGE_HISTORY='htb-anker-history-v1';
 const HISTORY_MAX=30;
+/* ═══════════════════════════════════════════
+   STORAGE-KEY FÜR KALIBRIERUNGEN
+═══════════════════════════════════════════ */
+const STORAGE_KALIB = 'htb-anker-kalibrierungen-v1';
 
+/* ═══════════════════════════════════════════
+   EINGEBAUTE KALIBRIERUNG
+   Quelle: Kalibrierschein CFK-Mathias 26.01.2026 [1]
+═══════════════════════════════════════════ */
+const BUILTIN_KALIBRIERUNGEN = [
+  {
+    id: 'NC41333832_2026-01-26',
+    displayName: 'CFK Presse NC41333832',
+    presseTyp: 'L-HK-DZ-140-250-105-HPR',
+    presseNr: 'NC41333832',
+    manometerTyp: 'DSI 160/1000',
+    manometerNr: '300177',
+    kalibriertAm: '2026-01-26',
+    gueltigMonate: 12,
+    // Belastungsliste kN → bar aus Kalibrierschein [1]
+    punkte: [
+      { kN: 5,    bar: 3   },
+      { kN: 10,   bar: 5   },
+      { kN: 15,   bar: 8   },
+      { kN: 20,   bar: 10  },
+      { kN: 25,   bar: 13  },
+      { kN: 30,   bar: 15  },
+      { kN: 35,   bar: 18  },
+      { kN: 40,   bar: 20  },
+      { kN: 45,   bar: 23  },
+      { kN: 50,   bar: 26  },
+      { kN: 55,   bar: 28  },
+      { kN: 60,   bar: 31  },
+      { kN: 65,   bar: 33  },
+      { kN: 70,   bar: 36  },
+      { kN: 75,   bar: 38  },
+      { kN: 80,   bar: 41  },
+      { kN: 85,   bar: 43  },
+      { kN: 90,   bar: 46  },
+      { kN: 95,   bar: 49  },
+      { kN: 100,  bar: 51  },
+      { kN: 110,  bar: 56  },
+      { kN: 120,  bar: 61  },
+      { kN: 130,  bar: 66  },
+      { kN: 140,  bar: 71  },
+      { kN: 150,  bar: 77  },
+      { kN: 160,  bar: 82  },
+      { kN: 170,  bar: 87  },
+      { kN: 180,  bar: 92  },
+      { kN: 190,  bar: 97  },
+      { kN: 200,  bar: 102 },
+      { kN: 220,  bar: 112 },
+      { kN: 240,  bar: 122 },
+      { kN: 260,  bar: 133 },
+      { kN: 280,  bar: 143 },
+      { kN: 300,  bar: 153 },
+      { kN: 320,  bar: 164 },
+      { kN: 340,  bar: 174 },
+      { kN: 360,  bar: 184 },
+      { kN: 380,  bar: 194 },
+      { kN: 400,  bar: 204 },
+      { kN: 420,  bar: 215 },
+      { kN: 440,  bar: 224 },
+      { kN: 460,  bar: 235 },
+      { kN: 480,  bar: 245 },
+      { kN: 500,  bar: 255 },
+      { kN: 520,  bar: 265 },
+      { kN: 540,  bar: 275 },
+      { kN: 560,  bar: 285 },
+      { kN: 580,  bar: 296 },
+      { kN: 600,  bar: 306 },
+      { kN: 620,  bar: 316 },
+      { kN: 640,  bar: 326 },
+      { kN: 660,  bar: 336 },
+      { kN: 680,  bar: 346 },
+      { kN: 700,  bar: 357 },
+      { kN: 720,  bar: 367 },
+      { kN: 740,  bar: 377 },
+      { kN: 760,  bar: 387 },
+      { kN: 780,  bar: 397 },
+      { kN: 800,  bar: 407 },
+      { kN: 850,  bar: 433 },
+      { kN: 900,  bar: 459 },
+      { kN: 950,  bar: 484 },
+      { kN: 1000, bar: 510 },
+      { kN: 1050, bar: 535 },
+      { kN: 1100, bar: 561 },
+      { kN: 1150, bar: 586 },
+      { kN: 1200, bar: 611 },
+      { kN: 1250, bar: 637 },
+      { kN: 1300, bar: 662 },
+      { kN: 1350, bar: 687 },
+      { kN: 1400, bar: 712 }
+    ]
+  }
+];
 const FILIALEN={
   Arzl:{adresse:'A-6471 Arzl im Pitztal, Gewerbepark Pitztal 16',tel:'+43 5412 / 63975',email:'office.arzl@htb-bau.at'},
   'Nüziders':{adresse:'A-6714 Nüziders, Landstraße 19',tel:'+43 5552 / 34 739',email:'office.nueziders@htb-bau.at'},
@@ -79,14 +174,164 @@ function formatElapsed(ms){const t=Math.max(0,Math.floor(ms/1000)),hh=Math.floor
 function dateTag(d=new Date()){return`${String(d.getDate()).padStart(2,'0')}${String(d.getMonth()+1).padStart(2,'0')}${d.getFullYear()}`;}
 function dateDE(iso){const s=String(iso||'').trim();const m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[3]}.${m[2]}.${m[1]}`:s;}
 function parseIntervalStr(str){return[...new Set(String(str||'').split(',').map(s=>Number(s.trim())).filter(n=>Number.isFinite(n)&&n>=0))].sort((a,b)=>a-b);}
+/* ═══════════════════════════════════════════════════════
+   KALIBRIERUNGS-MANAGEMENT
+═══════════════════════════════════════════════════════ */
 
+/** Lädt alle Kalibrierungen: eingebaut + lokal gespeicherte */
+function loadAllKalibs(){
+  let local = [];
+  try{
+    local = JSON.parse(localStorage.getItem(STORAGE_KALIB) || '[]');
+  }catch{}
+  // Eingebaute zuerst, dann lokale; eingebaute werden nicht überschrieben
+  const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k=>k.id));
+  const merged = [
+    ...BUILTIN_KALIBRIERUNGEN,
+    ...local.filter(k => !builtinIds.has(k.id))
+  ];
+  return merged;
+}
+
+/** Speichert NEUE Kalibrierungen (nur die nicht eingebauten) */
+function saveUserKalibs(kalibs){
+  const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k=>k.id));
+  const userOnly = kalibs.filter(k => !builtinIds.has(k.id));
+  try{
+    localStorage.setItem(STORAGE_KALIB, JSON.stringify(userOnly));
+  }catch(e){console.warn(e);}
+}
+
+/** Findet eine Kalibrierung anhand ihrer ID */
+function findKalibById(id){
+  return loadAllKalibs().find(k => k.id === id) || null;
+}
+
+/** Berechnet das Ablaufdatum einer Kalibrierung */
+function kalibGueltigBis(k){
+  if(!k?.kalibriertAm) return null;
+  const d = new Date(k.kalibriertAm);
+  d.setMonth(d.getMonth() + (k.gueltigMonate || 12));
+  return d;
+}
+
+/** Gibt Status zurück: 'ok' | 'warn' (< 30 Tage) | 'expired' */
+function kalibStatus(k){
+  const bis = kalibGueltigBis(k);
+  if(!bis) return 'ok';
+  const now = new Date();
+  const diffDays = Math.floor((bis - now) / 86400000);
+  if(diffDays < 0)  return 'expired';
+  if(diffDays < 30) return 'warn';
+  return 'ok';
+}
+/* ═══════════════════════════════════════════════════════
+  
+/* ═══════════════════════════════════════════════════════
+   INTERPOLATION  kN → bar
+   Lineare Interpolation aus Belastungsliste [1]
+═══════════════════════════════════════════════════════ */
+
+/**
+ * Interpoliert den Druck in bar für eine gegebene Kraft in kN.
+ * @param {number} zielKn  - gesuchte Kraft in kN
+ * @param {Array}  punkte  - Array aus {kN, bar} sortiert aufsteigend
+ * @returns {{ bar: number|null, oor: boolean }}
+ *   bar  = interpolierter Druck, null wenn nicht möglich
+ *   oor  = true wenn außerhalb des Kalibrierbereichs
+ */
+function interpoliereBar(zielKn, punkte){
+  if(!Array.isArray(punkte) || punkte.length < 2){
+    return { bar: null, oor: true };
+  }
+
+  const sorted = [...punkte].sort((a,b) => a.kN - b.kN);
+  const minKn  = sorted[0].kN;
+  const maxKn  = sorted[sorted.length-1].kN;
+
+  // Außerhalb des Bereichs
+  if(zielKn < minKn || zielKn > maxKn){
+    return { bar: null, oor: true };
+  }
+
+  // Exakter Treffer
+  const exact = sorted.find(p => p.kN === zielKn);
+  if(exact) return { bar: exact.bar, oor: false };
+
+  // Nachbarpunkte finden
+  let lo = sorted[0], hi = sorted[sorted.length-1];
+  for(let i = 0; i < sorted.length - 1; i++){
+    if(sorted[i].kN <= zielKn && sorted[i+1].kN >= zielKn){
+      lo = sorted[i];
+      hi = sorted[i+1];
+      break;
+    }
+  }
+
+  // Lineare Interpolation
+  const t   = (zielKn - lo.kN) / (hi.kN - lo.kN);
+  const bar = lo.bar + t * (hi.bar - lo.bar);
+
+  return { bar: Math.round(bar * 10) / 10, oor: false };
+}
+
+/**
+ * Berechnet alle Lastfaktor-Druckwerte für die aktiven Vorgaben
+ * und gibt ein Array von {label, kN, bar, oor} zurück.
+ */
+function berechneDruckvorschau(){
+  const kalib = findKalibById(state.meta.selectedKalibId);
+  const Pp = Number(state.vorgabe.Pp);
+  const Pa = Number(state.vorgabe.Pa);
+  const P0 = Number(state.vorgabe.P0);
+
+  const stufen = [
+    { label: 'Pa',       kN: Pa },
+    { label: '0,4 · Pp', kN: Number.isFinite(Pp) ? Pp * 0.40 : NaN },
+    { label: '0,55 · Pp',kN: Number.isFinite(Pp) ? Pp * 0.55 : NaN },
+    { label: '0,7 · Pp', kN: Number.isFinite(Pp) ? Pp * 0.70 : NaN },
+    { label: '0,85 · Pp',kN: Number.isFinite(Pp) ? Pp * 0.85 : NaN },
+    { label: 'Pp',        kN: Pp },
+    { label: 'P0',        kN: P0 }
+  ];
+
+  return stufen.map(s => {
+    if(!kalib || !Number.isFinite(s.kN) || s.kN < 0){
+      return { ...s, bar: null, oor: false, noKalib: !kalib };
+    }
+    const { bar, oor } = interpoliereBar(s.kN, kalib.punkte);
+    return { ...s, bar, oor };
+  });
+}
+
+/**
+ * Gibt den bar-Wert für eine kN-Kraft aus der aktiven Kalibrierung zurück.
+ * @returns {number|null} bar oder null
+ */
+function kNtoBar(kN){
+  const kalib = findKalibById(state.meta.selectedKalibId);
+  if(!kalib || !Number.isFinite(kN)) return null;
+  const { bar, oor } = interpoliereBar(kN, kalib.punkte);
+  return oor ? null : bar;
+}
 /* ────────── STATE ────────── */
 function getInitialState(){
   return{
-    meta:{filiale:'',bauvorhaben:'',bauherr:'',bauleitung:'',ankerlage:'',ankerNr:'',blattNr:'',pruefdatum:'',presseNr:'',presseTyp:'',manometerNr:'',pumpeNr:'',anmerkung:''},
-    vorgabe:{bodenart:'nichtbindig',ankertyp:'',LA:'',Ltb:'',Ltf:'',Le:'',Et:'195',At:'',P0:'',Pa:'0',Pp:'',Pt01k:'',Pd:'',gamma:'1.1'},
+    meta:{
+      filiale:'', bauvorhaben:'', bauherr:'', bauleitung:'',
+      ankerlage:'', ankerNr:'', blattNr:'', pruefdatum:'',
+      pumpeNr:'', anmerkung:'',
+      // Pressenauswahl als Teil des Protokolls
+      selectedKalibId: ''
+    },
+    vorgabe:{
+      bodenart:'nichtbindig', ankertyp:'',
+      LA:'', Ltb:'', Ltf:'', Le:'',
+      Et:'195', At:'', P0:'', Pa:'0',
+      Pp:'', Pt01k:'', Pd:'', gamma:'1.1'
+    },
     zyklen:[],
-    settings:{alarmDurationSec:4,alarmSoundEnabled:true}
+    settings:{ alarmDurationSec:4, alarmSoundEnabled:true }
   };
 }
 const state=getInitialState();
@@ -131,7 +376,9 @@ function applySnapshot(snap,replace=true){
     Object.assign(state.vorgabe,getInitialState().vorgabe,snap.vorgabe||{});
     state.zyklen=Array.isArray(snap.zyklen)?clone(snap.zyklen):[];
   }
-  syncMetaToUi();syncVorgabeToUi();renderZyklen();updateLappPreview();
+  syncMetaToUi();syncVorgabeToUi();renderZyklen();updateLappPreview();  renderPresseDropdown();
+  renderKalibInfo();
+  syncDruckFromKalib();
 }
 
 function saveCurrentToHistory(){
@@ -148,20 +395,27 @@ function saveCurrentToHistory(){
 
 /* ────────── UI SYNC ────────── */
 const META_FIELDS=[
-  ['meta-filiale','filiale'],['meta-bauvorhaben','bauvorhaben'],['meta-bauherr','bauherr'],
-  ['meta-bauleitung','bauleitung'],['meta-ankerlage','ankerlage'],['meta-ankerNr','ankerNr'],
-  ['meta-blattNr','blattNr'],['meta-pruefdatum','pruefdatum'],['meta-presseNr','presseNr'],
-  ['meta-presseTyp','presseTyp'],['meta-manometerNr','manometerNr'],['meta-pumpeNr','pumpeNr'],
-  ['meta-anmerkung','anmerkung']
+  ['meta-filiale',      'filiale'],
+  ['meta-bauvorhaben',  'bauvorhaben'],
+  ['meta-bauherr',      'bauherr'],
+  ['meta-bauleitung',   'bauleitung'],
+  ['meta-ankerlage',    'ankerlage'],
+  ['meta-ankerNr',      'ankerNr'],
+  ['meta-blattNr',      'blattNr'],
+  ['meta-pruefdatum',   'pruefdatum'],
+  ['meta-pumpeNr',      'pumpeNr'],
+  ['meta-anmerkung',    'anmerkung']
 ];
 const VOR_FIELDS=['ankertyp','LA','Ltb','Ltf','Le','Et','At','P0','Pa','Pp','Pt01k','Pd','gamma'];
 
-function syncMetaToUi(){META_FIELDS.forEach(([id,k])=>{const el=$(id);if(el)el.value=state.meta[k]||'';});}
-function collectMetaFromUi(){META_FIELDS.forEach(([id,k])=>{const el=$(id);if(el)state.meta[k]=el.value||'';});}
-function syncVorgabeToUi(){
-  VOR_FIELDS.forEach(k=>{const el=$('vor-'+k);if(el)el.value=state.vorgabe[k]||'';});
-  $('boden-bindig').checked=state.vorgabe.bodenart==='bindig';
-  $('boden-nichtbindig').checked=state.vorgabe.bodenart!=='bindig';
+function syncMetaToUi(){
+  META_FIELDS.forEach(([id,k]) => {
+    const el = $(id);
+    if(el) el.value = state.meta[k] || '';
+  });
+  // Pressenauswahl synchronisieren
+  const sel = $('presseSelect');
+  if(sel) sel.value = state.meta.selectedKalibId || '';
 }
 function collectVorgabeFromUi(){
   VOR_FIELDS.forEach(k=>{const el=$('vor-'+k);if(el)state.vorgabe[k]=el.value||'';});
@@ -492,7 +746,291 @@ function applyTimeAdjustment(){
   const card=document.querySelector(`.zyklus-card[data-zid="${z.id}"]`);
   updateTimerUi(card,z);updateFloatingTimerWidget();saveDraftDebounced();closeTimeAdjustModal();
 }
+ PRESSE UI
+═══════════════════════════════════════════════════════ */
 
+/** Befüllt das Dropdown mit allen verfügbaren Kalibrierungen */
+function renderPresseDropdown(){
+  const sel = $('presseSelect');
+  if(!sel) return;
+
+  const kalibs = loadAllKalibs();
+  const current = state.meta.selectedKalibId;
+
+  sel.innerHTML = `<option value="">— keine ausgewählt —</option>`;
+  kalibs.forEach(k => {
+    const status = kalibStatus(k);
+    const icon = status === 'ok' ? '✅' : status === 'warn' ? '⚠️' : '❌';
+    const opt = document.createElement('option');
+    opt.value = k.id;
+    opt.textContent = `${icon} ${k.displayName} (${k.kalibriertAm})`;
+    if(k.id === current) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+/** Zeigt die Kalibrier-Infobox für die ausgewählte Kalibrierung */
+function renderKalibInfo(){
+  const box      = $('kalibInfoBox');
+  const emptyHint= $('kalibEmptyHint');
+  const preview  = $('kalibPreview');
+  if(!box) return;
+
+  const kalib = findKalibById(state.meta.selectedKalibId);
+
+  if(!kalib){
+    box.hidden = true;
+    if(emptyHint) emptyHint.hidden = false;
+    if(preview)   preview.hidden   = true;
+    return;
+  }
+
+  box.hidden = false;
+  if(emptyHint) emptyHint.hidden = true;
+
+  // Header
+  $('kalibName').textContent = kalib.displayName;
+  $('kalibSub').textContent  = `${kalib.presseTyp} · ${kalib.presseNr}`;
+
+  // Gültigkeits-Badge
+  const status  = kalibStatus(kalib);
+  const bis     = kalibGueltigBis(kalib);
+  const badge   = $('kalibValidBadge');
+  const bisStr  = bis ? bis.toLocaleDateString('de-DE') : '—';
+  const diffDays= bis ? Math.floor((bis - new Date()) / 86400000) : 999;
+
+  badge.textContent =
+    status === 'ok'      ? `✅ Gültig bis ${bisStr}` :
+    status === 'warn'    ? `⚠️ Läuft ab in ${diffDays} Tagen (${bisStr})` :
+    `❌ Abgelaufen seit ${bisStr}`;
+  badge.className = `kalib-badge kalib-badge--${status}`;
+
+  // Infopunkte
+  $('kInfo-presseTyp').textContent = kalib.presseTyp  || '—';
+  $('kInfo-presseNr' ).textContent = kalib.presseNr   || '—';
+  $('kInfo-manTyp'   ).textContent = kalib.manometerTyp|| '—';
+  $('kInfo-manNr'    ).textContent = kalib.manometerNr || '—';
+  $('kInfo-kalibAm'  ).textContent =
+    kalib.kalibriertAm
+      ? new Date(kalib.kalibriertAm).toLocaleDateString('de-DE')
+      : '—';
+  $('kInfo-gueltigBis').textContent = bisStr;
+  $('kInfo-punkte'   ).textContent  = `${(kalib.punkte||[]).length} Stützpunkte`;
+
+  const maxKn = kalib.punkte?.length
+    ? Math.max(...kalib.punkte.map(p=>p.kN))
+    : 0;
+  $('kInfo-maxKn').textContent = `${maxKn} kN`;
+
+  // Druckvorschau
+  renderKalibPreview();
+}
+
+/** Rendert die Druckvorschau-Tabelle */
+function renderKalibPreview(){
+  const wrap    = $('kalibPreview');
+  const table   = $('kalibPreviewTable');
+  if(!wrap || !table) return;
+
+  const Pp  = Number(state.vorgabe.Pp);
+  const Pa  = Number(state.vorgabe.Pa);
+  const kalib = findKalibById(state.meta.selectedKalibId);
+
+  // Vorschau nur zeigen wenn Kalib + Pp vorhanden
+  if(!kalib || !Number.isFinite(Pp) || Pp <= 0){
+    wrap.hidden = true;
+    return;
+  }
+  wrap.hidden = false;
+
+  const vorschau = berechneDruckvorschau();
+
+  table.innerHTML = `
+    <div class="kalib-prev-row kalib-prev-row--head">
+      <span>Laststufe</span>
+      <span style="text-align:right">kN</span>
+      <span style="text-align:right">bar</span>
+    </div>
+    ${vorschau.map(v => {
+      const knStr  = Number.isFinite(v.kN) ? fmt(v.kN, 1) + ' kN' : '—';
+      const barCls = v.oor ? 'prev-bar prev-bar--oor'
+                   : v.noKalib ? 'prev-bar prev-bar--nokalib'
+                   : 'prev-bar';
+      const barStr = v.bar !== null ? fmt(v.bar, 1) + ' bar'
+                   : v.oor ? '⚠ außerhalb' : '—';
+      return `
+        <div class="kalib-prev-row">
+          <span class="prev-label">${h(v.label)}</span>
+          <span class="prev-kn">${knStr}</span>
+          <span class="${barCls}">${barStr}</span>
+        </div>`;
+    }).join('')}`;
+}
+/**
+ * Schreibt die bar-Werte aus der Kalibrierung in alle Messzellen.
+ * Wird aufgerufen wenn: Presse gewählt, Pp/Pa/P0 geändert.
+ */
+function syncDruckFromKalib(){
+  const kalib = findKalibById(state.meta.selectedKalibId);
+  if(!kalib){
+    // Keine Kalibrierung: Druckfelder editierbar lassen, nichts überschreiben
+    document.querySelectorAll('.mess-input--auto').forEach(el => {
+      el.classList.remove('mess-input--auto');
+      el.readOnly = false;
+    });
+    return;
+  }
+
+  const Pp = Number(state.vorgabe.Pp);
+  const Pa = Number(state.vorgabe.Pa);
+  const P0 = Number(state.vorgabe.P0);
+
+  // kN pro Laststufen-Faktor berechnen
+  function kNfuerFaktor(mode, faktor){
+    if(mode === 'pa') return Pa;
+    if(mode === 'p0') return P0;
+    if(mode === 'pp') return Number.isFinite(Pp) ? Pp * faktor : NaN;
+    return NaN;
+  }
+
+  state.zyklen.forEach(z => {
+    // Laststufen eindeutig gruppieren: für jede Stufe einen bar-Wert
+    const stufenBarMap = {};
+    z.laststufen?.forEach(ls => {
+      const kN  = kNfuerFaktor(ls.mode, ls.faktor);
+      const bar = kNtoBar(kN);
+      // Schlüssel = mode+faktor
+      const key = `${ls.mode}_${ls.faktor}`;
+      stufenBarMap[key] = bar !== null ? String(bar) : '';
+    });
+
+    // Messzeilen: Druckspalte aus Stufe übernehmen
+    z.rows?.forEach(row => {
+      const key = `${row.mode}_${row.factor}`;
+      const barVal = stufenBarMap[key];
+      row.druckBar = barVal !== undefined ? barVal : '';
+    });
+  });
+
+  // DOM aktualisieren: Druck-Inputs
+  document.querySelectorAll('.zyklus-card').forEach(card => {
+    const z = getZyklusById(card.dataset.zid);
+    if(!z) return;
+    z.rows?.forEach((row, idx) => {
+      const input = card.querySelector(
+        `[data-role="m-druck"][data-row="${idx}"]`
+      );
+      if(!input) return;
+      if(row.druckBar !== '' && row.druckBar !== undefined){
+        input.value   = row.druckBar;
+        input.readOnly= true;
+        input.classList.add('mess-input--auto');
+        input.title   = `Automatisch aus Kalibrierung berechnet`;
+      }else{
+        input.readOnly = false;
+        input.classList.remove('mess-input--auto');
+        input.title = '';
+      }
+    });
+  });
+
+  saveDraftDebounced();
+}
+/* ═══════════════════════════════════════════════════════
+   KALIBRIERUNG IMPORT / EXPORT / DELETE
+═══════════════════════════════════════════════════════ */
+
+async function handleKalibImport(file){
+  if(!file) return;
+  try{
+    const text = await file.text();
+    const raw  = JSON.parse(text);
+
+    // Einzeln oder Array
+    const list = Array.isArray(raw) ? raw : [raw];
+
+    // Validierung
+    const valid = list.filter(k =>
+      k.id && k.displayName && k.presseNr &&
+      Array.isArray(k.punkte) && k.punkte.length >= 2
+    );
+
+    if(!valid.length){
+      alert('Keine gültigen Kalibrierungen in der Datei gefunden.\n\nBitte JSON-Format prüfen.');
+      return;
+    }
+
+    // Mergen mit bestehenden User-Kalibs
+    const existing = loadAllKalibs();
+    const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k=>k.id));
+    const userKalibs = existing.filter(k => !builtinIds.has(k.id));
+
+    let addedCount = 0, updatedCount = 0;
+    valid.forEach(k => {
+      const idx = userKalibs.findIndex(u => u.id === k.id);
+      if(idx >= 0){
+        userKalibs[idx] = k;
+        updatedCount++;
+      }else{
+        userKalibs.push(k);
+        addedCount++;
+      }
+    });
+
+    saveUserKalibs(userKalibs);
+    renderPresseDropdown();
+    renderKalibInfo();
+
+    const msg = [];
+    if(addedCount)   msg.push(`${addedCount} neue Kalibrierung(en) hinzugefügt.`);
+    if(updatedCount) msg.push(`${updatedCount} bestehende aktualisiert.`);
+    alert('Import erfolgreich!\n' + msg.join('\n'));
+
+  }catch(e){
+    alert('Import fehlgeschlagen: ' + e.message);
+  }
+}
+
+function handleKalibExport(){
+  const id = state.meta.selectedKalibId;
+  if(!id){ alert('Bitte zuerst eine Presse auswählen.'); return; }
+  const kalib = findKalibById(id);
+  if(!kalib){ alert('Kalibrierung nicht gefunden.'); return; }
+  downloadJson(kalib, `HTB_Kalib_${kalib.presseNr}_${kalib.kalibriertAm}.json`);
+}
+
+function handleKalibDelete(){
+  const id = state.meta.selectedKalibId;
+  if(!id){ alert('Bitte zuerst eine Presse auswählen.'); return; }
+  const kalib = findKalibById(id);
+  if(!kalib){ alert('Kalibrierung nicht gefunden.'); return; }
+
+  // Eingebaute können nicht gelöscht werden
+  const isBuiltin = BUILTIN_KALIBRIERUNGEN.some(k => k.id === id);
+  if(isBuiltin){
+    alert('Eingebaute Kalibrierungen können nicht gelöscht werden.');
+    return;
+  }
+
+  if(!confirm(`Kalibrierung „${kalib.displayName}" wirklich löschen?`)) return;
+
+  const existing = loadAllKalibs();
+  const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k=>k.id));
+  const userKalibs = existing
+    .filter(k => !builtinIds.has(k.id))
+    .filter(k => k.id !== id);
+
+  saveUserKalibs(userKalibs);
+
+  if(state.meta.selectedKalibId === id){
+    state.meta.selectedKalibId = '';
+  }
+
+  renderPresseDropdown();
+  renderKalibInfo();
+  saveDraftDebounced();
+  alert('Kalibrierung gelöscht.');
+}
 /* ────────── RENDER: ZYKLUS ────────── */
 function buildLaststufenHtml(z){
   const Pp=Number(state.vorgabe.Pp);
@@ -912,9 +1450,20 @@ function init(){
   // Stammdaten
   META_FIELDS.forEach(([id,k])=>{const el=$(id);if(el)el.addEventListener('input',()=>{state.meta[k]=el.value;saveDraftDebounced();});});
   // Vorgabe
-  VOR_FIELDS.forEach(k=>{
-  const el=$('vor-'+k);
-  if(!el) return;
+   VOR_FIELDS.forEach(k => {
+    const el = $('vor-' + k);
+    if(!el) return;
+    el.addEventListener('input', () => {
+      state.vorgabe[k] = el.value || '';
+      maybeAutofillVorgabe(k);
+      updateLappPreview();       // auto-berechnete Werte
+      renderKalibPreview();      // Druckvorschau aktualisieren
+      syncDruckFromKalib();      // Druckwerte in Zyklen updaten
+      renderZyklen();
+      if(!$('tab-auswertung').hidden) renderAuswertung();
+      saveDraftDebounced();
+    });
+  });
 
   el.addEventListener('input',()=>{
     state.vorgabe[k]=el.value || '';
@@ -957,6 +1506,27 @@ function init(){
   $('btnImportFull').addEventListener('click',()=>$('importFullInput').click());
   $('importFullInput').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{const t=await f.text();applySnapshot(JSON.parse(t),true);saveDraftDebounced();alert('Vollständig importiert.');}catch{alert('Import fehlgeschlagen.');}finally{e.target.value='';}});
   // Audio
+    // ── PRESSE & KALIBRIERUNG ──
+  renderPresseDropdown();
+  renderKalibInfo();
+
+  $('presseSelect').addEventListener('change', e => {
+    state.meta.selectedKalibId = e.target.value;
+    renderKalibInfo();
+    syncDruckFromKalib();
+    saveDraftDebounced();
+  });
+
+  $('btnKalibImport').addEventListener('click', () =>
+    $('kalibImportInput').click()
+  );
+  $('kalibImportInput').addEventListener('change', async e => {
+    await handleKalibImport(e.target.files?.[0]);
+    e.target.value = '';
+  });
+
+  $('btnKalibExport').addEventListener('click', handleKalibExport);
+  $('btnKalibDelete').addEventListener('click', handleKalibDelete);
   installAudioUnlock();updateAlarmSoundButton();
   // Time-Adjust Modal
   $('timeAdjustInput')?.addEventListener('input',updateTimeAdjustPreview);
