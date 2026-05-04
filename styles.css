@@ -44,7 +44,7 @@ body{padding-bottom:env(safe-area-inset-bottom)}
 .card--collapsible[open]>.card__title::after{content:"▾";margin-left:auto;color:var(--htb-text-mute)}
 .card--collapsible:not([open])>.card__title::after{content:"▸";margin-left:auto;color:var(--htb-text-mute)}
 .card__body{}
-.card--actions-bottom{position:sticky;bottom:8px;z-index:5}
+.card--actions-bottom{position:static;bottom:8px;z-index:5}
 
 /* FORM */
 .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
