@@ -813,21 +813,43 @@ function handleKalibDelete(){
    INTERPOLATION kN → bar
 ═══════════════════════════════════════════════════════ */
 function interpoliereBar(zielKn, punkte){
-  if(!Array.isArray(punkte) || punkte.length < 1){
+  if (!Array.isArray(punkte) || punkte.length < 1 || !Number.isFinite(zielKn)) {
     return { bar: null, oor: true };
   }
 
-  const exact = punkte.find(
-    p => Number(p.kN) === Number(zielKn)
-  );
+  // Stützpunkte sortieren
+  const sorted = [...punkte]
+    .map(p => ({ kN: Number(p.kN), bar: Number(p.bar) }))
+    .filter(p => Number.isFinite(p.kN) && Number.isFinite(p.bar))
+    .sort((a, b) => a.kN - b.kN);
 
-  if(!exact){
-    // Kein exakter Stützpunkt → kein Druckwert
+  if (!sorted.length) {
+    return { bar: null, oor: true };
+  }
+
+  // 1️⃣ Exakter Treffer?
+  const exact = sorted.find(p => p.kN === zielKn);
+  if (exact) {
+    return { bar: exact.bar, oor: false };
+  }
+
+  // 2️⃣ Nächstniedriger Stützpunkt (prüfsicher, konservativ)
+  let candidate = null;
+  for (const p of sorted) {
+    if (p.kN <= zielKn) {
+      candidate = p;
+    } else {
+      break;
+    }
+  }
+
+  if (!candidate) {
+    // unterhalb des kleinsten Stützpunkts
     return { bar: null, oor: true };
   }
 
   return {
-    bar: Number(exact.bar),
+    bar: candidate.bar,
     oor: false
   };
 }
