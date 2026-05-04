@@ -3106,7 +3106,7 @@ function init(){
     syncDruckFromKalib();
   }
 
-  normalizeBottomActionCards();
+  normalizeKalibImportInput();
 
 
   document.querySelectorAll('.tab').forEach(t =>
