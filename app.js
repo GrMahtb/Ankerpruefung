@@ -1866,6 +1866,10 @@ function applyTimeAdjustment(){
 /* ──────────────────────────────────────────────────────
    PRESSE UI
 ────────────────────────────────────────────────────── */
+/* ──────────────────────────────────────────────────────
+   PRESSE UI
+   NEU: Stützpunkte-Dropdown + Löschen-Button
+────────────────────────────────────────────────────── */
 function renderPresseDropdown(){
   const sel = $('presseSelect');
   if(!sel) return;
@@ -1889,7 +1893,6 @@ function renderPresseDropdown(){
 function renderKalibInfo(){
   const box = $('kalibInfoBox');
   const emptyHint = $('kalibEmptyHint');
-  const preview = $('kalibPreview');
   if(!box) return;
 
   const kalib = findKalibById(state.meta.selectedKalibId);
@@ -1902,7 +1905,8 @@ function renderKalibInfo(){
   if(!kalib){
     box.hidden = true;
     if(emptyHint) emptyHint.hidden = false;
-    if(preview) preview.hidden = true;
+    renderKalibStuetzpunkte(null);
+    renderKalibPreview();
     return;
   }
 
@@ -1935,45 +1939,58 @@ function renderKalibInfo(){
   setText('kInfo-punkte', `${(kalib.punkte || []).length} Stützpunkte`);
   setText('kInfo-maxKn', `${kalib.punkte?.length ? Math.max(...kalib.punkte.map(p => p.kN)) : 0} kN`);
 
+  /* NEU: Stützpunkte-Dropdown befüllen */
+  renderKalibStuetzpunkte(kalib);
   renderKalibPreview();
 }
 
-function renderKalibPreview(){
-  const wrap = $('kalibPreview');
-  const table = $('kalibPreviewTable');
-  if(!wrap || !table) return;
+/* ──────────────────────────────────────────────────────
+   STÜTZPUNKTE-DROPDOWN (NEU)
+   Zeigt alle exakten CSV-Werte — keine Interpolation
+────────────────────────────────────────────────────── */
+function renderKalibStuetzpunkte(kalib){
+  const wrap = $('kalibStuetzpunkteWrap');
+  const sel  = $('kalibStuetzpunkteSelect');
+  const result = $('kalibStuetzpunkteResult');
 
-  const Pp = Number(state.vorgabe.Pp);
-  const kalib = findKalibById(state.meta.selectedKalibId);
+  if(!wrap || !sel || !result) return;
 
-  if(!kalib || !Number.isFinite(Pp) || Pp <= 0){
+  if(!kalib || !kalib.punkte?.length){
     wrap.hidden = true;
+    sel.innerHTML = '';
+    result.textContent = '';
     return;
   }
 
   wrap.hidden = false;
-  const vorschau = berechneDruckvorschau();
 
-  table.innerHTML = `
-    <div class="kalib-prev-row kalib-prev-row--head">
-      <span>Laststufe</span>
-      <span style="text-align:right">kN</span>
-      <span style="text-align:right">bar</span>
-    </div>
-    ${vorschau.map(v => {
-      const knStr = Number.isFinite(v.kN) ? fmt(v.kN,1) + ' kN' : '—';
-      const barCls = v.oor ? 'prev-bar prev-bar--oor' : v.noKalib ? 'prev-bar prev-bar--nokalib' : 'prev-bar';
-      const barStr = v.bar !== null ? fmt(v.bar,1) + ' bar' : (v.oor ? '⚠ außerhalb' : '—');
+  /* Nur exakte Werte aus der CSV — keinerlei Interpolation */
+  sel.innerHTML = `<option value="">Stützpunkt auswählen …</option>`;
+  kalib.punkte.forEach((p, i) => {
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = `${fmt(p.kN,1)} kN → ${fmt(p.bar,1)} bar`;
+    sel.appendChild(opt);
+  });
 
-      return `
-        <div class="kalib-prev-row">
-          <span class="prev-label">${h(v.label)}</span>
-          <span class="prev-kn">${knStr}</span>
-          <span class="${barCls}">${barStr}</span>
-        </div>
-      `;
-    }).join('')}
-  `;
+  sel.onchange = () => {
+    const idx = Number(sel.value);
+    if(!Number.isFinite(idx) || sel.value === ''){
+      result.textContent = '';
+      return;
+    }
+    const p = kalib.punkte[idx];
+    if(!p){
+      result.textContent = '';
+      return;
+    }
+    result.innerHTML = `
+      <span class="stuetz-kn">${fmt(p.kN,1)} kN</span>
+      <span class="stuetz-arr">→</span>
+      <span class="stuetz-bar">${fmt(p.bar,1)} bar</span>
+      <span class="stuetz-note">(exakter CSV-Wert · keine Interpolation)</span>
+    `;
+  };
 }
 
 /* ──────────────────────────────────────────────────────
