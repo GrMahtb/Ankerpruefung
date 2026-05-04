@@ -3,9 +3,9 @@
 const BASE_PATH = '/Ankerpruefung/';
 console.log('HTB Ankerprüfung app.js loaded');
 
-const STORAGE_DRAFT   = 'htb-anker-draft-v1';
-const STORAGE_HISTORY = 'htb-anker-history-v1';
-const STORAGE_KALIB   = 'htb-anker-kalibrierungen-v1';
+const STORAGE_DRAFT   = 'htb-anker-draft-v2';
+const STORAGE_HISTORY = 'htb-anker-history-v2';
+const STORAGE_KALIB   = 'htb-anker-kalibrierungen-v2';
 const HISTORY_MAX     = 30;
 
 /* ═══════════════════════════════════════════════════════
@@ -112,6 +112,155 @@ const FILIALEN = {
 };
 
 /* ═══════════════════════════════════════════════════════
+   TECHNISCHE DATEN ANKERTYPEN
+═══════════════════════════════════════════════════════ */
+const ANKER_TYPEN = [
+  { key:'GEWI_T_25',    group:'GEWI [T] 550/620',            label:'GEWI [T] 25',             nenndurchmesser:25,   muffe:40,  streckZug:'550/620', At:491,  lastStreck:270,  lastStreck90:243,    bruchlast:304,  bruch80:243.2  },
+  { key:'GEWI_T_28',    group:'GEWI [T] 550/620',            label:'GEWI [T] 28',             nenndurchmesser:28,   muffe:45,  streckZug:'550/620', At:616,  lastStreck:340,  lastStreck90:306,    bruchlast:382,  bruch80:305.6  },
+  { key:'GEWI_T_32',    group:'GEWI [T] 550/620',            label:'GEWI [T] 32',             nenndurchmesser:32,   muffe:52,  streckZug:'550/620', At:804,  lastStreck:440,  lastStreck90:396,    bruchlast:499,  bruch80:399.2  },
+  { key:'GEWI_T_40',    group:'GEWI [T] 550/620',            label:'GEWI [T] 40',             nenndurchmesser:40,   muffe:65,  streckZug:'550/620', At:1257, lastStreck:693,  lastStreck90:623.7,  bruchlast:781,  bruch80:624.8  },
+  { key:'GEWI_T_50',    group:'GEWI [T] 550/620',            label:'GEWI [T] 50',             nenndurchmesser:50,   muffe:80,  streckZug:'550/620', At:1963, lastStreck:1080, lastStreck90:972,    bruchlast:1215, bruch80:972    },
+  { key:'GEWI_T_57_5',  group:'GEWI [T] 555/700',            label:'GEWI [T] 57,5',           nenndurchmesser:57.5, muffe:102, streckZug:'555/700', At:2597, lastStreck:1441, lastStreck90:1296.9, bruchlast:1818, bruch80:1454.4 },
+
+  { key:'GEWI_TR_25',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 25',       nenndurchmesser:25,   muffe:45,  streckZug:'670/800', At:491,  lastStreck:329,  lastStreck90:296.1,  bruchlast:393,  bruch80:314.4  },
+  { key:'GEWI_TR_30',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 30',       nenndurchmesser:30,   muffe:55,  streckZug:'670/800', At:707,  lastStreck:474,  lastStreck90:426.6,  bruchlast:565,  bruch80:452    },
+  { key:'GEWI_TR_35',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 35',       nenndurchmesser:35,   muffe:65,  streckZug:'670/800', At:962,  lastStreck:645,  lastStreck90:580.5,  bruchlast:770,  bruch80:616    },
+  { key:'GEWI_TR_43',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 43',       nenndurchmesser:43,   muffe:80,  streckZug:'670/800', At:1452, lastStreck:973,  lastStreck90:875.7,  bruchlast:1162, bruch80:929.6  },
+  { key:'GEWI_TR_50',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 50',       nenndurchmesser:50,   muffe:90,  streckZug:'670/800', At:1936, lastStreck:1315, lastStreck90:1183.5, bruchlast:1570, bruch80:1256   },
+  { key:'GEWI_TR_57_5', group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 57,5',     nenndurchmesser:57.5, muffe:102, streckZug:'670/800', At:2597, lastStreck:1740, lastStreck90:1566,   bruchlast:2077, bruch80:1661.6 },
+
+  { key:'GEWI_WR_26_5', group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 26,5', nenndurchmesser:26.5, muffe:50,  streckZug:'950/1050', At:552,  lastStreck:525,  lastStreck90:472.5, bruchlast:580,  bruch80:464    },
+  { key:'GEWI_WR_32',   group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 32',   nenndurchmesser:32,   muffe:60,  streckZug:'950/1050', At:804,  lastStreck:760,  lastStreck90:684,   bruchlast:845,  bruch80:676    },
+  { key:'GEWI_WR_36',   group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 36',   nenndurchmesser:36,   muffe:68,  streckZug:'950/1050', At:1018, lastStreck:960,  lastStreck90:864,   bruchlast:1070, bruch80:856    },
+  { key:'GEWI_WR_40',   group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 40',   nenndurchmesser:40,   muffe:70,  streckZug:'950/1050', At:1257, lastStreck:1190, lastStreck90:1071,  bruchlast:1320, bruch80:1056   },
+  { key:'GEWI_WR_47',   group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 47',   nenndurchmesser:47,   muffe:83,  streckZug:'950/1050', At:1735, lastStreck:1650, lastStreck90:1485,  bruchlast:1820, bruch80:1456   },
+
+  { key:'IBO_R32_280',  group:'IBO', label:'IBO R32-280 (R32N)', nenndurchmesser:42,   muffe:null, streckZug:null, At:410,  lastStreck:220, lastStreck90:198, bruchlast:280,  bruch80:224    },
+  { key:'IBO_R32_360',  group:'IBO', label:'IBO R32-360 (R32S)', nenndurchmesser:42,   muffe:null, streckZug:null, At:510,  lastStreck:280, lastStreck90:252, bruchlast:360,  bruch80:288    },
+  { key:'IBO_R38_500',  group:'IBO', label:'IBO R38-500 (R38N)', nenndurchmesser:51,   muffe:null, streckZug:null, At:750,  lastStreck:400, lastStreck90:360, bruchlast:500,  bruch80:400    },
+  { key:'IBO_R51_550',  group:'IBO', label:'IBO R51-550 (R51L)', nenndurchmesser:63,   muffe:null, streckZug:null, At:890,  lastStreck:450, lastStreck90:405, bruchlast:550,  bruch80:440    },
+  { key:'IBO_R51_800',  group:'IBO', label:'IBO R51-800 (R51N)', nenndurchmesser:63,   muffe:null, streckZug:null, At:1150, lastStreck:640, lastStreck90:576, bruchlast:800,  bruch80:640    },
+
+  { key:'TITAN_30_11',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 30/11',  nenndurchmesser:29,   muffe:null, streckZug:'542', At:415,  lastStreck:null, lastStreck90:null, bruchlast:225,  bruch80:180    },
+  { key:'TITAN_40_20',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 40/20',  nenndurchmesser:40.5, muffe:null, streckZug:'515', At:730,  lastStreck:null, lastStreck90:null, bruchlast:372,  bruch80:297.6  },
+  { key:'TITAN_40_16',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 40/16',  nenndurchmesser:40.5, muffe:null, streckZug:'544', At:900,  lastStreck:null, lastStreck90:null, bruchlast:490,  bruch80:392    },
+  { key:'TITAN_52_26',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 52/26',  nenndurchmesser:50.3, muffe:null, streckZug:'520', At:1250, lastStreck:null, lastStreck90:null, bruchlast:650,  bruch80:520    },
+  { key:'TITAN_73_53',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 73/53',  nenndurchmesser:72.4, muffe:null, streckZug:'557', At:1615, lastStreck:null, lastStreck90:null, bruchlast:900,  bruch80:720    },
+  { key:'TITAN_73_45',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 73/45',  nenndurchmesser:72.4, muffe:null, streckZug:'544', At:2240, lastStreck:null, lastStreck90:null, bruchlast:1218, bruch80:974.4  },
+  { key:'TITAN_73_35',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 73/35',  nenndurchmesser:72.4, muffe:null, streckZug:'510', At:2710, lastStreck:null, lastStreck90:null, bruchlast:1386, bruch80:1108.8 },
+  { key:'TITAN_103_78', group:'Ischebeck TITAN', label:'Ischebeck TITAN 103/78', nenndurchmesser:101,  muffe:null, streckZug:'518', At:3140, lastStreck:null, lastStreck90:null, bruchlast:1626, bruch80:1300.8 },
+  { key:'TITAN_103_51', group:'Ischebeck TITAN', label:'Ischebeck TITAN 103/51', nenndurchmesser:101,  muffe:null, streckZug:'440', At:5680, lastStreck:null, lastStreck90:null, bruchlast:2500, bruch80:2000   }
+];
+
+function getAnkertypByKey(key){
+  return ANKER_TYPEN.find(t => t.key === key) || null;
+}
+
+/* ═══════════════════════════════════════════════════════
+   VISUAL STATES (nur JS, keine CSS-Änderung nötig)
+═══════════════════════════════════════════════════════ */
+function ensureDynamicStyles(){
+  if(document.getElementById('app-dynamic-styles')) return;
+
+  const style = document.createElement('style');
+  style.id = 'app-dynamic-styles';
+  style.textContent = `
+    .field__input--required,
+    .field__select--required,
+    .field__textarea--required{
+      background: rgba(255, 80, 80, 0.10) !important;
+      border-color: rgba(255, 120, 120, 0.45) !important;
+    }
+    .field__input--computed{
+      color: #2bb673 !important;
+      font-weight: 800 !important;
+    }
+    .mess-stage-col{
+      min-width: 72px;
+      font-weight: 700;
+      color: rgba(234,242,250,.92);
+      text-align: center;
+      background: rgba(255,255,255,.02);
+    }
+    .mess-stage-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:56px;
+      padding:4px 8px;
+      border-radius:999px;
+      background: rgba(240,138,28,.14);
+      color: #fff;
+      border:1px solid rgba(240,138,28,.35);
+      font-size:11px;
+      font-weight:800;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function setRequiredVisual(el, required){
+  if(!el) return;
+  el.classList.remove('field__input--required', 'field__select--required', 'field__textarea--required');
+
+  if(required){
+    if(el.classList.contains('field__select')) el.classList.add('field__select--required');
+    else if(el.classList.contains('field__textarea')) el.classList.add('field__textarea--required');
+    else el.classList.add('field__input--required');
+  }
+}
+
+function applyComputedVisual(el, computed){
+  if(!el) return;
+  el.classList.toggle('field__input--computed', !!computed);
+}
+
+function updateRequiredFieldStates(){
+  const requiredMetaIds = [
+    'meta-filiale',
+    'meta-Niederlassung'
+  ];
+
+  requiredMetaIds.forEach(id => {
+    const el = $(id);
+    if(el) setRequiredVisual(el, !String(el.value || '').trim());
+  });
+
+  const requiredSpecIds = [
+    'vor-ankertyp',
+    'vor-LA',
+    'vor-Ltb',
+    'vor-Ltf',
+    'vor-Le',
+    'vor-Et',
+    'vor-P0',
+    'vor-Pa',
+    'vor-Pd',
+    'vor-gamma'
+  ];
+
+  requiredSpecIds.forEach(id => {
+    const el = $(id);
+    if(el){
+      setRequiredVisual(el, !String(el.value || '').trim());
+    }
+  });
+
+  // automatische Felder nicht rot markieren
+  ['vor-At','vor-Pt01k','vor-Pp'].forEach(id => {
+    const el = $(id);
+    if(el) setRequiredVisual(el, false);
+  });
+
+  // Pp grün + readonly
+  const ppEl = $('vor-Pp');
+  if(ppEl){
+    ppEl.readOnly = true;
+    applyComputedVisual(ppEl, true);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
    UPDATE-BANNER
 ═══════════════════════════════════════════════════════ */
 function showUpdateBanner() {
@@ -144,191 +293,6 @@ function showUpdateBanner() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   TECHNISCHE DATEN ANKERTYPEN
-═══════════════════════════════════════════════════════ */
-const ANKER_TYPEN = [
-  // GEWI [T] 550/620
-  { key:'GEWI_T_25',    group:'GEWI [T] 550/620',            label:'GEWI [T] 25',             nenndurchmesser:25,   muffe:40,  streckZug:'550/620', At:491,  lastStreck:270,  lastStreck90:243,    bruchlast:304,  bruch80:243.2  },
-  { key:'GEWI_T_28',    group:'GEWI [T] 550/620',            label:'GEWI [T] 28',             nenndurchmesser:28,   muffe:45,  streckZug:'550/620', At:616,  lastStreck:340,  lastStreck90:306,    bruchlast:382,  bruch80:305.6  },
-  { key:'GEWI_T_32',    group:'GEWI [T] 550/620',            label:'GEWI [T] 32',             nenndurchmesser:32,   muffe:52,  streckZug:'550/620', At:804,  lastStreck:440,  lastStreck90:396,    bruchlast:499,  bruch80:399.2  },
-  { key:'GEWI_T_40',    group:'GEWI [T] 550/620',            label:'GEWI [T] 40',             nenndurchmesser:40,   muffe:65,  streckZug:'550/620', At:1257, lastStreck:693,  lastStreck90:623.7,  bruchlast:781,  bruch80:624.8  },
-  { key:'GEWI_T_50',    group:'GEWI [T] 550/620',            label:'GEWI [T] 50',             nenndurchmesser:50,   muffe:80,  streckZug:'550/620', At:1963, lastStreck:1080, lastStreck90:972,    bruchlast:1215, bruch80:972    },
-  { key:'GEWI_T_57_5',  group:'GEWI [T] 555/700',            label:'GEWI [T] 57,5',           nenndurchmesser:57.5, muffe:102, streckZug:'555/700', At:2597, lastStreck:1441, lastStreck90:1296.9, bruchlast:1818, bruch80:1454.4 },
-  // GEWI Plus [TR] 670/800
-  { key:'GEWI_TR_25',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 25',       nenndurchmesser:25,   muffe:45,  streckZug:'670/800', At:491,  lastStreck:329,  lastStreck90:296.1,  bruchlast:393,  bruch80:314.4  },
-  { key:'GEWI_TR_30',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 30',       nenndurchmesser:30,   muffe:55,  streckZug:'670/800', At:707,  lastStreck:474,  lastStreck90:426.6,  bruchlast:565,  bruch80:452    },
-  { key:'GEWI_TR_35',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 35',       nenndurchmesser:35,   muffe:65,  streckZug:'670/800', At:962,  lastStreck:645,  lastStreck90:580.5,  bruchlast:770,  bruch80:616    },
-  { key:'GEWI_TR_43',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 43',       nenndurchmesser:43,   muffe:80,  streckZug:'670/800', At:1452, lastStreck:973,  lastStreck90:875.7,  bruchlast:1162, bruch80:929.6  },
-  { key:'GEWI_TR_50',   group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 50',       nenndurchmesser:50,   muffe:90,  streckZug:'670/800', At:1936, lastStreck:1315, lastStreck90:1183.5, bruchlast:1570, bruch80:1256   },
-  { key:'GEWI_TR_57_5', group:'GEWI Plus [TR] 670/800',      label:'GEWI Plus [TR] 57,5',     nenndurchmesser:57.5, muffe:102, streckZug:'670/800', At:2597, lastStreck:1740, lastStreck90:1566,   bruchlast:2077, bruch80:1661.6 },
-  // GEWI hochfest [WR] 950/1050
-  { key:'GEWI_WR_26_5', group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 26,5', nenndurchmesser:26.5, muffe:50,  streckZug:'950/1050', At:552,  lastStreck:525,  lastStreck90:472.5, bruchlast:580,  bruch80:464    },
-  { key:'GEWI_WR_32',   group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 32',   nenndurchmesser:32,   muffe:60,  streckZug:'950/1050', At:804,  lastStreck:760,  lastStreck90:684,   bruchlast:845,  bruch80:676    },
-  { key:'GEWI_WR_36',   group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 36',   nenndurchmesser:36,   muffe:68,  streckZug:'950/1050', At:1018, lastStreck:960,  lastStreck90:864,   bruchlast:1070, bruch80:856    },
-  { key:'GEWI_WR_40',   group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 40',   nenndurchmesser:40,   muffe:70,  streckZug:'950/1050', At:1257, lastStreck:1190, lastStreck90:1071,  bruchlast:1320, bruch80:1056   },
-  { key:'GEWI_WR_47',   group:'GEWI hochfest [WR] 950/1050', label:'GEWI hochfest [WR] 47',   nenndurchmesser:47,   muffe:83,  streckZug:'950/1050', At:1735, lastStreck:1650, lastStreck90:1485,  bruchlast:1820, bruch80:1456   },
-  // IBO
-  { key:'IBO_R32_280',  group:'IBO', label:'IBO R32-280 (R32N)', nenndurchmesser:42,   muffe:null, streckZug:null, At:410,  lastStreck:220, lastStreck90:198, bruchlast:280,  bruch80:224    },
-  { key:'IBO_R32_360',  group:'IBO', label:'IBO R32-360 (R32S)', nenndurchmesser:42,   muffe:null, streckZug:null, At:510,  lastStreck:280, lastStreck90:252, bruchlast:360,  bruch80:288    },
-  { key:'IBO_R38_500',  group:'IBO', label:'IBO R38-500 (R38N)', nenndurchmesser:51,   muffe:null, streckZug:null, At:750,  lastStreck:400, lastStreck90:360, bruchlast:500,  bruch80:400    },
-  { key:'IBO_R51_550',  group:'IBO', label:'IBO R51-550 (R51L)', nenndurchmesser:63,   muffe:null, streckZug:null, At:890,  lastStreck:450, lastStreck90:405, bruchlast:550,  bruch80:440    },
-  { key:'IBO_R51_800',  group:'IBO', label:'IBO R51-800 (R51N)', nenndurchmesser:63,   muffe:null, streckZug:null, At:1150, lastStreck:640, lastStreck90:576, bruchlast:800,  bruch80:640    },
-  // Ischebeck TITAN
-  { key:'TITAN_30_11',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 30/11',  nenndurchmesser:29,   muffe:null, streckZug:'542', At:415,  lastStreck:null, lastStreck90:null, bruchlast:225,  bruch80:180    },
-  { key:'TITAN_40_20',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 40/20',  nenndurchmesser:40.5, muffe:null, streckZug:'515', At:730,  lastStreck:null, lastStreck90:null, bruchlast:372,  bruch80:297.6  },
-  { key:'TITAN_40_16',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 40/16',  nenndurchmesser:40.5, muffe:null, streckZug:'544', At:900,  lastStreck:null, lastStreck90:null, bruchlast:490,  bruch80:392    },
-  { key:'TITAN_52_26',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 52/26',  nenndurchmesser:50.3, muffe:null, streckZug:'520', At:1250, lastStreck:null, lastStreck90:null, bruchlast:650,  bruch80:520    },
-  { key:'TITAN_73_53',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 73/53',  nenndurchmesser:72.4, muffe:null, streckZug:'557', At:1615, lastStreck:null, lastStreck90:null, bruchlast:900,  bruch80:720    },
-  { key:'TITAN_73_45',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 73/45',  nenndurchmesser:72.4, muffe:null, streckZug:'544', At:2240, lastStreck:null, lastStreck90:null, bruchlast:1218, bruch80:974.4  },
-  { key:'TITAN_73_35',  group:'Ischebeck TITAN', label:'Ischebeck TITAN 73/35',  nenndurchmesser:72.4, muffe:null, streckZug:'510', At:2710, lastStreck:null, lastStreck90:null, bruchlast:1386, bruch80:1108.8 },
-  { key:'TITAN_103_78', group:'Ischebeck TITAN', label:'Ischebeck TITAN 103/78', nenndurchmesser:101,  muffe:null, streckZug:'518', At:3140, lastStreck:null, lastStreck90:null, bruchlast:1626, bruch80:1300.8 },
-  { key:'TITAN_103_51', group:'Ischebeck TITAN', label:'Ischebeck TITAN 103/51', nenndurchmesser:101,  muffe:null, streckZug:'440', At:5680, lastStreck:null, lastStreck90:null, bruchlast:2500, bruch80:2000   }
-];
-
-function getAnkertypByKey(key){
-  return ANKER_TYPEN.find(t => t.key === key) || null;
-}
-
-/* ═══════════════════════════════════════════════════════
-   ANKERTYP UI
-═══════════════════════════════════════════════════════ */
-function slugify(v){
-  return String(v || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .toLowerCase();
-}
-
-function initAnkertypSelect(){
-  const old = $('vor-ankertyp');
-  if(!old) return;
-
-  if(old.tagName === 'SELECT'){
-    fillAnkertypOptions(old);
-    return;
-  }
-
-  const select = document.createElement('select');
-  select.id = old.id;
-  select.className = old.className.replace('field__input','field__select');
-  fillAnkertypOptions(select);
-
-  const currentValue = old.value || state.vorgabe.ankertyp || '';
-  old.replaceWith(select);
-
-  if(currentValue){
-    const exists = ANKER_TYPEN.some(t => t.key === currentValue);
-    if(exists){
-      select.value = currentValue;
-    }else{
-      const opt = document.createElement('option');
-      opt.value = currentValue;
-      opt.textContent = currentValue;
-      select.appendChild(opt);
-      select.value = currentValue;
-    }
-  }
-}
-
-function fillAnkertypOptions(select){
-  const current = select.value || state.vorgabe.ankertyp || '';
-  select.innerHTML = `<option value="">Bitte wählen</option>`;
-
-  const groups = {};
-  ANKER_TYPEN.forEach(t => {
-    if(!groups[t.group]) groups[t.group] = [];
-    groups[t.group].push(t);
-  });
-
-  Object.entries(groups).forEach(([group, items]) => {
-    const og = document.createElement('optgroup');
-    og.label = group;
-    items.forEach(item => {
-      const opt = document.createElement('option');
-      opt.value = item.key;
-      opt.textContent = item.label;
-      og.appendChild(opt);
-    });
-    select.appendChild(og);
-  });
-
-  if(current && ANKER_TYPEN.some(t => t.key === current)){
-    select.value = current;
-  }
-}
-
-function ensureAnkertypInfoBox(){
-  let box = $('ankertypInfoBox');
-  if(box) return box;
-
-  const field = $('vor-ankertyp')?.closest('.field');
-  if(!field) return null;
-
-  box = document.createElement('div');
-  box.id = 'ankertypInfoBox';
-  box.className = 'info-box field--full';
-  box.style.cssText = 'margin-top:12px;padding:10px 14px;border-radius:8px;background:rgba(86,183,255,.08);border:1px solid rgba(86,183,255,.2);font-size:13px;line-height:1.7';
-
-  const grid = field.parentElement;
-  if(grid) grid.appendChild(box);
-
-  return box;
-}
-
-function renderAnkertypInfo(){
-  const box = ensureAnkertypInfoBox();
-  if(!box) return;
-
-  const typ = getAnkertypByKey(state.vorgabe.ankertyp);
-  if(!typ){
-    box.hidden = true;
-    return;
-  }
-
-  const rows = [
-    ['Typ',                        typ.label],
-    ['Nenndurchmesser',            typ.nenndurchmesser != null ? `${typ.nenndurchmesser} mm` : '—'],
-    ['Ø über Muffe',               typ.muffe != null ? `${typ.muffe} mm` : '—'],
-    ['Streckgrenze / Zugfestigkeit', typ.streckZug || '—'],
-    ['Querschnittsfläche At',      typ.At != null ? `${fmt(typ.At,0)} mm²` : '—'],
-    ['Last an der Streckgrenze',   typ.lastStreck != null ? `${fmt(typ.lastStreck,1)} kN` : '—'],
-    ['90 % Streckgrenze',          typ.lastStreck90 != null ? `${fmt(typ.lastStreck90,1)} kN` : '—'],
-    ['Bruchlast',                  typ.bruchlast != null ? `${fmt(typ.bruchlast,1)} kN` : '—'],
-    ['80 % Bruchlast',             typ.bruch80 != null ? `${fmt(typ.bruch80,1)} kN` : '—']
-  ];
-
-  box.hidden = false;
-  box.innerHTML = `<b style="display:block;margin-bottom:4px">Technische Daten</b>${rows.map(([k,v])=>`${h(k)}: <b>${h(v)}</b>`).join('<br>')}`;
-}
-
-function applyAnkertypPreset(key, { overwrite = true } = {}){
-  const typ = getAnkertypByKey(key);
-  state.vorgabe.ankertyp = key || '';
-
-  if(!typ){
-    renderAnkertypInfo();
-    return;
-  }
-
-  if(typ.At != null && (overwrite || !state.vorgabe.At || String(state.vorgabe.At).trim() === '')){
-    state.vorgabe.At = formatInputNumber(Number(typ.At), 0);
-    if($('vor-At')) $('vor-At').value = state.vorgabe.At;
-  }
-
-  if(typ.lastStreck != null && (overwrite || !state.vorgabe.Pt01k || String(state.vorgabe.Pt01k).trim() === '')){
-    state.vorgabe.Pt01k = formatInputNumber(Number(typ.lastStreck), 1);
-    if($('vor-Pt01k')) $('vor-Pt01k').value = state.vorgabe.Pt01k;
-  }
-
-  renderAnkertypInfo();
-  updateLappPreview();
-  if(!$('tab-auswertung')?.hidden) renderAuswertung();
-  saveDraftDebounced();
-}
-
-/* ═══════════════════════════════════════════════════════
    NORM / VORLAGE
 ═══════════════════════════════════════════════════════ */
 const STD_INTERVALS_15  = [0,1,2,3,4,5,7,10,15];
@@ -354,7 +318,6 @@ function makeLaststufe(kind='factor', factor=1, druck=''){
 
 function normalizeLaststufe(ls){
   if(!ls) return makeLaststufe('pa', 0, '');
-
   const inferredKind =
     ls.kind ||
     (ls.label === 'P0'
@@ -575,6 +538,15 @@ function downloadText(text, filename, type='text/plain;charset=utf-8'){
   setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
 
+function slugify(v){
+  return String(v || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .toLowerCase();
+}
+
 /* ═══════════════════════════════════════════════════════
    CSV IMPORT / EXPORT
 ═══════════════════════════════════════════════════════ */
@@ -724,8 +696,6 @@ function kalibStatus(k){
   return 'ok';
 }
 
-/* NEU: handleKalibImport erzeugt immer eine eindeutige ID,
-   überschreibt nie eine bestehende Kalibrierung [1] */
 async function handleKalibImport(file){
   if(!file) return;
 
@@ -737,7 +707,6 @@ async function handleKalibImport(file){
     const builtinIds = new Set(BUILTIN_KALIBRIERUNGEN.map(k => k.id));
     const userKalibs = existing.filter(k => !builtinIds.has(k.id));
 
-    /* Eindeutige ID erzeugen — nie überschreiben */
     const baseId = [
       slugify(kalib.displayName),
       slugify(kalib.presseNr),
@@ -754,7 +723,6 @@ async function handleKalibImport(file){
     userKalibs.push(kalib);
     saveUserKalibs(userKalibs);
 
-    /* Neu importierte Presse direkt auswählen */
     state.meta.selectedKalibId = kalib.id;
 
     renderPresseDropdown();
@@ -810,48 +778,46 @@ function handleKalibDelete(){
 }
 
 /* ═══════════════════════════════════════════════════════
-   INTERPOLATION kN → bar
+   DRUCK OHNE INTERPOLATION
+   → exakter Treffer, sonst nächstniedriger Stützpunkt
 ═══════════════════════════════════════════════════════ */
-function interpoliereBar(zielKn, punkte){
+function lookupStuetzpunkt(zielKn, punkte){
   if (!Array.isArray(punkte) || punkte.length < 1 || !Number.isFinite(zielKn)) {
-    return { bar: null, oor: true };
+    return { bar:null, oor:true, exact:false, basisKn:null };
   }
 
-  // Stützpunkte sortieren
   const sorted = [...punkte]
-    .map(p => ({ kN: Number(p.kN), bar: Number(p.bar) }))
+    .map(p => ({ kN:Number(p.kN), bar:Number(p.bar) }))
     .filter(p => Number.isFinite(p.kN) && Number.isFinite(p.bar))
     .sort((a, b) => a.kN - b.kN);
 
   if (!sorted.length) {
-    return { bar: null, oor: true };
+    return { bar:null, oor:true, exact:false, basisKn:null };
   }
 
-  // 1️⃣ Exakter Treffer?
   const exact = sorted.find(p => p.kN === zielKn);
-  if (exact) {
-    return { bar: exact.bar, oor: false };
+  if(exact){
+    return { bar:exact.bar, oor:false, exact:true, basisKn:exact.kN };
   }
 
-  // 2️⃣ Nächstniedriger Stützpunkt (prüfsicher, konservativ)
   let candidate = null;
   for (const p of sorted) {
-    if (p.kN <= zielKn) {
-      candidate = p;
-    } else {
-      break;
-    }
+    if (p.kN <= zielKn) candidate = p;
+    else break;
   }
 
   if (!candidate) {
-    // unterhalb des kleinsten Stützpunkts
-    return { bar: null, oor: true };
+    return { bar:null, oor:true, exact:false, basisKn:null };
   }
 
-  return {
-    bar: candidate.bar,
-    oor: false
-  };
+  return { bar:candidate.bar, oor:false, exact:false, basisKn:candidate.kN };
+}
+
+function kNtoBar(kN){
+  const kalib = findKalibById(state.meta.selectedKalibId);
+  if(!kalib || !Number.isFinite(kN)) return null;
+  const { bar, oor } = lookupStuetzpunkt(kN, kalib.punkte);
+  return oor ? null : bar;
 }
 
 function berechneDruckvorschau(){
@@ -872,18 +838,11 @@ function berechneDruckvorschau(){
 
   return stufen.map(s => {
     if(!kalib || !Number.isFinite(s.kN) || s.kN < 0){
-      return { ...s, bar:null, oor:false, noKalib:!kalib };
+      return { ...s, bar:null, oor:false, noKalib:!kalib, exact:false, basisKn:null };
     }
-    const { bar, oor } = interpoliereBar(s.kN, kalib.punkte);
-    return { ...s, bar, oor };
+    const { bar, oor, exact, basisKn } = lookupStuetzpunkt(s.kN, kalib.punkte);
+    return { ...s, bar, oor, exact, basisKn };
   });
-}
-
-function kNtoBar(kN){
-  const kalib = findKalibById(state.meta.selectedKalibId);
-  if(!kalib || !Number.isFinite(kN)) return null;
-  const { bar, oor } = interpoliereBar(kN, kalib.punkte);
-  return oor ? null : bar;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -1024,6 +983,7 @@ function setZyklenMode(mode){
   renderKalibPreview();
   syncDruckFromKalib();
   updateLappPreview();
+  updateRequiredFieldStates();
   saveDraftDebounced();
 }
 
@@ -1144,6 +1104,7 @@ function applySnapshot(snap, replace=true){
   renderKalibPreview();
   renderZyklen();
   updateLappPreview();
+  updateRequiredFieldStates();
   syncDruckFromKalib();
 }
 
@@ -1169,6 +1130,7 @@ function saveCurrentToHistory(){
 ═══════════════════════════════════════════════════════ */
 const META_FIELDS = [
   ['meta-filiale','filiale'],
+  ['meta-Niederlassung','filiale'],
   ['meta-bauvorhaben','bauvorhaben'],
   ['meta-bauherr','bauherr'],
   ['meta-bauleitung','bauleitung'],
@@ -1210,6 +1172,12 @@ function syncVorgabeToUi(){
 
   if($('boden-bindig')) $('boden-bindig').checked = state.vorgabe.bodenart === 'bindig';
   if($('boden-nichtbindig')) $('boden-nichtbindig').checked = state.vorgabe.bodenart !== 'bindig';
+
+  const ppEl = $('vor-Pp');
+  if(ppEl){
+    ppEl.readOnly = true;
+    applyComputedVisual(ppEl, true);
+  }
 
   renderAnkertypInfo();
 }
@@ -1268,7 +1236,6 @@ function updateComputedRowsForCard(card, z){
 
 /* ═══════════════════════════════════════════════════════
    AUTO-BERECHNUNG VORGABEN
-   Pp nicht doppelt anzeigen
 ═══════════════════════════════════════════════════════ */
 function getMeasuredLappForDisplay(){
   const zs = [...state.zyklen].sort((a,b) => b.nr - a.nr);
@@ -1288,9 +1255,16 @@ function computeVorgabeAuto(){
   const Et    = Number(state.vorgabe.Et);
   const At    = Number(state.vorgabe.At);
   const Pa    = Number(state.vorgabe.Pa);
-  const Pp    = Number(state.vorgabe.Pp);
   const Pd    = Number(state.vorgabe.Pd);
   const gamma = Number(state.vorgabe.gamma);
+
+  const Pp = (Number.isFinite(Pd) && Number.isFinite(gamma) && gamma > 0)
+    ? Pd * gamma
+    : NaN;
+
+  state.vorgabe.Pp = Number.isFinite(Pp) ? formatInputNumber(Pp, 2) : '';
+
+  if($('vor-Pp')) $('vor-Pp').value = state.vorgabe.Pp;
 
   const minLapp = (Number.isFinite(Ltf)&&Number.isFinite(Le)) ? (0.8*Ltf + Le) : NaN;
   const maxLapp = (Number.isFinite(Ltf)&&Number.isFinite(Le)&&Number.isFinite(Ltb)) ? (Ltf + Le + 0.5*Ltb) : NaN;
@@ -1310,43 +1284,24 @@ function computeVorgabeAuto(){
     Number.isFinite(At) && At > 0
   ) ? (maxLapp * deltaF * 1000) / (Et * At) : NaN;
 
-  const PpFromPd = (Number.isFinite(Pd)&&Number.isFinite(gamma)&&gamma>0) ? (Pd * gamma) : NaN;
-  const PdFromPp = (Number.isFinite(Pp)&&Number.isFinite(gamma)&&gamma>0) ? (Pp / gamma) : NaN;
-
   const measured = getMeasuredLappForDisplay();
 
   return {
+    Pp,
     minLapp,
     maxLapp,
     sGrenzB,
     sGrenzA,
-    PpFromPd,
-    PdFromPp,
     measuredLapp: measured.Lapp,
     measuredZyklus: measured.zyklus
   };
 }
 
 function maybeAutofillVorgabe(changedKey){
-  const a = computeVorgabeAuto();
-
-  if(
-    (changedKey === 'Pd' || changedKey === 'gamma') &&
-    (!state.vorgabe.Pp || String(state.vorgabe.Pp).trim() === '') &&
-    Number.isFinite(a.PpFromPd)
-  ){
-    state.vorgabe.Pp = formatInputNumber(a.PpFromPd,1);
-    if($('vor-Pp')) $('vor-Pp').value = state.vorgabe.Pp;
+  if(changedKey === 'ankertyp'){
+    return;
   }
-
-  if(
-    (changedKey === 'Pp' || changedKey === 'gamma') &&
-    (!state.vorgabe.Pd || String(state.vorgabe.Pd).trim() === '') &&
-    Number.isFinite(a.PdFromPp)
-  ){
-    state.vorgabe.Pd = formatInputNumber(a.PdFromPp,1);
-    if($('vor-Pd')) $('vor-Pd').value = state.vorgabe.Pd;
-  }
+  computeVorgabeAuto();
 }
 
 function updateLappPreview(){
@@ -1363,18 +1318,27 @@ function updateLappPreview(){
   put('calc-sGrenzB', a.sGrenzB, ' mm', 2);
   put('calc-sGrenzA', a.sGrenzA, ' mm', 2);
 
+  const ppCard = $('calc-PpFromPd');
+  if(ppCard){
+    ppCard.textContent = Number.isFinite(a.Pp) ? `${fmt(a.Pp,2)} kN` : '—';
+    ppCard.style.color = Number.isFinite(a.Pp) ? '#2bb673' : '';
+  }
+
+  const pdBack = $('calc-PdFromPp');
+  if(pdBack){
+    pdBack.textContent = '—';
+  }
+
   const hintPp = $('hint-vor-Pp');
   if(hintPp){
-    hintPp.textContent = Number.isFinite(a.PpFromPd)
-      ? `Auto aus Pd · γa = ${fmt(a.PpFromPd,1)} kN`
+    hintPp.textContent = Number.isFinite(a.Pp)
+      ? `Auto aus Pd · γa = ${fmt(a.Pp,2)} kN`
       : '';
   }
 
   const hintPd = $('hint-vor-Pd');
   if(hintPd){
-    hintPd.textContent = Number.isFinite(a.PdFromPp)
-      ? `Auto aus Pp / γa = ${fmt(a.PdFromPp,1)} kN`
-      : '';
+    hintPd.textContent = '';
   }
 
   const lappEl = $('calc-LappMeasured');
@@ -1395,11 +1359,144 @@ function updateLappPreview(){
       checkEl.className = 'inline-badge';
     }
   }
+
+  updateRequiredFieldStates();
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
+   ANKERTYP UI
+═══════════════════════════════════════════════════════ */
+function initAnkertypSelect(){
+  const old = $('vor-ankertyp');
+  if(!old) return;
+
+  if(old.tagName === 'SELECT'){
+    fillAnkertypOptions(old);
+    return;
+  }
+
+  const select = document.createElement('select');
+  select.id = old.id;
+  select.className = old.className.replace('field__input','field__select');
+  fillAnkertypOptions(select);
+
+  const currentValue = old.value || state.vorgabe.ankertyp || '';
+  old.replaceWith(select);
+
+  if(currentValue){
+    const exists = ANKER_TYPEN.some(t => t.key === currentValue);
+    if(exists){
+      select.value = currentValue;
+    }else{
+      const opt = document.createElement('option');
+      opt.value = currentValue;
+      opt.textContent = currentValue;
+      select.appendChild(opt);
+      select.value = currentValue;
+    }
+  }
+}
+
+function fillAnkertypOptions(select){
+  const current = select.value || state.vorgabe.ankertyp || '';
+  select.innerHTML = `<option value="">Bitte wählen</option>`;
+
+  const groups = {};
+  ANKER_TYPEN.forEach(t => {
+    if(!groups[t.group]) groups[t.group] = [];
+    groups[t.group].push(t);
+  });
+
+  Object.entries(groups).forEach(([group, items]) => {
+    const og = document.createElement('optgroup');
+    og.label = group;
+    items.forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item.key;
+      opt.textContent = item.label;
+      og.appendChild(opt);
+    });
+    select.appendChild(og);
+  });
+
+  if(current && ANKER_TYPEN.some(t => t.key === current)){
+    select.value = current;
+  }
+}
+
+function ensureAnkertypInfoBox(){
+  let box = $('ankertypInfoBox');
+  if(box) return box;
+
+  const field = $('vor-ankertyp')?.closest('.field');
+  if(!field) return null;
+
+  box = document.createElement('div');
+  box.id = 'ankertypInfoBox';
+  box.className = 'info-box field--full';
+  box.style.cssText = 'margin-top:12px;padding:10px 14px;border-radius:8px;background:rgba(86,183,255,.08);border:1px solid rgba(86,183,255,.2);font-size:13px;line-height:1.7';
+
+  const grid = field.parentElement;
+  if(grid) grid.appendChild(box);
+
+  return box;
+}
+
+function renderAnkertypInfo(){
+  const box = ensureAnkertypInfoBox();
+  if(!box) return;
+
+  const typ = getAnkertypByKey(state.vorgabe.ankertyp);
+  if(!typ){
+    box.hidden = true;
+    return;
+  }
+
+  const rows = [
+    ['Typ',                        typ.label],
+    ['Nenndurchmesser',            typ.nenndurchmesser != null ? `${typ.nenndurchmesser} mm` : '—'],
+    ['Ø über Muffe',               typ.muffe != null ? `${typ.muffe} mm` : '—'],
+    ['Streckgrenze / Zugfestigkeit', typ.streckZug || '—'],
+    ['Querschnittsfläche At',      typ.At != null ? `${fmt(typ.At,0)} mm²` : '—'],
+    ['Last an der Streckgrenze',   typ.lastStreck != null ? `${fmt(typ.lastStreck,1)} kN` : '—'],
+    ['90 % Streckgrenze',          typ.lastStreck90 != null ? `${fmt(typ.lastStreck90,1)} kN` : '—'],
+    ['Bruchlast',                  typ.bruchlast != null ? `${fmt(typ.bruchlast,1)} kN` : '—'],
+    ['80 % Bruchlast',             typ.bruch80 != null ? `${fmt(typ.bruch80,1)} kN` : '—']
+  ];
+
+  box.hidden = false;
+  box.innerHTML = `<b style="display:block;margin-bottom:4px">Technische Daten</b>${rows.map(([k,v])=>`${h(k)}: <b>${h(v)}</b>`).join('<br>')}`;
+}
+
+function applyAnkertypPreset(key, { overwrite = true } = {}){
+  const typ = getAnkertypByKey(key);
+  state.vorgabe.ankertyp = key || '';
+
+  if(!typ){
+    renderAnkertypInfo();
+    updateRequiredFieldStates();
+    return;
+  }
+
+  if(typ.At != null && (overwrite || !state.vorgabe.At || String(state.vorgabe.At).trim() === '')){
+    state.vorgabe.At = formatInputNumber(Number(typ.At), 0);
+    if($('vor-At')) $('vor-At').value = state.vorgabe.At;
+  }
+
+  if(typ.lastStreck != null && (overwrite || !state.vorgabe.Pt01k || String(state.vorgabe.Pt01k).trim() === '')){
+    state.vorgabe.Pt01k = formatInputNumber(Number(typ.lastStreck), 1);
+    if($('vor-Pt01k')) $('vor-Pt01k').value = state.vorgabe.Pt01k;
+  }
+
+  renderAnkertypInfo();
+  updateLappPreview();
+  if(!$('tab-auswertung')?.hidden) renderAuswertung();
+  saveDraftDebounced();
+}
+
+/* ═══════════════════════════════════════════════════════
    AUDIO / ALARM
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function getAlarmAudioContext(){
   if(!_audioCtx){
     try{
@@ -1556,9 +1653,9 @@ async function toggleAlarmSoundByUserGesture(){
   }
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    TIMER (GLOBAL ÜBER ALLE ZYKLEN)
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function ensureTimer(zid,z){
   if(!timerMap[zid]){
     const min = Number(z?.elapsedMs || 0) / 60000;
@@ -1771,9 +1868,9 @@ function resetActiveTimer(){
   }
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    FLOATING TIMER
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function getFirstRunningZyklus(){
   return state.zyklen.find(z => timerMap[z.id]?.running) || null;
 }
@@ -1823,9 +1920,9 @@ function stopFloatingLoopIfIdle(){
   }
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    TIME ADJUST MODAL
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function openTimeAdjustModal(zid){
   _timeAdjustVid = zid;
   if($('timeAdjustInput')) $('timeAdjustInput').value = '0';
@@ -1869,13 +1966,10 @@ function applyTimeAdjustment(){
   closeTimeAdjustModal();
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    PRESSE UI
-────────────────────────────────────────────────────── */
-/* ──────────────────────────────────────────────────────
-   PRESSE UI
-   NEU: Stützpunkte-Dropdown + Löschen-Button
-────────────────────────────────────────────────────── */
+   → als normales Dropdown wie Stammdaten
+═══════════════════════════════════════════════════════ */
 function renderPresseDropdown(){
   const sel = $('presseSelect');
   if(!sel) return;
@@ -1883,23 +1977,61 @@ function renderPresseDropdown(){
   const kalibs = loadAllKalibs();
   const current = state.meta.selectedKalibId;
 
-  sel.innerHTML = `<option value="">— keine ausgewählt —</option>`;
+  sel.innerHTML = `<option value="">Bitte wählen</option>`;
 
   kalibs.forEach(k => {
-    const status = kalibStatus(k);
-    const icon = status === 'ok' ? '✅' : status === 'warn' ? '⚠️' : '❌';
     const opt = document.createElement('option');
     opt.value = k.id;
-    opt.textContent = `${icon} ${k.displayName} (${k.kalibriertAm})`;
+    opt.textContent = `${k.displayName}${k.kalibriertAm ? ` (${k.kalibriertAm})` : ''}`;
     if(k.id === current) opt.selected = true;
     sel.appendChild(opt);
   });
 }
-function renderKalibPreview(){
-  // Vorschau ist optional – leere Funktion verhindert Initialisierungsfehler
-  return;
+
+function renderKalibStuetzpunkte(kalib){
+  const wrap = $('kalibStuetzpunkteWrap');
+  const sel  = $('kalibStuetzpunkteSelect');
+  const result = $('kalibStuetzpunkteResult');
+
+  if(!wrap || !sel || !result) return;
+
+  if(!kalib || !kalib.punkte?.length){
+    wrap.hidden = true;
+    sel.innerHTML = '';
+    result.textContent = '';
+    return;
+  }
+
+  wrap.hidden = false;
+  sel.innerHTML = `<option value="">Stützpunkt auswählen …</option>`;
+
+  kalib.punkte.forEach((p, i) => {
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = `${fmt(p.kN,1)} kN → ${fmt(p.bar,1)} bar`;
+    sel.appendChild(opt);
+  });
+
+  sel.onchange = () => {
+    const idx = Number(sel.value);
+    if(!Number.isFinite(idx) || sel.value === ''){
+      result.textContent = '';
+      return;
+    }
+    const p = kalib.punkte[idx];
+    if(!p){
+      result.textContent = '';
+      return;
+    }
+    result.innerHTML = `
+      <span class="stuetz-kn">${fmt(p.kN,1)} kN</span>
+      <span class="stuetz-arr">→</span>
+      <span class="stuetz-bar">${fmt(p.bar,1)} bar</span>
+      <span class="stuetz-note">(exakter CSV-Wert · keine Interpolation)</span>
+    `;
+  };
 }
-``
+
 function renderKalibInfo(){
   const box = $('kalibInfoBox');
   const emptyHint = $('kalibEmptyHint');
@@ -1949,63 +2081,53 @@ function renderKalibInfo(){
   setText('kInfo-punkte', `${(kalib.punkte || []).length} Stützpunkte`);
   setText('kInfo-maxKn', `${kalib.punkte?.length ? Math.max(...kalib.punkte.map(p => p.kN)) : 0} kN`);
 
-  /* NEU: Stützpunkte-Dropdown befüllen */
   renderKalibStuetzpunkte(kalib);
   renderKalibPreview();
 }
 
-/* ──────────────────────────────────────────────────────
-   STÜTZPUNKTE-DROPDOWN (NEU)
-   Zeigt alle exakten CSV-Werte — keine Interpolation
-────────────────────────────────────────────────────── */
-function renderKalibStuetzpunkte(kalib){
-  const wrap = $('kalibStuetzpunkteWrap');
-  const sel  = $('kalibStuetzpunkteSelect');
-  const result = $('kalibStuetzpunkteResult');
+function renderKalibPreview(){
+  const wrap = $('kalibPreview');
+  const table = $('kalibPreviewTable');
+  if(!wrap || !table) return;
 
-  if(!wrap || !sel || !result) return;
+  const Pp = Number(state.vorgabe.Pp);
+  const kalib = findKalibById(state.meta.selectedKalibId);
 
-  if(!kalib || !kalib.punkte?.length){
+  if(!kalib || !Number.isFinite(Pp) || Pp <= 0){
     wrap.hidden = true;
-    sel.innerHTML = '';
-    result.textContent = '';
     return;
   }
 
   wrap.hidden = false;
+  const vorschau = berechneDruckvorschau();
 
-  /* Nur exakte Werte aus der CSV — keinerlei Interpolation */
-  sel.innerHTML = `<option value="">Stützpunkt auswählen …</option>`;
-  kalib.punkte.forEach((p, i) => {
-    const opt = document.createElement('option');
-    opt.value = String(i);
-    opt.textContent = `${fmt(p.kN,1)} kN → ${fmt(p.bar,1)} bar`;
-    sel.appendChild(opt);
-  });
+  table.innerHTML = `
+    <div class="kalib-prev-row kalib-prev-row--head">
+      <span>Laststufe</span>
+      <span style="text-align:right">kN</span>
+      <span style="text-align:right">bar</span>
+    </div>
+    ${vorschau.map(v => {
+      const knStr = Number.isFinite(v.kN) ? fmt(v.kN,1) + ' kN' : '—';
+      const note = v.exact ? '' : (v.basisKn != null ? ` · Stützpunkt ${fmt(v.basisKn,1)} kN` : '');
+      const barStr = v.bar !== null
+        ? `${fmt(v.bar,1)} bar${note}`
+        : (v.oor ? '⚠ außerhalb' : '—');
 
-  sel.onchange = () => {
-    const idx = Number(sel.value);
-    if(!Number.isFinite(idx) || sel.value === ''){
-      result.textContent = '';
-      return;
-    }
-    const p = kalib.punkte[idx];
-    if(!p){
-      result.textContent = '';
-      return;
-    }
-    result.innerHTML = `
-      <span class="stuetz-kn">${fmt(p.kN,1)} kN</span>
-      <span class="stuetz-arr">→</span>
-      <span class="stuetz-bar">${fmt(p.bar,1)} bar</span>
-      <span class="stuetz-note">(exakter CSV-Wert · keine Interpolation)</span>
-    `;
-  };
+      return `
+        <div class="kalib-prev-row">
+          <span class="prev-label">${h(v.label)}</span>
+          <span class="prev-kn">${knStr}</span>
+          <span class="${v.oor ? 'prev-bar prev-bar--oor' : 'prev-bar'}">${barStr}</span>
+        </div>
+      `;
+    }).join('')}
+  `;
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    DRUCK AUS KALIBRIERUNG
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function syncDruckFromKalib(){
   const kalib = findKalibById(state.meta.selectedKalibId);
 
@@ -2099,9 +2221,9 @@ function syncDruckFromKalib(){
   saveDraftDebounced();
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    GLOBALER TIMER HTML
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function buildGlobalTimerHtml(){
   const z = getActiveZyklus();
   const display = z ? formatElapsed(getElapsedMs(z.id,z)) : '00:00';
@@ -2147,17 +2269,18 @@ function buildGlobalTimerHtml(){
       <div class="timer-info" id="globalTimerStartzeit">Noch nicht gestartet</div>
       <div class="timer-info timer-next" id="globalTimerNext">Nächste Messung: —</div>
       <div class="hint" style="text-align:left;margin-top:8px">
-        <b>Norm / Vorlage:</b> 5 fixe Lastzyklen nach Vorlage.
+        <b>Norm / Vorlage:</b> Zeitintervalle fix.
         <br>
-        <b>Freie Eingabe:</b> Intervalle, Laststufen und Haltelaststufe veränderbar.
+        <b>Freie Eingabe:</b> Intervalle und Laststufen veränderbar.
       </div>
     </div>
   `;
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    ZYKLUS-RENDERING
-────────────────────────────────────────────────────── */
+   → Laststufe links der Min
+═══════════════════════════════════════════════════════ */
 function buildLaststufenHtml(z){
   const isFree = state.settings.zyklenMode === 'frei';
   z.laststufen = normalizeLaststufenArray(z.laststufen);
@@ -2223,14 +2346,15 @@ function buildLaststufenHtml(z){
   }).join('');
 }
 
-function buildTableRow(z,row,idx){
+function buildTableRow(z,row,idx,stageLabel,isFree){
   const isLast = idx === z.messungen.length - 1;
   return `
     <tr data-row="${idx}">
+      <td class="mess-stage-col"><span class="mess-stage-pill">${h(stageLabel)}</span></td>
       <td>
         <div class="minute-cell">
-          <input class="mess-input minute-input" data-role="m-min" data-row="${idx}" type="number" step="1" inputmode="numeric" value="${h(row.min)}">
-          ${isLast ? `<button class="row-plus" data-role="row-plus" data-row="${idx}" type="button">+</button>` : ''}
+          <input class="mess-input minute-input" data-role="m-min" data-row="${idx}" type="number" step="1" inputmode="numeric" value="${h(row.min)}" ${isFree ? '' : 'readonly'}>
+          ${isFree && isLast ? `<button class="row-plus" data-role="row-plus" data-row="${idx}" type="button">+</button>` : ''}
         </div>
       </td>
       <td><input class="mess-input" data-role="m-druck" data-row="${idx}" type="number" step="0.1" inputmode="decimal" value="${h(row.druck)}"></td>
@@ -2246,6 +2370,8 @@ function buildZyklusHtml(z){
   const haltIdx = Number.isInteger(z.haltLaststufeIdx)
     ? z.haltLaststufeIdx
     : defaultHoldIdxFromLaststufen(z.laststufen);
+
+  const stageLabel = normalizeLaststufenArray(z.laststufen)[haltIdx]?.label || '—';
 
   return `
     <div class="zyklus-card" data-zid="${h(z.id)}">
@@ -2284,6 +2410,7 @@ function buildZyklusHtml(z){
         <table class="mess-table">
           <thead>
             <tr>
+              <th class="th-stage">Laststufe</th>
               <th class="th-min">Min</th>
               <th class="th-druck">Druck<br><small>bar</small></th>
               <th class="th-mess">Mess&shy;uhr<br><small>mm</small></th>
@@ -2291,7 +2418,7 @@ function buildZyklusHtml(z){
               <th class="th-anm">Anm.</th>
             </tr>
           </thead>
-          <tbody>${z.messungen.map((r,i)=>buildTableRow(z,r,i)).join('')}</tbody>
+          <tbody>${z.messungen.map((r,i)=>buildTableRow(z,r,i,stageLabel,isFree)).join('')}</tbody>
         </table>
       </div>
     </div>
@@ -2357,6 +2484,9 @@ function reconcileMessungen(z){
   });
 }
 
+/* ═══════════════════════════════════════════════════════
+   DELEGATION
+═══════════════════════════════════════════════════════ */
 function hookZyklenDelegation(){
   const host = $('zyklenContainer');
   if(!host || host.dataset.bound === '1') return;
@@ -2459,6 +2589,8 @@ function hookZyklenDelegation(){
     }
 
     if(role === 'intervalle'){
+      if(state.settings.zyklenMode !== 'frei') return;
+
       z.intervalleStr = el.value;
       reconcileMessungen(z);
 
@@ -2475,6 +2607,7 @@ function hookZyklenDelegation(){
     }
 
     if(role === 'm-min'){
+      if(state.settings.zyklenMode !== 'frei') return;
       if(z.messungen[idx]) z.messungen[idx].min = el.value;
       updateLappPreview();
       saveDraftDebounced();
@@ -2573,6 +2706,8 @@ function hookZyklenDelegation(){
     }
 
     if(role === 'row-plus'){
+      if(state.settings.zyklenMode !== 'frei') return;
+
       const last = Number(z.messungen[z.messungen.length - 1]?.min || 0);
       const ints = parseIntervalStr(z.intervalleStr);
       const step = ints.length >= 2 ? (ints[ints.length - 1] - ints[ints.length - 2]) : 15;
@@ -2610,9 +2745,9 @@ function hookZyklenDelegation(){
   });
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    BERECHNUNGEN / AUSWERTUNG
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function calcLapp(deltaS_mm,Pp_kN,Pa_kN,Et_kNmm2,At_mm2){
   const dF = Pp_kN - Pa_kN;
   if(!Number.isFinite(deltaS_mm) || !Number.isFinite(dF) || dF <= 0 || !Number.isFinite(Et_kNmm2) || !Number.isFinite(At_mm2)) return NaN;
@@ -2854,9 +2989,9 @@ function renderAuswertung(){
   }).join('');
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    HISTORY
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function renderHistoryList(){
   const host = $('historyList');
   if(!host) return;
@@ -2935,9 +3070,9 @@ function hookHistoryDelegation(){
   });
 }
 
-/* ──────────────────────────────────────────────────────
-   TEMPLATE / EXPORT / PDF HELPERS
-────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   TEMPLATE / EXPORT / PDF
+═══════════════════════════════════════════════════════ */
 function downloadJson(data, filename){
   const blob = new Blob([JSON.stringify(data,null,2)], { type:'application/json' });
   const url = URL.createObjectURL(blob);
@@ -3030,8 +3165,13 @@ async function exportPdfFromSnapshot(snap){
 
     page.drawText(`Zyklus ${z.nr} · Halt ${z.haltMin} min`,{ x:30, y, size:10, font:fontB });
     y -= 12;
-    page.drawText('Min   Druck   Mess.   Verschieb.   Anm.',{ x:30, y, size:8, font:fontB });
+    page.drawText('Stufe   Min   Druck   Mess.   Verschieb.   Anm.',{ x:30, y, size:8, font:fontB });
     y -= 10;
+
+    const holdIdx = Number.isInteger(z.haltLaststufeIdx)
+      ? z.haltLaststufeIdx
+      : defaultHoldIdxFromLaststufen(z.laststufen);
+    const stageLabel = normalizeLaststufenArray(z.laststufen)[holdIdx]?.label || '—';
 
     z.messungen.forEach(m => {
       if(y < 80){
@@ -3040,7 +3180,7 @@ async function exportPdfFromSnapshot(snap){
       }
 
       page.drawText(
-        `${String(m.min).padEnd(5)} ${String(m.druck || '').padEnd(7)} ${String(m.ablesung || '').padEnd(7)} ${String(m.versch || '').padEnd(11)} ${m.anm || ''}`,
+        `${String(stageLabel).padEnd(8)} ${String(m.min).padEnd(5)} ${String(m.druck || '').padEnd(7)} ${String(m.ablesung || '').padEnd(7)} ${String(m.versch || '').padEnd(11)} ${m.anm || ''}`,
         { x:30, y, size:8, font }
       );
       y -= 10;
@@ -3049,10 +3189,11 @@ async function exportPdfFromSnapshot(snap){
     y -= 6;
   });
 
-  const fil = FILIALEN[meta.filiale] || {};
+  const filiale = meta.filiale || meta.Niederlassung || '';
+  const fil = FILIALEN[filiale] || {};
   pdf.getPages().forEach(p => {
     p.drawRectangle({ x:0, y:0, width:W, height:30, color:rgb(0.05,0.18,0.31) });
-    p.drawText(`HTB Baugesellschaft m.b.H. – Filiale ${meta.filiale || '—'}`, {
+    p.drawText(`HTB Baugesellschaft m.b.H. – Filiale ${filiale || '—'}`, {
       x:30, y:18, size:8, font:fontB, color:rgb(1,1,1)
     });
     p.drawText(`${fil.adresse || ''} · ${fil.tel || ''} · ${fil.email || ''}`, {
@@ -3072,8 +3213,7 @@ async function exportPdfFromSnapshot(snap){
 }
 
 function normalizeBottomActionCards(){
-  /* Sticky-Verhalten wird ausschließlich über CSS gesteuert.
-     Kein JS-Override — sonst scrollt das Speicher-Panel mit. */
+  /* KEIN JS-Override – Sticky kommt nur aus CSS */
 }
 
 function normalizeKalibImportInput(){
@@ -3083,30 +3223,19 @@ function normalizeKalibImportInput(){
   }
 }
 
-/* ──────────────────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════
    TABS / INIT
-────────────────────────────────────────────────────── */
+═══════════════════════════════════════════════════════ */
 function switchTab(name){
-  document.querySelectorAll('.tab').forEach(t =>
-    t.classList.toggle('is-active', t.dataset.tab === name)
-  );
-
-  document.querySelectorAll('.pane').forEach(p =>
-    p.hidden = p.id !== 'tab-' + name
-  );
-
-  // ✅ Aktion‑ / Speicher‑Balken nur im Formular anzeigen
-  const bottomBar = document.querySelector('.bottom-actions');
-  if(bottomBar){
-    bottomBar.style.display = (name === 'formular') ? '' : 'none';
-  }
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('is-active', t.dataset.tab === name));
+  document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'tab-' + name);
 
   if(name === 'auswertung') renderAuswertung();
   if(name === 'verlauf') renderHistoryList();
 }
-``
 
 function init(){
+  ensureDynamicStyles();
   initAnkertypSelect();
 
   loadDraft();
@@ -3129,7 +3258,7 @@ function init(){
   }
 
   normalizeKalibImportInput();
-
+  updateRequiredFieldStates();
 
   document.querySelectorAll('.tab').forEach(t =>
     t.addEventListener('click', () => switchTab(t.dataset.tab))
@@ -3139,6 +3268,13 @@ function init(){
     const el = $(id);
     el?.addEventListener('input', () => {
       state.meta[k] = el.value;
+      updateRequiredFieldStates();
+      saveDraftDebounced();
+    });
+
+    el?.addEventListener('change', () => {
+      state.meta[k] = el.value;
+      updateRequiredFieldStates();
       saveDraftDebounced();
     });
   });
@@ -3149,7 +3285,9 @@ function init(){
 
     const evtName = el.tagName === 'SELECT' ? 'change' : 'input';
     el.addEventListener(evtName, () => {
-      state.vorgabe[k] = el.value || '';
+      if(k !== 'Pp'){
+        state.vorgabe[k] = el.value || '';
+      }
 
       if(k === 'ankertyp'){
         applyAnkertypPreset(state.vorgabe.ankertyp, { overwrite:true });
@@ -3166,6 +3304,7 @@ function init(){
       }
 
       if(!$('tab-auswertung')?.hidden) renderAuswertung();
+      updateRequiredFieldStates();
       saveDraftDebounced();
     });
   });
@@ -3181,6 +3320,7 @@ function init(){
     }
 
     if(!$('tab-auswertung')?.hidden) renderAuswertung();
+    updateRequiredFieldStates();
     saveDraftDebounced();
   });
 
@@ -3195,6 +3335,7 @@ function init(){
     }
 
     if(!$('tab-auswertung')?.hidden) renderAuswertung();
+    updateRequiredFieldStates();
     saveDraftDebounced();
   });
 
@@ -3260,6 +3401,7 @@ function init(){
     renderKalibPreview();
     renderZyklen();
     updateLappPreview();
+    updateRequiredFieldStates();
     saveDraftDebounced();
   });
 
