@@ -516,117 +516,120 @@ function ensureDynamicStyles(){
 
   const style = document.createElement('style');
   style.id = 'app-dynamic-style-v20';
- style.textContent = `
-  html{
-    -webkit-text-size-adjust:100%;
-  }
+  style.textContent = `
+    html{
+      -webkit-text-size-adjust:100%;
+    }
 
-  .field__input,
-  .field__select,
-  .field__textarea,
-  .mess-input,
-  .modal-input{
-    font-size:16px !important;
-  }
+    .field__input,
+    .field__select,
+    .field__textarea,
+    .mess-input,
+    .modal-input{
+      font-size:16px !important;
+    }
 
-  .field__input--required, .field__select--required, .field__textarea--required{
-    background: rgba(255,80,80,.10) !important;
-    border-color: rgba(255,120,120,.45) !important;
-  }
+    .field__input--required, .field__select--required, .field__textarea--required{
+      background: rgba(255,80,80,.10) !important;
+      border-color: rgba(255,120,120,.45) !important;
+    }
 
-  .field__input--computed{
-    color:#2bb673 !important;
-    font-weight:800 !important;
-  }
+    .field__input--computed{
+      color:#2bb673 !important;
+      font-weight:800 !important;
+    }
 
-  .mess-stage-col, .th-stage{
-    width:44px !important;
-    min-width:44px !important;
-    max-width:44px !important;
-    text-align:center;
-    font-size:10px;
-    padding-left:4px !important;
-    padding-right:4px !important;
-  }
+    .mess-stage-col, .th-stage{
+      width:44px !important;
+      min-width:44px !important;
+      max-width:44px !important;
+      text-align:center;
+      font-size:10px;
+      padding-left:4px !important;
+      padding-right:4px !important;
+    }
 
-  .mess-load-col, .th-load{
-    width:54px !important;
-    min-width:54px !important;
-    max-width:54px !important;
-    text-align:center;
-    font-size:10px;
-    padding-left:4px !important;
-    padding-right:4px !important;
-  }
+    .mess-load-col, .th-load{
+      width:54px !important;
+      min-width:54px !important;
+      max-width:54px !important;
+      text-align:center;
+      font-size:10px;
+      padding-left:4px !important;
+      padding-right:4px !important;
+    }
 
-  .mess-druck-col, .th-druck{
-    width:60px !important;
-    min-width:60px !important;
-    max-width:60px !important;
-    text-align:center;
-    font-size:10px;
-    padding-left:4px !important;
-    padding-right:4px !important;
-  }
+    .mess-druck-col, .th-druck{
+      width:60px !important;
+      min-width:60px !important;
+      max-width:60px !important;
+      text-align:center;
+      font-size:10px;
+      padding-left:4px !important;
+      padding-right:4px !important;
+    }
 
-  .th-min{
-    width:56px !important;
-    min-width:56px !important;
-    max-width:56px !important;
-  }
+    .th-min{
+      width:56px !important;
+      min-width:56px !important;
+      max-width:56px !important;
+    }
 
-  .th-mess{
-    width:106px !important;
-    min-width:106px !important;
-  }
+    .th-mess{
+      width:106px !important;
+      min-width:106px !important;
+    }
 
-  .mess-table .minute-cell{
-    min-width:64px;
-  }
+    .mess-table .minute-cell{
+      min-width:64px;
+    }
 
-  .mess-table .minute-input{
-    min-width:52px;
-    width:52px;
-  }
+    .mess-table .minute-input{
+      min-width:52px;
+      width:52px;
+    }
 
-  .mess-table [data-role="row-ablesung"]{
-    min-width:96px;
-    width:96px;
-    font-size:16px !important;
-    font-weight:700;
-  }
+    .mess-table [data-role="row-ablesung"]{
+      min-width:96px;
+      width:96px;
+      font-size:16px !important;
+      font-weight:700;
+    }
 
-  .mess-table [data-role="row-versch"]{
-    min-width:74px;
-    width:74px;
-  }
+    .mess-table [data-role="row-versch"]{
+      min-width:74px;
+      width:74px;
+    }
 
-  .zyklus-load-row .field{
-    min-width:88px !important;
-  }
+    .zyklus-load-row .field{
+      min-width:88px !important;
+    }
 
-  .row-active td{
-    background: rgba(240,138,28,.12) !important;
-  }
+    .row-active td{
+      background: rgba(240,138,28,.12) !important;
+    }
 
-  .row-active .mess-stage-pill{
-    background: rgba(240,138,28,.22);
-    box-shadow: 0 0 0 1px rgba(240,138,28,.45) inset;
-  }
+    .row-active .mess-stage-pill{
+      background: rgba(240,138,28,.22);
+      box-shadow: 0 0 0 1px rgba(240,138,28,.45) inset;
+    }
 
-  .current-measurement{
-    border:2px solid #f08a1c !important;
-    box-shadow:0 0 0 3px rgba(240,138,28,.22) !important;
-    background:rgba(255,180,90,.12) !important;
-    animation:currentFieldPulse 1.2s ease-in-out infinite;
-  }
+    .current-measurement{
+      border:2px solid #f08a1c !important;
+      box-shadow:0 0 0 3px rgba(240,138,28,.22) !important;
+      background:rgba(255,180,90,.12) !important;
+      animation:currentFieldPulse 1.2s ease-in-out infinite;
+    }
 
-  @keyframes currentFieldPulse{
-    0%   { box-shadow:0 0 0 0 rgba(240,138,28,.35); }
-    70%  { box-shadow:0 0 0 6px rgba(240,138,28,0); }
-    100% { box-shadow:0 0 0 0 rgba(240,138,28,0); }
-  }
-`;
+    @keyframes currentFieldPulse{
+      0%   { box-shadow:0 0 0 0 rgba(240,138,28,.35); }
+      70%  { box-shadow:0 0 0 6px rgba(240,138,28,0); }
+      100% { box-shadow:0 0 0 0 rgba(240,138,28,0); }
+    }
+  `;
+
+  document.head.appendChild(style);
+}
 
 function setRequiredVisual(el, required){
   if(!el) return;
@@ -3683,10 +3686,15 @@ function bindStaticUi(){
     alert('Einstellungen gespeichert.');
   });
 
-  $('timeAdjustInput')?.addEventListener('input', updateTimeAdjustPreview);
-  $('btnTimeAdjustApply')?.addEventListener('click', applyTimeAdjustment);
-  $('btnTimeAdjustClose')?.addEventListener('click', closeTimeAdjustModal);
-  $('btnTimeAdjustCancel')?.addEventListener('click', closeTimeAdjustModal);
+ $('timeAdjustInput')?.addEventListener('input', updateTimeAdjustPreview);
+
+const timeApplyBtn = $('btnTimeAdjustApply') || $('timeAdjustApply');
+const timeCancelBtn = $('btnTimeAdjustCancel') || $('timeAdjustCancel');
+const timeCloseBtn = $('btnTimeAdjustClose');
+
+timeApplyBtn?.addEventListener('click', applyTimeAdjustment);
+timeCancelBtn?.addEventListener('click', closeTimeAdjustModal);
+timeCloseBtn?.addEventListener('click', closeTimeAdjustModal);
 
   $('timeAdjustModal')?.addEventListener('click', e => {
     if(e.target === $('timeAdjustModal')){
