@@ -3062,11 +3062,8 @@ async function exportPdfFromSnapshot(snap){
 }
 
 function normalizeBottomActionCards(){
-  document.querySelectorAll('.card--actions-bottom').forEach(el => {
-    el.style.position = 'static';
-    el.style.bottom = 'auto';
-    el.style.zIndex = 'auto';
-  });
+  /* Sticky-Verhalten wird ausschließlich über CSS gesteuert.
+     Kein JS-Override — sonst scrollt das Speicher-Panel mit. */
 }
 
 function normalizeKalibImportInput(){
@@ -3082,8 +3079,6 @@ function normalizeKalibImportInput(){
 function switchTab(name){
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('is-active', t.dataset.tab === name));
   document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'tab-' + name);
-
-  normalizeBottomActionCards();
 
   if(name === 'auswertung') renderAuswertung();
   if(name === 'verlauf') renderHistoryList();
@@ -3112,7 +3107,7 @@ function init(){
   }
 
   normalizeBottomActionCards();
-  normalizeKalibImportInput();
+
 
   document.querySelectorAll('.tab').forEach(t =>
     t.addEventListener('click', () => switchTab(t.dataset.tab))
