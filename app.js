@@ -1873,7 +1873,11 @@ function renderPresseDropdown(){
     sel.appendChild(opt);
   });
 }
-
+function renderKalibPreview(){
+  // Vorschau ist optional – leere Funktion verhindert Initialisierungsfehler
+  return;
+}
+``
 function renderKalibInfo(){
   const box = $('kalibInfoBox');
   const emptyHint = $('kalibEmptyHint');
@@ -3061,12 +3065,24 @@ function normalizeKalibImportInput(){
    TABS / INIT
 ────────────────────────────────────────────────────── */
 function switchTab(name){
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('is-active', t.dataset.tab === name));
-  document.querySelectorAll('.pane').forEach(p => p.hidden = p.id !== 'tab-' + name);
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('is-active', t.dataset.tab === name)
+  );
+
+  document.querySelectorAll('.pane').forEach(p =>
+    p.hidden = p.id !== 'tab-' + name
+  );
+
+  // ✅ Aktion‑ / Speicher‑Balken nur im Formular anzeigen
+  const bottomBar = document.querySelector('.bottom-actions');
+  if(bottomBar){
+    bottomBar.style.display = (name === 'formular') ? '' : 'none';
+  }
 
   if(name === 'auswertung') renderAuswertung();
   if(name === 'verlauf') renderHistoryList();
 }
+``
 
 function init(){
   initAnkertypSelect();
