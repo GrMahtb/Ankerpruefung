@@ -539,71 +539,120 @@ function ensureDynamicStyles(){
       font-weight:800 !important;
     }
 
-    .mess-stage-col, .th-stage{
-      width:44px !important;
-      min-width:44px !important;
-      max-width:44px !important;
-      text-align:center;
-      font-size:10px;
-      padding-left:4px !important;
-      padding-right:4px !important;
-    }
+    .mess-table{
+  width:100%;
+  table-layout:fixed;
+  border-collapse:collapse;
+}
 
-    .mess-load-col, .th-load{
-      width:54px !important;
-      min-width:54px !important;
-      max-width:54px !important;
-      text-align:center;
-      font-size:10px;
-      padding-left:4px !important;
-      padding-right:4px !important;
-    }
+.mess-table th,
+.mess-table td{
+  padding:2px 3px !important;
+  vertical-align:middle;
+}
 
-    .mess-druck-col, .th-druck{
-      width:60px !important;
-      min-width:60px !important;
-      max-width:60px !important;
-      text-align:center;
-      font-size:10px;
-      padding-left:4px !important;
-      padding-right:4px !important;
-    }
+.mess-stage-col, .th-stage{
+  width:30px !important;
+  min-width:30px !important;
+  max-width:30px !important;
+  text-align:center;
+  font-size:9px;
+  padding-left:2px !important;
+  padding-right:2px !important;
+}
 
-    .th-min{
-      width:56px !important;
-      min-width:56px !important;
-      max-width:56px !important;
-    }
+.mess-load-col, .th-load{
+  width:42px !important;
+  min-width:42px !important;
+  max-width:42px !important;
+  text-align:center;
+  font-size:9px;
+  padding-left:2px !important;
+  padding-right:2px !important;
+}
 
-    .th-mess{
-      width:106px !important;
-      min-width:106px !important;
-    }
+.mess-druck-col, .th-druck{
+  width:48px !important;
+  min-width:48px !important;
+  max-width:48px !important;
+  text-align:center;
+  font-size:9px;
+  padding-left:2px !important;
+  padding-right:2px !important;
+}
 
-    .mess-table .minute-cell{
-      min-width:64px;
-    }
+.th-min{
+  width:48px !important;
+  min-width:48px !important;
+  max-width:48px !important;
+}
 
-    .mess-table .minute-input{
-      min-width:52px;
-      width:52px;
-    }
+.th-mess{
+  width:120px !important;
+  min-width:120px !important;
+}
 
-    .mess-table [data-role="row-ablesung"]{
-      min-width:96px;
-      width:96px;
-      font-size:16px !important;
-      font-weight:700;
-    }
+.th-versch{
+  width:78px !important;
+  min-width:78px !important;
+}
 
-    .mess-table [data-role="row-versch"]{
-      min-width:74px;
-      width:74px;
-    }
+.th-anm{
+  width:40px !important;
+  min-width:40px !important;
+  max-width:40px !important;
+}
 
-    .zyklus-load-row .field{
-      min-width:88px !important;
-    }
+.mess-stage-pill{
+  font-size:9px !important;
+  line-height:1.1 !important;
+  padding:1px 2px !important;
+  border-radius:4px;
+}
+
+.mess-table .minute-cell{
+  min-width:52px;
+  display:flex;
+  align-items:center;
+  gap:3px;
+}
+
+.mess-table .minute-input{
+  min-width:44px;
+  width:44px;
+}
+
+.mess-table [data-role="row-ablesung"]{
+  min-width:112px;
+  width:112px;
+  font-size:16px !important;
+  font-weight:700;
+}
+
+.mess-table [data-role="row-versch"]{
+  min-width:72px;
+  width:72px;
+}
+
+.mess-table [data-role="stage-druck"]{
+  width:100%;
+}
+
+.zyklus-load-row{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.zyklus-load-row .field{
+  min-width:64px !important;
+  width:64px !important;
+}
+
+.field--stage-druck .hint{
+  text-align:center !important;
+  font-size:10px !important;
+}
 
     .row-active td{
       background: rgba(240,138,28,.12) !important;
@@ -3527,6 +3576,29 @@ document.addEventListener('input', e => {
       if(!$('tab-auswertung')?.hidden) renderAuswertung();
       saveDraftDebounced();
     }
+  }
+});
+/* ---------------- table enter navigation ---------------- */
+document.addEventListener('keydown', e => {
+  if(e.key !== 'Enter') return;
+
+  const input = e.target.closest('[data-role="row-ablesung"], [data-role="row-min"]');
+  if(!input) return;
+
+  e.preventDefault();
+
+  const role = input.dataset.role;
+  const testKey = input.dataset.test;
+  const cycleId = input.dataset.cycle;
+  const nextRow = Number(input.dataset.row) + 1;
+
+  const next = qs(
+    `[data-role="${role}"][data-test="${testKey}"][data-cycle="${cycleId}"][data-row="${nextRow}"]`
+  );
+
+  if(next){
+    next.focus();
+    next.select?.();
   }
 });
 /* ---------------- main tabs ---------------- */
