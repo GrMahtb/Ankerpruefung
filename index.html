@@ -15,6 +15,29 @@
   <link rel="stylesheet" href="/Ankerpruefung/styles.css?v=1" />
 
   <script defer src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+
+  <style>
+    .test-switcher{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+
+    .test-switcher .btn.is-active{
+      background:#0d2f4f;
+      color:#fff;
+      border-color:#0d2f4f;
+    }
+
+    .test-pane[hidden]{
+      display:none !important;
+    }
+
+    .test-pane{
+      margin-top:12px;
+    }
+  </style>
 </head>
 <body>
 
@@ -80,38 +103,62 @@
 
   <!-- ========== FORMULAR ========== -->
   <main id="tab-formular" class="pane is-active" role="tabpanel">
+
     <section class="card">
       <div class="card__title">Prüfart</div>
 
-      <div class="action-row" style="justify-content:flex-start; gap:8px; flex-wrap:wrap;">
-        <button class="btn btn--ghost btn--small is-active" data-set-active-test="eignung" type="button">Eignungsprüfung</button>
-        <button class="btn btn--ghost btn--small" data-set-active-test="auszieh" type="button">Ausziehversuch</button>
-        <button class="btn btn--ghost btn--small" data-set-active-test="abnahme" type="button">Abnahmeprüfung</button>
+      <div class="test-switcher" role="tablist" aria-label="Prüfarten">
+        <button class="btn btn--ghost btn--small is-active" data-set-active-test="eignung" type="button">
+          Eignungsprüfung
+        </button>
+        <button class="btn btn--ghost btn--small" data-set-active-test="auszieh" type="button">
+          Ausziehversuch
+        </button>
+        <button class="btn btn--ghost btn--small" data-set-active-test="abnahme" type="button">
+          Abnahmeprüfung
+        </button>
       </div>
 
       <div class="hint" style="text-align:left; margin-top:8px;">
-        Die Formulare werden dynamisch von <code>app.js</code> aufgebaut.
+        Die aktive Prüfart wird als eigener Formular-Tab dargestellt.
       </div>
     </section>
 
-    <div id="content-eignung"></div>
-    <div id="content-auszieh"></div>
-    <div id="content-abnahme"></div>
+    <section id="test-pane-eignung" class="test-pane" data-test-pane="eignung">
+      <div id="content-eignung"></div>
+    </section>
+
+    <section id="test-pane-auszieh" class="test-pane" data-test-pane="auszieh" hidden>
+      <div id="content-auszieh"></div>
+    </section>
+
+    <section id="test-pane-abnahme" class="test-pane" data-test-pane="abnahme" hidden>
+      <div id="content-abnahme"></div>
+    </section>
+
   </main>
 
   <!-- ========== AUSWERTUNG ========== -->
   <main id="tab-auswertung" class="pane" role="tabpanel" hidden>
+
     <section class="card">
       <div class="card__title">Auswertung</div>
 
-      <div class="action-row" style="justify-content:flex-start; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
-        <button class="btn btn--ghost btn--small is-active" data-set-eval-test="eignung" type="button">Eignungsprüfung</button>
-        <button class="btn btn--ghost btn--small" data-set-eval-test="auszieh" type="button">Ausziehversuch</button>
-        <button class="btn btn--ghost btn--small" data-set-eval-test="abnahme" type="button">Abnahmeprüfung</button>
+      <div class="test-switcher" role="tablist" aria-label="Auswertungs-Prüfarten" style="margin-bottom:12px;">
+        <button class="btn btn--ghost btn--small is-active" data-set-eval-test="eignung" type="button">
+          Eignungsprüfung
+        </button>
+        <button class="btn btn--ghost btn--small" data-set-eval-test="auszieh" type="button">
+          Ausziehversuch
+        </button>
+        <button class="btn btn--ghost btn--small" data-set-eval-test="abnahme" type="button">
+          Abnahmeprüfung
+        </button>
       </div>
 
       <div id="auswertungContainer"></div>
     </section>
+
   </main>
 
   <!-- ========== VERLAUF ========== -->
