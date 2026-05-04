@@ -2351,7 +2351,324 @@ function renderHistoryList(){
     `;
   }).join('');
 }
+/* ---------------- pdf template helpers ---------------- */
+const PDF_BRAND = {
+  name:'HTB Baugesellschaft m.b.H.',
+  slogan:'BAUEN MIT SPEZIALISTEN ALS PARTNER'
+};
 
+function pdfSafe(v){
+  return String(v ?? '')
+    .replace(/[–—]/g,'-')
+    .replace(/[•→]/g,'-')
+    .replace(/[\u0000-\u001F\u007F]/g,'');
+}
+
+function drawTextSafe(page, text, options){
+  page.drawText(pdfSafe(text), options);
+}
+
+async function loadPdfAssetsAnker(pdf){
+  const { StandardFonts } = window.PDFLib;
+
+  let fontR = await pdf.embedFont(StandardFonts.Helvetica);
+  let fontB = await pdf.embedFont(StandardFonts.HelveticaBold);
+
+  try{
+    const fontkit = window.fontkit || window.PDFLibFontkit;
+    if(fontkit){
+      pdf.registerFontkit(fontkit);
+
+      const fontBytesR = await fetch(`${BASE_PATH}fonts/arial.ttf?v=1`).then(r => {
+        if(!r.ok) throw new Error('arial.ttf fehlt');
+        return r.arrayBuffer();
+      });
+
+      fontR = await pdf.embedFont(fontBytesR, { subset:true });
+
+      try{
+        const fontBytesB = await fetch(`${BASE_PATH}fonts/arialbd.ttf?v=1`).then(r => {
+          if(!r.ok) throw new Error('arialbd.ttf fehlt');
+          return r.arrayBuffer();
+        });
+        fontB = await pdf.embedFont(fontBytesB, { subset:true });
+      }catch{}
+    }
+  }catch(err){
+    console.warn('PDF-Fonts fallback aktiv:', err);
+  }
+
+  let logo = null;
+  try{
+    const b = await fetch(`${BASE_PATH}logo.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+    logo = await pdf.embedPng(b);
+  }catch{}
+
+  let fusszeile = null;
+  try{
+    const b = await fetch(`${BASE_PATH}Fu%C3%9Fzeile.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+    fusszeile = await pdf.embedPng(b);
+  }catch{
+    try{
+      const b = await fetch(`${BASE_PATH}Fusszeile.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+      fusszeile = await pdf.embedPng(b);
+    }catch{}
+  }
+
+  return { fontR, fontB, logo, fusszeile };
+}
+
+function getPdfCtxAnker(PDFLib, assets, currentMeta){
+  const { rgb } = PDFLib;
+  const PAGE_W = 595.28;
+  const PAGE_H = 841.89;
+  const mm = v => v * 72 / 25.4;
+  const K = rgb(0,0,0);
+  const GREY = rgb(0.90,0.90,0.90);
+  return { PAGE_W, PAGE_H, mm, K, GREY, rgb, ...assets, currentMeta };
+}
+
+function getFooterTextSingleLineAnker(meta, subtitle=''){
+  const fil = FILIALEN[meta?.filiale] || {};
+  return `${PDF_BRAND.name} · ${fil.tel || ''} · ${fil.email || ''} · ${fil.adresse || ''}${subtitle ? ' · ' + subtitle : ''}`;
+}
+
+function getFooterFontSize(font, text, maxW, startSize=6.2, minSize=4.4){
+  let size = startSize;
+  const safe = pdfSafe(text);
+  while(size > minSize && font.widthOfTextAtSize(safe, size) > maxW){
+    size -= 0.2;
+  }
+  return size;
+}
+
+function drawNewFooterFullAnker(page, ctx, subtitle=''){
+  const { PAGE_W, mm, fontR, K, fusszeile, currentMeta } = ctx;
+
+  let imgH = 0;
+  if(fusszeile){
+    const scale = PAGE_W / fusszeile.width;
+    imgH = fusszeile.height * scale;
+    page.drawImage(fusszeile, { x:0, y:0, width:PAGE_W, height:imgH });
+  }
+
+  const x = mm(8);
+  const maxW = PAGE_W - x - mm(8);
+  const text = getFooterTextSingleLineAnker(currentMeta || {}, subtitle);
+  const size = getFooterFontSize(fontR, text, maxW, 6.0, 4.4);
+
+  drawTextSafe(page, text, {
+    x,
+    y: imgH + mm(3.4),
+    size,
+    font: fontR,
+    color: K
+  });
+
+  return imgH + mm(9.5);
+}
+
+function drawHeaderBarAnker(page, ctx, title, sub=''){
+  const { mm, fontR, fontB, K, GREY, logo, PAGE_W, PAGE_H } = ctx;
+  const margin = mm(8);
+  const W = PAGE_W - 2 * margin;
+  const H = PAGE_H - 2 * margin;
+  const hdrH = mm(13);
+
+  page.drawRectangle({
+    x: margin,
+    y: margin + H - hdrH,
+    width: W,
+    height: hdrH,
+    color: GREY,
+    borderColor: K,
+    borderWidth: 0.8
+  });
+
+  if(logo){
+    const lh = hdrH * 0.75;
+    const scale = lh / logo.height;
+    page.drawImage(logo, {
+      x: margin + mm(2),
+      y: margin + H - hdrH + (hdrH - lh) / 2,
+      width: logo.width * scale,
+      height: lh
+    });
+  }
+
+  drawTextSafe(page, title, {
+    x: margin + mm(32),
+    y: margin + H - hdrH + mm(4.2),
+    size: 13,
+    font: fontB,
+    color: K
+  });
+
+  if(sub){
+    drawTextSafe(page, sub, {
+      x: margin + mm(32),
+      y: margin + H - hdrH + mm(1.5),
+      size: 8,
+      font: fontR,
+      color: K
+    });
+  }
+}
+
+async function embedDataUrlImageAnker(pdf, dataUrl){
+  if(!dataUrl) return null;
+
+  const b64 = String(dataUrl).split(',')[1] || '';
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+
+  return /^data:image\/png/i.test(dataUrl)
+    ? await pdf.embedPng(bytes)
+    : await pdf.embedJpg(bytes);
+}
+
+async function drawCoverPageAnker(pdf, ctx, testKey, snap){
+  const { PAGE_W, PAGE_H, mm, fontR, fontB, K, logo, rgb } = ctx;
+  const page = pdf.addPage([PAGE_W, PAGE_H]);
+
+  const footerH = drawNewFooterFullAnker(page, ctx, TEST_LABELS[testKey]);
+  const contentBottom = footerH;
+
+  const margin = mm(10);
+  const leftW = PAGE_W * 0.52;
+  const rightX = leftW + mm(6);
+  const rightW = PAGE_W - rightX - margin;
+
+  const headerH = mm(38);
+  const headerBotY = PAGE_H - margin - headerH;
+
+  page.drawRectangle({
+    x:0, y:headerBotY,
+    width:PAGE_W, height:headerH,
+    color:rgb(0.82,0.82,0.82)
+  });
+
+  page.drawLine({
+    start:{ x:0, y:headerBotY + headerH },
+    end:{ x:PAGE_W, y:headerBotY + headerH },
+    thickness:1.5,
+    color:K
+  });
+
+  if(logo){
+    const maxLogoH = headerH - mm(14);
+    const scale = maxLogoH / logo.height;
+    const lw = logo.width * scale;
+    const lh = logo.height * scale;
+    const logoY = headerBotY + mm(10);
+
+    page.drawImage(logo, {
+      x:margin,
+      y:logoY,
+      width:lw,
+      height:lh
+    });
+
+    drawTextSafe(page, PDF_BRAND.name, {
+      x:margin,
+      y:logoY - mm(5),
+      size:7.5,
+      font:fontR,
+      color:K
+    });
+  }
+
+  drawTextSafe(page, TEST_LABELS[testKey], {
+    x:rightX,
+    y:headerBotY + (headerH / 2) - mm(4),
+    size:24,
+    font:fontB,
+    color:K
+  });
+
+  page.drawLine({
+    start:{ x:0, y:headerBotY },
+    end:{ x:PAGE_W, y:headerBotY },
+    thickness:1.5,
+    color:K
+  });
+
+  const test = snap.tests?.[testKey];
+  const fields = [
+    { label:'Bauvorhaben / Objekt', value:snap.meta?.bauvorhaben || '—', big:false },
+    { label:'Bauherr', value:snap.meta?.bauherr || '—', big:false },
+    { label:'Prüfart', value:TEST_LABELS[testKey], big:true },
+    { label:'Lage / Nummer', value:`${snap.meta?.lage || '—'} · ${snap.meta?.nummer || '—'}`, big:false },
+    { label:'Datum / Filiale', value:`${dateDE(snap.meta?.pruefdatum) || '—'} · ${snap.meta?.filiale || '—'}`, big:false }
+  ];
+
+  const lineLeft = margin + mm(6);
+  const lineRight = rightX - mm(6);
+  const areaTop = headerBotY - mm(4);
+  const areaBottom = contentBottom + mm(4);
+  const areaH = areaTop - areaBottom;
+  const slotH = areaH / fields.length;
+
+  fields.forEach((field, i) => {
+    const slotTop = areaTop - i * slotH;
+    const slotBottom = slotTop - slotH;
+    const textY = slotBottom + slotH / 2;
+
+    if(field.label){
+      drawTextSafe(page, field.label.toUpperCase(), {
+        x: lineLeft,
+        y: textY + mm(5),
+        size: 7,
+        font: fontR,
+        color: rgb(0.45,0.45,0.45)
+      });
+    }
+
+    drawTextSafe(page, field.value, {
+      x: lineLeft,
+      y: textY - mm(2),
+      size: field.big ? 20 : 12,
+      font: fontB,
+      color: K
+    });
+
+    if(i < fields.length - 1){
+      page.drawLine({
+        start:{ x:lineLeft, y:slotBottom },
+        end:{ x:lineRight, y:slotBottom },
+        thickness:0.7,
+        color:K
+      });
+    }
+  });
+
+  const overview = test?.photos?.overview || '';
+  if(overview){
+    try{
+      const img = await embedDataUrlImageAnker(pdf, overview);
+      const photoTop = headerBotY;
+      const photoAreaH = photoTop - contentBottom;
+      const ratio = img.width / img.height;
+
+      let dw = rightW;
+      let dh = dw / ratio;
+      if(dh > photoAreaH){
+        dh = photoAreaH;
+        dw = dh * ratio;
+      }
+
+      page.drawImage(img, {
+        x: rightX + (rightW - dw) / 2,
+        y: contentBottom,
+        width: dw,
+        height: dh
+      });
+    }catch(err){
+      console.warn('Cover-Foto konnte nicht eingebettet werden:', err);
+    }
+  }
+}
 /* ---------------- pdf export ---------------- */
 async function exportPdfForTest(testKey, snapshotState=null){
   if(!window.PDFLib){
@@ -2363,75 +2680,165 @@ async function exportPdfForTest(testKey, snapshotState=null){
   const meta = snap.meta || state.meta;
   const test = snap.tests?.[testKey] || getTest(testKey);
 
-  const { PDFDocument, StandardFonts, rgb } = PDFLib;
+  const { PDFDocument, rgb } = PDFLib;
   const pdf = await PDFDocument.create();
-  const font = await pdf.embedFont(StandardFonts.Helvetica);
-  const fontB = await pdf.embedFont(StandardFonts.HelveticaBold);
+  const assets = await loadPdfAssetsAnker(pdf);
+  const ctx = getPdfCtxAnker(PDFLib, assets, meta);
 
-  let page = pdf.addPage([595.28, 841.89]);
-  const W = page.getWidth();
-  const H = page.getHeight();
-  let y = H - 50;
+  await drawCoverPageAnker(pdf, ctx, testKey, snap);
 
-  page.drawRectangle({ x:0, y:H-36, width:W, height:36, color:rgb(0.05,0.18,0.31) });
-  page.drawText(`HTB ${TEST_LABELS[testKey]}`, { x:30, y:H-24, size:14, font:fontB, color:rgb(1,1,1) });
+  for(const cycle of (test.cycles || [])){
+    let page = pdf.addPage([ctx.PAGE_W, ctx.PAGE_H]);
 
-  const rows = [
-    ['Bauvorhaben', meta.bauvorhaben || '—'],
-    ['Bauherr', meta.bauherr || '—'],
-    ['Lage', meta.lage || '—'],
-    [getNumberLabel(testKey), meta.nummer || '—'],
-    ['Prüfdatum', dateDE(meta.pruefdatum)],
-    [getTypeLabel(testKey), getAnkertypByKey(test.typeKey)?.label || '—']
-  ];
+    const margin = ctx.mm(8);
+    const x0 = margin;
+    const y0 = margin;
+    const W = ctx.PAGE_W - 2 * margin;
+    const H = ctx.PAGE_H - 2 * margin;
 
-  y = H - 70;
-  rows.forEach(([k,v]) => {
-    page.drawText(`${k}:`, { x:30, y, size:10, font:fontB });
-    page.drawText(String(v), { x:160, y, size:10, font });
-    y -= 16;
-  });
+    page.drawRectangle({
+      x:x0, y:y0, width:W, height:H,
+      borderColor:ctx.K, borderWidth:1.2
+    });
 
-  y -= 10;
-  page.drawText('Protokoll', { x:30, y, size:12, font:fontB });
-  y -= 16;
+    drawHeaderBarAnker(page, ctx, `${TEST_LABELS[testKey]} – ${cycle.title}`, PDF_BRAND.name);
+    drawNewFooterFullAnker(page, ctx, TEST_LABELS[testKey]);
 
-  (test.cycles || []).forEach(cycle => {
-    if(y < 120){
-      page = pdf.addPage([595.28, 841.89]);
-      y = H - 50;
-    }
+    let y = ctx.PAGE_H - ctx.mm(30);
 
-    page.drawText(`${cycle.title}`, { x:30, y, size:10, font:fontB });
-    y -= 12;
-    page.drawText('Stufe   Last   Druck   Min   Messuhr   Versch.', { x:30, y, size:8, font:fontB });
-    y -= 10;
+    const typ = getAnkertypByKey(test.typeKey)?.label || '—';
+    const metaLines = [
+      `Bauvorhaben: ${meta.bauvorhaben || '—'}`,
+      `Bauherr: ${meta.bauherr || '—'}`,
+      `${getNumberLabel(testKey)}: ${meta.nummer || '—'}`,
+      `Lage: ${meta.lage || '—'}`,
+      `Prüfdatum: ${dateDE(meta.pruefdatum) || '—'}`,
+      `${getTypeLabel(testKey)}: ${typ}`
+    ];
 
-    (cycle.rows || []).forEach(row => {
-      if(y < 50){
-        page = pdf.addPage([595.28, 841.89]);
-        y = H - 50;
+    metaLines.forEach(line => {
+      drawTextSafe(page, line, {
+        x: x0 + ctx.mm(6),
+        y,
+        size: 9,
+        font: ctx.fontR,
+        color: ctx.K
+      });
+      y -= ctx.mm(6);
+    });
+
+    y -= ctx.mm(2);
+    drawTextSafe(page, 'Messprotokoll', {
+      x: x0 + ctx.mm(6),
+      y,
+      size: 11,
+      font: ctx.fontB,
+      color: ctx.K
+    });
+    y -= ctx.mm(8);
+
+    const colX = [
+      x0 + ctx.mm(6),
+      x0 + ctx.mm(28),
+      x0 + ctx.mm(52),
+      x0 + ctx.mm(74),
+      x0 + ctx.mm(91),
+      x0 + ctx.mm(112)
+    ];
+
+    drawTextSafe(page, 'Stufe',   { x:colX[0], y, size:7.5, font:ctx.fontB, color:ctx.K });
+    drawTextSafe(page, 'Last',    { x:colX[1], y, size:7.5, font:ctx.fontB, color:ctx.K });
+    drawTextSafe(page, 'Druck',   { x:colX[2], y, size:7.5, font:ctx.fontB, color:ctx.K });
+    drawTextSafe(page, 'Min',     { x:colX[3], y, size:7.5, font:ctx.fontB, color:ctx.K });
+    drawTextSafe(page, 'Messuhr', { x:colX[4], y, size:7.5, font:ctx.fontB, color:ctx.K });
+    drawTextSafe(page, 'Versch.', { x:colX[5], y, size:7.5, font:ctx.fontB, color:ctx.K });
+
+    y -= ctx.mm(4);
+
+    page.drawLine({
+      start:{ x:x0 + ctx.mm(6), y:y + ctx.mm(2) },
+      end:{ x:ctx.PAGE_W - ctx.mm(12), y:y + ctx.mm(2) },
+      thickness:0.6,
+      color:ctx.K
+    });
+
+    y -= ctx.mm(2);
+
+    for(const row of (cycle.rows || [])){
+      if(y < ctx.mm(28)){
+        page = pdf.addPage([ctx.PAGE_W, ctx.PAGE_H]);
+        page.drawRectangle({
+          x:x0, y:y0, width:W, height:H,
+          borderColor:ctx.K, borderWidth:1.2
+        });
+        drawHeaderBarAnker(page, ctx, `${TEST_LABELS[testKey]} – ${cycle.title}`, PDF_BRAND.name);
+        drawNewFooterFullAnker(page, ctx, TEST_LABELS[testKey]);
+        y = ctx.PAGE_H - ctx.mm(34);
       }
 
       const stage = cycle.stageDefs?.[row.stageIdx];
       const kn = stage ? calcStageLoad(stage, testKey) : NaN;
 
-      page.drawText(
-        `${String(stage?.label || '').padEnd(8)} ${String(Number.isFinite(kn) ? fmt(kn,1) : '').padEnd(8)} ${String(stage?.druck || '').padEnd(7)} ${String(row.min).padEnd(4)} ${String(row.ablesung || '').padEnd(8)} ${String(row.versch || '')}`,
-        { x:30, y, size:8, font }
-      );
-      y -= 10;
-    });
+      drawTextSafe(page, String(stage?.label || ''), {
+        x: colX[0], y, size:7.2, font:ctx.fontR, color:ctx.K
+      });
+      drawTextSafe(page, Number.isFinite(kn) ? `${fmt(kn,1)} kN` : '—', {
+        x: colX[1], y, size:7.2, font:ctx.fontR, color:ctx.K
+      });
+      drawTextSafe(page, String(stage?.druck || '—'), {
+        x: colX[2], y, size:7.2, font:ctx.fontR, color:ctx.K
+      });
+      drawTextSafe(page, String(row.min ?? '—'), {
+        x: colX[3], y, size:7.2, font:ctx.fontR, color:ctx.K
+      });
+      drawTextSafe(page, String(row.ablesung || '—'), {
+        x: colX[4], y, size:7.2, font:ctx.fontR, color:ctx.K
+      });
+      drawTextSafe(page, String(row.versch || '—'), {
+        x: colX[5], y, size:7.2, font:ctx.fontR, color:ctx.K
+      });
 
-    y -= 8;
-  });
+      y -= ctx.mm(5);
+    }
 
-  const fil = FILIALEN[meta.filiale] || {};
-  pdf.getPages().forEach(p => {
-    p.drawRectangle({ x:0, y:0, width:W, height:28, color:rgb(0.05,0.18,0.31) });
-    p.drawText(`HTB Baugesellschaft m.b.H. – ${meta.filiale || '—'}`, { x:30, y:17, size:8, font:fontB, color:rgb(1,1,1) });
-    p.drawText(`${fil.adresse || ''}`, { x:30, y:7, size:7, font, color:rgb(.85,.9,1) });
-  });
+    const detail = test.photos?.detail || '';
+    if(detail){
+      try{
+        const img = await embedDataUrlImageAnker(pdf, detail);
+        const p = pdf.addPage([ctx.PAGE_W, ctx.PAGE_H]);
+
+        p.drawRectangle({
+          x:x0, y:y0, width:W, height:H,
+          borderColor:ctx.K, borderWidth:1.2
+        });
+
+        drawHeaderBarAnker(p, ctx, `${TEST_LABELS[testKey]} – Detailfoto`, PDF_BRAND.name);
+        drawNewFooterFullAnker(p, ctx, TEST_LABELS[testKey]);
+
+        const areaX = x0 + ctx.mm(12);
+        const areaY = y0 + ctx.mm(18);
+        const areaW = W - ctx.mm(24);
+        const areaH = H - ctx.mm(40);
+
+        const ratio = img.width / img.height;
+        let dw = areaW;
+        let dh = dw / ratio;
+        if(dh > areaH){
+          dh = areaH;
+          dw = dh * ratio;
+        }
+
+        p.drawImage(img, {
+          x: areaX + (areaW - dw) / 2,
+          y: areaY + (areaH - dh) / 2,
+          width: dw,
+          height: dh
+        });
+      }catch(err){
+        console.warn('Detailfoto konnte nicht eingebettet werden:', err);
+      }
+    }
+  }
 
   const bytes = await pdf.save();
   const blob = new Blob([bytes], { type:'application/pdf' });
@@ -3757,7 +4164,56 @@ function bindStaticUi(){
     saveDraftDebounced();
     alert('Einstellungen gespeichert.');
   });
+$('btnExportTemplate')?.addEventListener('click', () => {
+  const testKey = getActiveTestKey();
+  const payload = buildTemplatePayload(testKey);
+  downloadJson(payload, `${dateTag()}_HTB_${testKey}_Vorlage.htbanker.json`);
+});
 
+$('btnImportTemplate')?.addEventListener('click', () => {
+  $('importTemplateGlobalInput')?.click();
+});
+
+$('importTemplateGlobalInput')?.addEventListener('change', async e => {
+  const file = e.target.files?.[0];
+  if(!file) return;
+
+  try{
+    await importTemplateFile(getActiveTestKey(), file);
+    alert('Vorlage importiert.');
+  }catch(err){
+    console.error(err);
+    alert('Vorlage konnte nicht importiert werden.');
+  }finally{
+    e.target.value = '';
+  }
+});
+
+$('btnExportFull')?.addEventListener('click', () => {
+  downloadJson(collectSnapshot(), `${dateTag()}_HTB_Ankerpruefung_Export.json`);
+});
+
+$('btnImportFull')?.addEventListener('click', () => {
+  $('importFullGlobalInput')?.click();
+});
+
+$('importFullGlobalInput')?.addEventListener('change', async e => {
+  const file = e.target.files?.[0];
+  if(!file) return;
+
+  try{
+    const txt = await file.text();
+    const snap = JSON.parse(txt);
+    applySnapshot(snap, true);
+    saveDraftDebounced();
+    alert('Vollständiger Import erfolgreich.');
+  }catch(err){
+    console.error(err);
+    alert('Datei konnte nicht importiert werden.');
+  }finally{
+    e.target.value = '';
+  }
+});
  $('timeAdjustInput')?.addEventListener('input', updateTimeAdjustPreview);
 
 const timeApplyBtn = $('btnTimeAdjustApply') || $('timeAdjustApply');
