@@ -1920,7 +1920,7 @@ function renderPhotoSection(testKey){
       <div class="card__body">
         <div class="photo-grid">
           <div class="photo-box">
-            <div class="photo-box__title">Übersichtsfoto</div>
+            <div class="photo-box__title">Übersichtsfoto / PDF-Cover</div>
             <div class="photo-preview">${photos.overview ? `<img src="${photos.overview}" alt="Übersichtsfoto">` : 'Kein Bild'}</div>
             <div class="photo-actions">
               <button class="btn btn--ghost btn--small" data-role="photo-pick-overview" data-test="${testKey}" type="button">Foto wählen</button>
@@ -1930,7 +1930,7 @@ function renderPhotoSection(testKey){
           </div>
 
           <div class="photo-box">
-            <div class="photo-box__title">Übersichtsfoto / PDF-Cover</div>
+            <div class="photo-box__title">Detailfoto</div>
             <div class="photo-preview">${photos.detail ? `<img src="${photos.detail}" alt="Detailfoto">` : 'Kein Bild'}</div>
             <div class="photo-actions">
               <button class="btn btn--ghost btn--small" data-role="photo-pick-detail" data-test="${testKey}" type="button">Foto wählen</button>
@@ -2923,6 +2923,76 @@ async function embedDataUrlImageAnker(pdf, dataUrl){
     : await pdf.embedJpg(bytes);
 }
 
+async function drawImagePageAnker(pdf, ctx, title, subtitle, dataUrl){
+  const { PAGE_W, PAGE_H, mm, fontR, K } = ctx;
+  const page = pdf.addPage([PAGE_W, PAGE_H]);
+
+  const margin = mm(8);
+  const x0 = margin;
+  const y0 = margin;
+  const W = PAGE_W - 2 * margin;
+  const H = PAGE_H - 2 * margin;
+
+  page.drawRectangle({
+    x:x0, y:y0, width:W, height:H,
+    borderColor:ctx.K, borderWidth:1.2
+  });
+
+  drawHeaderBarAnker(page, ctx, title, subtitle);
+  drawNewFooterFullAnker(page, ctx, title);
+
+  if(dataUrl){
+    try{
+      const img = await embedDataUrlImageAnker(pdf, dataUrl);
+      const areaX = x0 + mm(8);
+      const areaY = y0 + mm(12);
+      const areaW = W - mm(16);
+      const areaH = H - mm(28);
+
+      const ratio = img.width / img.height;
+      let dw = areaW;
+      let dh = dw / ratio;
+      if(dh > areaH){
+        dh = areaH;
+        dw = dh * ratio;
+      }
+
+      page.drawImage(img, {
+        x: areaX + (areaW - dw) / 2,
+        y: areaY + (areaH - dh) / 2,
+        width: dw,
+        height: dh
+      });
+    }catch(err){
+      console.error(err);
+      drawTextSafeAnker(page, 'Bild konnte nicht eingebettet werden.', {
+        x: x0 + 20,
+        y: y0 + H / 2,
+        size: 10,
+        font: fontR,
+        color: K
+      });
+    }
+  }else{
+    page.drawRectangle({
+      x: x0 + mm(15),
+      y: y0 + mm(20),
+      width: W - mm(30),
+      height: H - mm(35),
+      borderColor: ctx.K,
+      borderWidth: 0.8
+    });
+
+    drawTextSafeAnker(page, 'Kein Bild vorhanden.', {
+      x: x0 + 35,
+      y: y0 + H / 2,
+      size: 10,
+      font: fontR,
+      color: K
+    });
+  }
+}
+
 async function drawCoverPageAnker(pdf, ctx, testKey, snap){
   const { PAGE_W, PAGE_H, mm, fontR, fontB, K, logo, rgb } = ctx;
   const page = pdf.addPage([PAGE_W, PAGE_H]);
@@ -2957,7 +3027,6 @@ async function drawCoverPageAnker(pdf, ctx, testKey, snap){
     const scale = maxLogoH / logo.height;
     const lw = logo.width * scale;
     const lh = logo.height * scale;
-    logoY = headerBotY + mm(10);
 
     page.drawImage(logo, {
       x: margin,
@@ -3034,7 +3103,7 @@ async function drawCoverPageAnker(pdf, ctx, testKey, snap){
         start:{ x: lineLeft, y: slotBottom },
         end:{ x: lineRight, y: slotBottom },
         thickness:0.7,
-        color:K
+        color: K
       });
     }
   });
@@ -3043,7 +3112,7 @@ async function drawCoverPageAnker(pdf, ctx, testKey, snap){
   if(overview){
     try{
       const img = await embedDataUrlImageAnker(pdf, overview);
-      const photoTop   = headerBotY;
+      const photoTop = headerBotY;
       const photoAreaH = photoTop - contentBottom;
 
       const ratio = img.width / img.height;
@@ -3074,6 +3143,16 @@ async function drawCoverPageAnker(pdf, ctx, testKey, snap){
     });
 
     drawTextSafeAnker(page, 'Kein Übersichtsfoto vorhanden.', {
+      x: rightX + mm(8),
+      y: contentBottom + (headerBotY - contentBottom) / 2,
+      size: 10,
+      font: fontR,
+      color: K
+    });
+  }
+}
+
+      
 /* ---------------- pdf export ---------------- */
 async function exportPdfForTest(testKey, snapshotState=null){
   if(!window.PDFLib){
@@ -3085,16 +3164,15 @@ async function exportPdfForTest(testKey, snapshotState=null){
   const meta = snap.meta || state.meta;
   const test = snap.tests?.[testKey] || getTest(testKey);
 
-  const { PDFDocument, rgb } = PDFLib;
+  const { PDFDocument } = window.PDFLib;
   const pdf = await PDFDocument.create();
   const assets = await loadPdfAssetsAnker(pdf);
-  const ctx = getPdfCtxAnker(PDFLib, assets, meta);
+  const ctx = getPdfCtxAnker(window.PDFLib, assets, meta);
 
   await drawCoverPageAnker(pdf, ctx, testKey, snap);
 
-  for(const cycle of (test.cycles || [])){
-    let page = pdf.addPage([ctx.PAGE_W, ctx.PAGE_H]);
-
+  function createProtocolPage(title){
+    const page = pdf.addPage([ctx.PAGE_W, ctx.PAGE_H]);
     const margin = ctx.mm(8);
     const x0 = margin;
     const y0 = margin;
@@ -3106,7 +3184,7 @@ async function exportPdfForTest(testKey, snapshotState=null){
       borderColor:ctx.K, borderWidth:1.2
     });
 
-    drawHeaderBarAnker(page, ctx, `${TEST_LABELS[testKey]} – ${cycle.title}`, PDF_BRAND.name);
+    drawHeaderBarAnker(page, ctx, `${TEST_LABELS[testKey]} – ${title}`, 'HTB Baugesellschaft m.b.H.');
     drawNewFooterFullAnker(page, ctx, TEST_LABELS[testKey]);
 
     let y = ctx.PAGE_H - ctx.mm(30);
@@ -3122,7 +3200,7 @@ async function exportPdfForTest(testKey, snapshotState=null){
     ];
 
     metaLines.forEach(line => {
-      drawTextSafe(page, line, {
+      drawTextSafeAnker(page, line, {
         x: x0 + ctx.mm(6),
         y,
         size: 9,
@@ -3133,7 +3211,8 @@ async function exportPdfForTest(testKey, snapshotState=null){
     });
 
     y -= ctx.mm(2);
-    drawTextSafe(page, 'Messprotokoll', {
+
+    drawTextSafeAnker(page, 'Messprotokoll', {
       x: x0 + ctx.mm(6),
       y,
       size: 11,
@@ -3151,12 +3230,12 @@ async function exportPdfForTest(testKey, snapshotState=null){
       x0 + ctx.mm(112)
     ];
 
-    drawTextSafe(page, 'Stufe',   { x:colX[0], y, size:7.5, font:ctx.fontB, color:ctx.K });
-    drawTextSafe(page, 'Last',    { x:colX[1], y, size:7.5, font:ctx.fontB, color:ctx.K });
-    drawTextSafe(page, 'Druck',   { x:colX[2], y, size:7.5, font:ctx.fontB, color:ctx.K });
-    drawTextSafe(page, 'Min',     { x:colX[3], y, size:7.5, font:ctx.fontB, color:ctx.K });
-    drawTextSafe(page, 'Messuhr', { x:colX[4], y, size:7.5, font:ctx.fontB, color:ctx.K });
-    drawTextSafe(page, 'Versch.', { x:colX[5], y, size:7.5, font:ctx.fontB, color:ctx.K });
+    drawTextSafeAnker(page, 'Stufe',   { x:colX[0], y, size:7.5, font:ctx.fontB, color:ctx.K });
+    drawTextSafeAnker(page, 'Last',    { x:colX[1], y, size:7.5, font:ctx.fontB, color:ctx.K });
+    drawTextSafeAnker(page, 'Druck',   { x:colX[2], y, size:7.5, font:ctx.fontB, color:ctx.K });
+    drawTextSafeAnker(page, 'Min',     { x:colX[3], y, size:7.5, font:ctx.fontB, color:ctx.K });
+    drawTextSafeAnker(page, 'Messuhr', { x:colX[4], y, size:7.5, font:ctx.fontB, color:ctx.K });
+    drawTextSafeAnker(page, 'Versch.', { x:colX[5], y, size:7.5, font:ctx.fontB, color:ctx.K });
 
     y -= ctx.mm(4);
 
@@ -3169,80 +3248,80 @@ async function exportPdfForTest(testKey, snapshotState=null){
 
     y -= ctx.mm(2);
 
+    return { page, y, x0 };
+  }
+
+  for(const cycle of (test.cycles || [])){
+    let { page, y, x0 } = createProtocolPage(cycle.title);
+
     for(const row of (cycle.rows || [])){
       if(y < ctx.mm(28)){
-        page = pdf.addPage([ctx.PAGE_W, ctx.PAGE_H]);
-        page.drawRectangle({
-          x:x0, y:y0, width:W, height:H,
-          borderColor:ctx.K, borderWidth:1.2
-        });
-        drawHeaderBarAnker(page, ctx, `${TEST_LABELS[testKey]} – ${cycle.title}`, PDF_BRAND.name);
-        drawNewFooterFullAnker(page, ctx, TEST_LABELS[testKey]);
-        y = ctx.PAGE_H - ctx.mm(34);
+        ({ page, y, x0 } = createProtocolPage(cycle.title));
       }
 
       const stage = cycle.stageDefs?.[row.stageIdx];
       const kn = stage ? calcStageLoad(stage, testKey) : NaN;
 
-      drawTextSafe(page, String(stage?.label || ''), {
-        x: colX[0], y, size:7.2, font:ctx.fontR, color:ctx.K
+      drawTextSafeAnker(page, String(stage?.label || ''), {
+        x: x0 + ctx.mm(6),
+        y,
+        size: 7.2,
+        font: ctx.fontR,
+        color: ctx.K
       });
-      drawTextSafe(page, Number.isFinite(kn) ? `${fmt(kn,1)} kN` : '—', {
-        x: colX[1], y, size:7.2, font:ctx.fontR, color:ctx.K
+
+      drawTextSafeAnker(page, Number.isFinite(kn) ? `${fmt(kn,1)} kN` : '—', {
+        x: x0 + ctx.mm(28),
+        y,
+        size: 7.2,
+        font: ctx.fontR,
+        color: ctx.K
       });
-      drawTextSafe(page, String(stage?.druck || '—'), {
-        x: colX[2], y, size:7.2, font:ctx.fontR, color:ctx.K
+
+      drawTextSafeAnker(page, String(stage?.druck || '—'), {
+        x: x0 + ctx.mm(52),
+        y,
+        size: 7.2,
+        font: ctx.fontR,
+        color: ctx.K
       });
-      drawTextSafe(page, String(row.min ?? '—'), {
-        x: colX[3], y, size:7.2, font:ctx.fontR, color:ctx.K
+
+      drawTextSafeAnker(page, String(row.min ?? '—'), {
+        x: x0 + ctx.mm(74),
+        y,
+        size: 7.2,
+        font: ctx.fontR,
+        color: ctx.K
       });
-      drawTextSafe(page, String(row.ablesung || '—'), {
-        x: colX[4], y, size:7.2, font:ctx.fontR, color:ctx.K
+
+      drawTextSafeAnker(page, String(row.ablesung || '—'), {
+        x: x0 + ctx.mm(91),
+        y,
+        size: 7.2,
+        font: ctx.fontR,
+        color: ctx.K
       });
-      drawTextSafe(page, String(row.versch || '—'), {
-        x: colX[5], y, size:7.2, font:ctx.fontR, color:ctx.K
+
+      drawTextSafeAnker(page, String(row.versch || '—'), {
+        x: x0 + ctx.mm(112),
+        y,
+        size: 7.2,
+        font: ctx.fontR,
+        color: ctx.K
       });
 
       y -= ctx.mm(5);
     }
+  }
 
-    const detail = test.photos?.detail || '';
-    if(detail){
-      try{
-        const img = await embedDataUrlImageAnker(pdf, detail);
-        const p = pdf.addPage([ctx.PAGE_W, ctx.PAGE_H]);
-
-        p.drawRectangle({
-          x:x0, y:y0, width:W, height:H,
-          borderColor:ctx.K, borderWidth:1.2
-        });
-
-        drawHeaderBarAnker(p, ctx, `${TEST_LABELS[testKey]} – Detailfoto`, PDF_BRAND.name);
-        drawNewFooterFullAnker(p, ctx, TEST_LABELS[testKey]);
-
-        const areaX = x0 + ctx.mm(12);
-        const areaY = y0 + ctx.mm(18);
-        const areaW = W - ctx.mm(24);
-        const areaH = H - ctx.mm(40);
-
-        const ratio = img.width / img.height;
-        let dw = areaW;
-        let dh = dw / ratio;
-        if(dh > areaH){
-          dh = areaH;
-          dw = dh * ratio;
-        }
-
-        p.drawImage(img, {
-          x: areaX + (areaW - dw) / 2,
-          y: areaY + (areaH - dh) / 2,
-          width: dw,
-          height: dh
-        });
-      }catch(err){
-        console.warn('Detailfoto konnte nicht eingebettet werden:', err);
-      }
-    }
+  if(test.photos?.detail){
+    await drawImagePageAnker(
+      pdf,
+      ctx,
+      `${TEST_LABELS[testKey]} – Detailfoto`,
+      `${meta.bauvorhaben || ''} · ${dateDE(meta.pruefdatum) || ''}`,
+      test.photos.detail
+    );
   }
 
   const bytes = await pdf.save();
