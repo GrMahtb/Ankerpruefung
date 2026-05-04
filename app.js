@@ -516,32 +516,117 @@ function ensureDynamicStyles(){
 
   const style = document.createElement('style');
   style.id = 'app-dynamic-style-v20';
-  style.textContent = `
-    .field__input--required, .field__select--required, .field__textarea--required{
-      background: rgba(255,80,80,.10) !important;
-      border-color: rgba(255,120,120,.45) !important;
-    }
-    .field__input--computed{
-      color:#2bb673 !important;
-      font-weight:800 !important;
-    }
-    .mess-stage-col, .th-stage{
-      width:58px !important;
-      min-width:58px !important;
-      max-width:58px !important;
-      text-align:center;
-      font-size:11px;
-    }
-    .mess-load-col, .th-load{
-      width:66px !important;
-      min-width:66px !important;
-      max-width:66px !important;
-      text-align:center;
-      font-size:11px;
-    }
-  `;
-  document.head.appendChild(style);
-}
+ style.textContent = `
+  html{
+    -webkit-text-size-adjust:100%;
+  }
+
+  .field__input,
+  .field__select,
+  .field__textarea,
+  .mess-input,
+  .modal-input{
+    font-size:16px !important;
+  }
+
+  .field__input--required, .field__select--required, .field__textarea--required{
+    background: rgba(255,80,80,.10) !important;
+    border-color: rgba(255,120,120,.45) !important;
+  }
+
+  .field__input--computed{
+    color:#2bb673 !important;
+    font-weight:800 !important;
+  }
+
+  .mess-stage-col, .th-stage{
+    width:44px !important;
+    min-width:44px !important;
+    max-width:44px !important;
+    text-align:center;
+    font-size:10px;
+    padding-left:4px !important;
+    padding-right:4px !important;
+  }
+
+  .mess-load-col, .th-load{
+    width:54px !important;
+    min-width:54px !important;
+    max-width:54px !important;
+    text-align:center;
+    font-size:10px;
+    padding-left:4px !important;
+    padding-right:4px !important;
+  }
+
+  .mess-druck-col, .th-druck{
+    width:60px !important;
+    min-width:60px !important;
+    max-width:60px !important;
+    text-align:center;
+    font-size:10px;
+    padding-left:4px !important;
+    padding-right:4px !important;
+  }
+
+  .th-min{
+    width:56px !important;
+    min-width:56px !important;
+    max-width:56px !important;
+  }
+
+  .th-mess{
+    width:106px !important;
+    min-width:106px !important;
+  }
+
+  .mess-table .minute-cell{
+    min-width:64px;
+  }
+
+  .mess-table .minute-input{
+    min-width:52px;
+    width:52px;
+  }
+
+  .mess-table [data-role="row-ablesung"]{
+    min-width:96px;
+    width:96px;
+    font-size:16px !important;
+    font-weight:700;
+  }
+
+  .mess-table [data-role="row-versch"]{
+    min-width:74px;
+    width:74px;
+  }
+
+  .zyklus-load-row .field{
+    min-width:88px !important;
+  }
+
+  .row-active td{
+    background: rgba(240,138,28,.12) !important;
+  }
+
+  .row-active .mess-stage-pill{
+    background: rgba(240,138,28,.22);
+    box-shadow: 0 0 0 1px rgba(240,138,28,.45) inset;
+  }
+
+  .current-measurement{
+    border:2px solid #f08a1c !important;
+    box-shadow:0 0 0 3px rgba(240,138,28,.22) !important;
+    background:rgba(255,180,90,.12) !important;
+    animation:currentFieldPulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes currentFieldPulse{
+    0%   { box-shadow:0 0 0 0 rgba(240,138,28,.35); }
+    70%  { box-shadow:0 0 0 6px rgba(240,138,28,0); }
+    100% { box-shadow:0 0 0 0 rgba(240,138,28,0); }
+  }
+`;
 
 function setRequiredVisual(el, required){
   if(!el) return;
@@ -1596,7 +1681,7 @@ function buildMeasurementBody(cycle, testKey){
     if(isFirstInStage){
       html += `<td class="mess-stage-col" rowspan="${rowspan}"><span class="mess-stage-pill">${h(stage.label)}</span></td>`;
       html += `<td class="mess-load-col" rowspan="${rowspan}">${Number.isFinite(lastKn) ? fmt(lastKn,1) : '—'}</td>`;
-      html += `<td rowspan="${rowspan}"><input class="mess-input ${autoDruck ? 'mess-input--auto' : ''}" data-role="stage-druck" data-test="${testKey}" data-cycle="${cycle.id}" data-stage="${row.stageIdx}" type="number" step="0.1" value="${h(stage.druck)}" ${autoDruck ? 'readonly' : ''}></td>`;
+      html += `<td class="mess-druck-col" rowspan="${rowspan}"><input class="mess-input ${autoDruck ? 'mess-input--auto' : ''}" data-role="stage-druck" data-test="${testKey}" data-cycle="${cycle.id}" data-stage="${row.stageIdx}" type="number" step="0.1" value="${h(stage.druck)}" ${autoDruck ? 'readonly' : ''}></td>`;
     }
 
     html += `
@@ -2535,6 +2620,8 @@ function highlightActiveMeasurementRow(testKey, cycle){
   if(!card) return;
 
   qsa('tbody tr', card).forEach(r => r.classList.remove('row-active'));
+  qsa('.current-measurement', card).forEach(el => el.classList.remove('current-measurement'));
+
   if(!cycle) return;
 
   const holdIdx = Number.isInteger(cycle.holdStageIdx) ? cycle.holdStageIdx : 0;
@@ -2552,8 +2639,14 @@ function highlightActiveMeasurementRow(testKey, cycle){
     if(elapsedMin >= Number(row.min)) active = row;
   }
 
-  const el = qs(`tr[data-row="${active._idx}"]`, card);
-  if(el) el.classList.add('row-active');
+  const rowEl = qs(`tr[data-row="${active._idx}"]`, card);
+  if(rowEl) rowEl.classList.add('row-active');
+
+  const strongHighlight = !!timerMap[cycle.id]?.running || Number(cycle.elapsedMs || 0) > 0;
+  if(strongHighlight){
+    const ablesungInput = qs(`[data-role="row-ablesung"][data-row="${active._idx}"]`, card);
+    if(ablesungInput) ablesungInput.classList.add('current-measurement');
+  }
 }
 
 function triggerIntervalAlarm(testKey){
