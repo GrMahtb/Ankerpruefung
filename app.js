@@ -3452,6 +3452,10 @@ function syncTestChoiceUi(){
     el.classList.toggle('is-active', el.dataset.setEvalTest === state.evalTest);
   });
 
+  qsa('[data-test-pane]').forEach(el => {
+    el.hidden = el.dataset.testPane !== state.activeTest;
+  });
+
   const activeSelect = $('activeTestSelect');
   if(activeSelect) activeSelect.value = state.activeTest;
 
