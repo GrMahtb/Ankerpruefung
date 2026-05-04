@@ -813,39 +813,23 @@ function handleKalibDelete(){
    INTERPOLATION kN → bar
 ═══════════════════════════════════════════════════════ */
 function interpoliereBar(zielKn, punkte){
-  if(!Array.isArray(punkte) || punkte.length < 2) return { bar:null, oor:true };
-
-  const sorted = [...punkte]
-    .map(p => ({ kN:Number(p.kN), bar:Number(p.bar) }))
-    .filter(p => Number.isFinite(p.kN) && Number.isFinite(p.bar))
-    .sort((a,b) => a.kN - b.kN);
-
-  if(sorted.length < 2) return { bar:null, oor:true };
-
-  const minKn = sorted[0].kN;
-  const maxKn = sorted[sorted.length - 1].kN;
-
-  if(!Number.isFinite(zielKn) || zielKn < minKn || zielKn > maxKn){
-    return { bar:null, oor:true };
+  if(!Array.isArray(punkte) || punkte.length < 1){
+    return { bar: null, oor: true };
   }
 
-  const exact = sorted.find(p => p.kN === zielKn);
-  if(exact) return { bar:exact.bar, oor:false };
+  const exact = punkte.find(
+    p => Number(p.kN) === Number(zielKn)
+  );
 
-  let lo = sorted[0];
-  let hi = sorted[sorted.length - 1];
-
-  for(let i=0;i<sorted.length-1;i++){
-    if(sorted[i].kN <= zielKn && sorted[i+1].kN >= zielKn){
-      lo = sorted[i];
-      hi = sorted[i+1];
-      break;
-    }
+  if(!exact){
+    // Kein exakter Stützpunkt → kein Druckwert
+    return { bar: null, oor: true };
   }
 
-  const t = (zielKn - lo.kN) / (hi.kN - lo.kN);
-  const bar = lo.bar + t * (hi.bar - lo.bar);
-  return { bar:Math.round(bar * 10) / 10, oor:false };
+  return {
+    bar: Number(exact.bar),
+    oor: false
+  };
 }
 
 function berechneDruckvorschau(){
