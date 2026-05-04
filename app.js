@@ -369,24 +369,15 @@ function lookupStuetzpunkt(kN, punkte){
     return { bar: exact.bar, exact:true, oor:false, basisKn:exact.kN };
   }
 
-  const min = pts[0].kN;
-  const max = pts[pts.length - 1].kN;
-  if(value < min || value > max){
-    return { bar:null, exact:false, oor:true, basisKn:null };
+  // Prinzip: besser zu hoch geprüft als zu gering
+  // => immer auf den nächsthöheren verfügbaren Stützpunkt gehen
+  const nextHigher = pts.find(p => p.kN >= value);
+  if(nextHigher){
+    return { bar: nextHigher.bar, exact:false, oor:false, basisKn:nextHigher.kN };
   }
 
-  let nearest = pts[0];
-  let bestDist = Math.abs(pts[0].kN - value);
-
-  for(const p of pts){
-    const dist = Math.abs(p.kN - value);
-    if(dist < bestDist){
-      bestDist = dist;
-      nearest = p;
-    }
-  }
-
-  return { bar: nearest.bar, exact:false, oor:false, basisKn:nearest.kN };
+  // Oberhalb des größten Stützpunktes => außerhalb des Kalibrierbereichs
+  return { bar:null, exact:false, oor:true, basisKn:null };
 }
 
 function kNtoBar(kN, kalibId=null){
@@ -1541,14 +1532,26 @@ function renderStageEditor(stage, idx, testKey, cycle){
   const lastKn = calcStageLoad(stage, testKey);
 
   if(!isFree){
-    return `
-      <div class="field">
-        <span class="field__label">${h(stage.label)}</span>
-        <input class="field__input ${autoDruck ? 'mess-input--auto' : ''}" data-role="stage-druck" data-test="${testKey}" data-cycle="${cycle.id}" data-stage="${idx}" type="number" step="0.1" value="${h(stage.druck)}" ${autoDruck ? 'readonly' : ''}>
-        <span class="hint" style="font-size:11px;text-align:left;margin-top:2px">≈ ${Number.isFinite(lastKn) ? fmt(lastKn,1) : '—'} kN</span>
-      </div>
-    `;
-  }
+  return `
+    <div class="field field--stage-druck">
+      <input
+        class="field__input ${autoDruck ? 'mess-input--auto' : ''}"
+        data-role="stage-druck"
+        data-test="${testKey}"
+        data-cycle="${cycle.id}"
+        data-stage="${idx}"
+        type="number"
+        step="0.1"
+        value="${h(stage.druck)}"
+        ${autoDruck ? 'readonly' : ''}
+        placeholder="${h(stage.label)}"
+      >
+      <span class="hint" style="font-size:11px;text-align:left;margin-top:2px">
+        ≈ ${Number.isFinite(lastKn) ? fmt(lastKn,1) : '—'} kN
+      </span>
+    </div>
+  `;
+}
 
   return `
     <div class="field" style="min-width:130px">
@@ -1615,12 +1618,14 @@ function buildMeasurementBody(cycle, testKey){
 
 function renderCycleCard(cycle, testKey){
   const isFree = getTest(testKey).mode === 'frei';
+  const badgeText = `${testKey === 'eignung' ? 'Zyklus' : 'Abschnitt'} ${cycle.nr}`;
+  const secondaryTitle = cycle.title && cycle.title !== badgeText ? cycle.title : '';
 
   return `
     <div class="zyklus-card" data-cycle-card="${cycle.id}">
       <div class="zyklus-card__head">
-        <span class="zyklus-badge">${testKey === 'eignung' ? 'Zyklus' : 'Abschnitt'} ${cycle.nr}</span>
-        <span class="zyklus-title">${h(cycle.title)}</span>
+        <span class="zyklus-badge">${h(badgeText)}</span>
+        ${secondaryTitle ? `<span class="zyklus-title">${h(secondaryTitle)}</span>` : ''}
         <span class="zyklus-spacer"></span>
         ${isFree ? `<button class="zyklus-del" data-role="cycle-del" data-test="${testKey}" data-cycle="${cycle.id}" type="button">Löschen</button>` : ''}
       </div>
