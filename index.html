@@ -7,8 +7,8 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="HTB Prüfungen" />
-  <title>HTB Prüfungen</title>
+  <meta name="apple-mobile-web-app-title" content="Ankerprüfung" />
+  <title>HTB Ankerprüfung</title>
 
   <link rel="manifest" href="/Ankerpruefung/manifest.json?v=1" />
   <link rel="icon" type="image/svg+xml" href="/Ankerpruefung/icon.svg?v=1" />
@@ -36,15 +36,15 @@
           <button class="modal-adj-btn" data-adj="-60" type="button">-1 min</button>
           <button class="modal-adj-btn" data-adj="-10" type="button">-10 s</button>
           <input id="timeAdjustInput" class="modal-input" type="number" step="1" value="0" />
-          <button class="modal-adj-btn" data-adj="10" type="button">+10 s</button>
-          <button class="modal-adj-btn" data-adj="60" type="button">+1 min</button>
+          <button class="modal-adj-btn" data-adj="+10" type="button">+10 s</button>
+          <button class="modal-adj-btn" data-adj="+60" type="button">+1 min</button>
         </div>
         <div class="modal-preview" id="timeAdjustPreview">Neue Zeit: 00:00</div>
       </div>
 
       <div class="modal-buttons">
-        <button id="timeAdjustApply" class="btn btn--save btn--small" type="button">Übernehmen</button>
-        <button id="timeAdjustCancel" class="btn btn--ghost btn--small" type="button">Abbrechen</button>
+        <button id="btnTimeAdjustApply" class="btn btn--save btn--small" type="button">Übernehmen</button>
+        <button id="btnTimeAdjustCancel" class="btn btn--ghost btn--small" type="button">Abbrechen</button>
       </div>
     </div>
   </div>
@@ -52,83 +52,91 @@
   <header class="brand">
     <div class="brand__bar">
       <div class="brand__logo">
-        <img src="/Ankerpruefung/logo.svg?v=1" alt="HTB Logo"
-             onerror="this.onerror=null;this.src='/Ankerpruefung/logo.png?v=1';" />
+        <img
+          src="/Ankerpruefung/logo.svg?v=1"
+          alt="HTB Logo"
+          onerror="this.onerror=null;this.src='/Ankerpruefung/logo.png?v=1';"
+        />
       </div>
       <div class="brand__info">
-        <div class="brand__company">HTB Prüfungen</div>
+        <div class="brand__company">Ankerprüfung</div>
         <div class="brand__subtitle">HTB Baugesellschaft m.b.H. · Spezialtiefbau</div>
       </div>
     </div>
   </header>
 
   <nav class="tabs" role="tablist" aria-label="Menü">
-    <button class="tab is-active" data-tab="eignung" type="button">Eignungsprüfung</button>
-    <button class="tab" data-tab="auszieh" type="button">Ausziehversuch</button>
-    <button class="tab" data-tab="abnahme" type="button">Abnahmeprüfung</button>
+    <button class="tab is-active" data-tab="formular" type="button">Formular</button>
     <button class="tab" data-tab="auswertung" type="button">Auswertung</button>
     <button class="tab" data-tab="verlauf" type="button">Verlauf</button>
     <button class="tab tab--icon" data-tab="settings" type="button" aria-label="Einstellungen">
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"
-              stroke="currentColor" stroke-width="2"/>
+          stroke="currentColor" stroke-width="2"/>
       </svg>
     </button>
   </nav>
 
-  <main id="tab-eignung" class="pane is-active" role="tabpanel">
+  <!-- ========== FORMULAR ========== -->
+  <main id="tab-formular" class="pane is-active" role="tabpanel">
+    <section class="card">
+      <div class="card__title">Prüfart</div>
+
+      <div class="action-row" style="justify-content:flex-start; gap:8px; flex-wrap:wrap;">
+        <button class="btn btn--ghost btn--small is-active" data-set-active-test="eignung" type="button">Eignungsprüfung</button>
+        <button class="btn btn--ghost btn--small" data-set-active-test="auszieh" type="button">Ausziehversuch</button>
+        <button class="btn btn--ghost btn--small" data-set-active-test="abnahme" type="button">Abnahmeprüfung</button>
+      </div>
+
+      <div class="hint" style="text-align:left; margin-top:8px;">
+        Die Formulare werden dynamisch von <code>app.js</code> aufgebaut.
+      </div>
+    </section>
+
     <div id="content-eignung"></div>
-  </main>
-
-  <main id="tab-auszieh" class="pane" role="tabpanel" hidden>
     <div id="content-auszieh"></div>
-  </main>
-
-  <main id="tab-abnahme" class="pane" role="tabpanel" hidden>
     <div id="content-abnahme"></div>
   </main>
 
+  <!-- ========== AUSWERTUNG ========== -->
   <main id="tab-auswertung" class="pane" role="tabpanel" hidden>
     <section class="card">
       <div class="card__title">Auswertung</div>
 
-      <div class="form-grid">
-        <label class="field">
-          <span class="field__label">Prüfung auswählen</span>
-          <select id="evalTestSelect" class="field__select">
-            <option value="eignung">Eignungsprüfung</option>
-            <option value="auszieh">Ausziehversuch</option>
-            <option value="abnahme">Abnahmeprüfung</option>
-          </select>
-        </label>
+      <div class="action-row" style="justify-content:flex-start; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+        <button class="btn btn--ghost btn--small is-active" data-set-eval-test="eignung" type="button">Eignungsprüfung</button>
+        <button class="btn btn--ghost btn--small" data-set-eval-test="auszieh" type="button">Ausziehversuch</button>
+        <button class="btn btn--ghost btn--small" data-set-eval-test="abnahme" type="button">Abnahmeprüfung</button>
       </div>
 
       <div id="auswertungContainer"></div>
     </section>
-
-    <section class="card card--actions card--actions-bottom">
-      <div class="action-row">
-        <button id="btnSaveAuswertung" class="btn btn--save btn--small" type="button">Speichern</button>
-        <button id="btnPdfAuswertung" class="btn btn--ghost btn--small" type="button">PDF Auswertung</button>
-      </div>
-    </section>
   </main>
 
+  <!-- ========== VERLAUF ========== -->
   <main id="tab-verlauf" class="pane" role="tabpanel" hidden>
     <section class="card">
       <div class="card__title">Gespeicherte Protokolle</div>
       <div id="historyList" class="historyList"></div>
       <div class="hint">Neueste oben · lokal gespeichert · max. 30 Einträge</div>
     </section>
+
+    <section class="card card--actions card--actions-bottom">
+      <div class="action-row">
+        <button id="btnSaveVerlauf" class="btn btn--save btn--small" type="button">Speichern</button>
+      </div>
+    </section>
   </main>
 
+  <!-- ========== SETTINGS ========== -->
   <main id="tab-settings" class="pane" role="tabpanel" hidden>
     <section class="card">
       <div class="card__title">Einstellungen</div>
 
       <div class="settings-group">
         <div class="settings-group__title">Alarm</div>
+
         <div class="action-row" style="justify-content:flex-start; margin-top:6px;">
           <button id="btnAlarmSoundToggle" class="btn btn--ghost btn--small" type="button">Ton einschalten</button>
         </div>
@@ -142,40 +150,6 @@
           Für iPhone: Ton einmal hier aktivieren oder vor dem Start testen.
         </div>
       </div>
-
-      <div class="settings-group">
-        <div class="settings-group__title">Vorlagen Export / Import</div>
-
-        <div class="form-grid">
-          <label class="field">
-            <span class="field__label">Prüfung</span>
-            <select id="settingsTemplateTarget" class="field__select">
-              <option value="eignung">Eignungsprüfung</option>
-              <option value="auszieh">Ausziehversuch</option>
-              <option value="abnahme">Abnahmeprüfung</option>
-            </select>
-          </label>
-        </div>
-
-        <div class="action-row" style="justify-content:flex-start;gap:10px;flex-wrap:wrap; margin-top:10px">
-          <button id="btnExportTemplate" class="btn btn--ghost btn--small" type="button">📤 Vorlage exportieren</button>
-          <button id="btnImportTemplate" class="btn btn--ghost btn--small" type="button">📥 Vorlage importieren</button>
-          <input id="importFileInput" type="file" accept=".json" style="display:none" />
-        </div>
-
-        <div class="hint" style="text-align:left">
-          Die Stammdaten werden immer mit exportiert / importiert. Prüfungsdaten nur für die gewählte Prüfung.
-        </div>
-      </div>
-
-      <div class="settings-group">
-        <div class="settings-group__title">Vollständiger Export / Import</div>
-        <div class="action-row" style="justify-content:flex-start;gap:10px;flex-wrap:wrap">
-          <button id="btnExportFull" class="btn btn--ghost btn--small" type="button">📦 Export</button>
-          <button id="btnImportFull" class="btn btn--ghost btn--small" type="button">📦 Import</button>
-          <input id="importFullInput" type="file" accept=".json" style="display:none" />
-        </div>
-      </div>
     </section>
 
     <section class="card card--actions card--actions-bottom">
@@ -186,11 +160,11 @@
   </main>
 
   <footer class="footer">
-    &copy; <b>HTB Baugesellschaft m.b.H.</b> – Prüf-App
+    &copy; <b>HTB Baugesellschaft m.b.H.</b> – Ankerprüfung PWA
     <br />
     <button id="btnInstall" class="btn btn--install" type="button" hidden>App installieren</button>
   </footer>
 
-  <script src="/Ankerpruefung/app.js?v=20"></script>
+  <script src="/Ankerpruefung/app.js?v=1"></script>
 </body>
 </html>
