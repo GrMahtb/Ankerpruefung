@@ -147,30 +147,33 @@
     </details>
 
    <!-- ═══════════════════ PRESSE ═══════════════════ -->
-<section class="card">
-  <div class="card__title">Presse / Kalibrierung</div>
 
-  <!-- Auswahl -->
-  <div class="form-grid">
-    <label class="field field--full">
-      <span class="field__label">Spannpresse auswählen</span>
-      <select id="presseSelect" class="field__select">
-        <option value="">— keine ausgewählt —</option>
-      </select>
-    </label>
-  </div>
+<details class="card card--collapsible">
+  <summary class="card__title">Presse / Kalibrierung</summary>
 
-  <!-- Aktions-Buttons: Import / Export / LÖSCHEN -->
-  <div class="action-row" style="justify-content:flex-start; margin-top:12px; gap:8px; flex-wrap:wrap">
-    <button id="btnKalibImport" class="btn btn--ghost btn--small" type="button">📥 CSV importieren</button>
-    <button id="btnKalibExport" class="btn btn--ghost btn--small" type="button">📤 CSV exportieren / Vorlage</button>
-    <button id="btnKalibDelete" class="btn btn--danger btn--small" type="button">🗑 Kalibrierung löschen</button>
-    <input id="kalibImportInput" type="file" accept=".csv,text/csv" style="display:none" />
-  </div>
+  <div class="card__body">
 
-  <p id="kalibEmptyHint" class="hint" style="text-align:left; margin-top:10px">
-    Noch keine Presse ausgewählt. CSV importieren oder Presse aus der Liste wählen.
-  </p>
+    <!-- Auswahl -->
+    <div class="form-grid">
+      <label class="field field--full">
+        <span class="field__label">Spannpresse auswählen</span>
+        <select id="presseSelect" class="field__select">
+          <option value="">— keine ausgewählt —</option>
+        </select>
+      </label>
+    </div>
+
+    <!-- Aktions-Buttons -->
+    <div class="action-row" style="justify-content:flex-start; margin-top:12px; gap:8px; flex-wrap:wrap">
+      <button id="btnKalibImport" class="btn btn--ghost btn--small" type="button">📥 CSV importieren</button>
+      <button id="btnKalibExport" class="btn btn--ghost btn--small" type="button">📤 CSV exportieren / Vorlage</button>
+      <button id="btnKalibDelete" class="btn btn--danger btn--small" type="button">🗑 Kalibrierung löschen</button>
+      <input id="kalibImportInput" type="file" accept=".csv,text/csv" style="display:none" />
+    </div>
+
+    <p id="kalibEmptyHint" class="hint" style="text-align:left; margin-top:10px">
+      Noch keine Presse ausgewählt. CSV importieren oder Presse aus der Liste wählen.
+    </p>
 
   <!-- Info-Box zur gewählten Kalibrierung -->
   <div id="kalibInfoBox" class="settings-group" hidden style="margin-top:12px">
