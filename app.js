@@ -519,6 +519,69 @@ function ensureDynamicStyles(){
   style.textContent = `
     html{
       -webkit-text-size-adjust:100%;
+      background:#6d6d72 !important;
+    }
+
+    body{
+      background:#6d6d72 !important;
+      color:#fff !important;
+    }
+
+    .brand,
+    .brand__bar,
+    .tabs,
+    .pane{
+      background:#6d6d72 !important;
+      color:#fff !important;
+      box-shadow:none !important;
+    }
+
+    .card,
+    .timer-box,
+    .modal-box,
+    .photo-box,
+    .settings-group,
+    .historyItem,
+    .auswertung-block,
+    .table-wrap,
+    .info-box,
+    .kalib-preview{
+      background:rgba(54,54,58,.92) !important;
+      color:#fff !important;
+      border-color:rgba(255,255,255,.14) !important;
+    }
+
+    .brand__subtitle,
+    .hint,
+    .field__hint,
+    .timer-edit-hint,
+    .kalib-info__sub{
+      color:rgba(255,255,255,.74) !important;
+    }
+
+    .tab,
+    .btn,
+    .timer-btn,
+    .btn-plus{
+      border-color:rgba(255,255,255,.18) !important;
+    }
+
+    .tab.is-active,
+    .btn--save,
+    .timer-btn--start,
+    .btn-plus{
+      background:#3d3d41 !important;
+      color:#fff !important;
+      border-color:#d4d4d8 !important;
+    }
+
+    .btn--ghost,
+    .timer-btn--ghost,
+    .timer-btn--stop,
+    .btn--danger{
+      background:#4a4a4f !important;
+      color:#fff !important;
+      border-color:#d4d4d8 !important;
     }
 
     .field__input,
@@ -527,159 +590,201 @@ function ensureDynamicStyles(){
     .mess-input,
     .modal-input{
       font-size:16px !important;
+      background:rgba(255,255,255,.06) !important;
+      color:#fff !important;
+      border-color:rgba(255,255,255,.18) !important;
+    }
+
+    .field__input::placeholder{
+      color:rgba(255,255,255,.48) !important;
     }
 
     .field__input--required, .field__select--required, .field__textarea--required{
-      background: rgba(255,80,80,.10) !important;
-      border-color: rgba(255,120,120,.45) !important;
+      background: rgba(255,255,255,.08) !important;
+      border-color: rgba(255,255,255,.42) !important;
     }
 
     .field__input--computed{
-      color:#2bb673 !important;
+      color:#f2f2f4 !important;
       font-weight:800 !important;
     }
 
     .mess-table{
-  width:100%;
-  table-layout:fixed;
-  border-collapse:collapse;
-}
+      width:100%;
+      table-layout:fixed;
+      border-collapse:collapse;
+    }
 
-.mess-table th,
-.mess-table td{
-  padding:2px 3px !important;
-  vertical-align:middle;
-}
+    .mess-table th,
+    .mess-table td{
+      padding:2px 3px !important;
+      vertical-align:middle;
+    }
 
-.mess-stage-col, .th-stage{
-  width:30px !important;
-  min-width:30px !important;
-  max-width:30px !important;
-  text-align:center;
-  font-size:9px;
-  padding-left:2px !important;
-  padding-right:2px !important;
-}
+    .mess-stage-col, .th-stage{
+      width:30px !important;
+      min-width:30px !important;
+      max-width:30px !important;
+      text-align:center;
+      font-size:9px;
+      padding-left:2px !important;
+      padding-right:2px !important;
+    }
 
-.mess-load-col, .th-load{
-  width:42px !important;
-  min-width:42px !important;
-  max-width:42px !important;
-  text-align:center;
-  font-size:9px;
-  padding-left:2px !important;
-  padding-right:2px !important;
-}
+    .mess-load-col, .th-load{
+      width:42px !important;
+      min-width:42px !important;
+      max-width:42px !important;
+      text-align:center;
+      font-size:9px;
+      padding-left:2px !important;
+      padding-right:2px !important;
+    }
 
-.mess-druck-col, .th-druck{
-  width:48px !important;
-  min-width:48px !important;
-  max-width:48px !important;
-  text-align:center;
-  font-size:9px;
-  padding-left:2px !important;
-  padding-right:2px !important;
-}
+    .mess-druck-col, .th-druck{
+      width:48px !important;
+      min-width:48px !important;
+      max-width:48px !important;
+      text-align:center;
+      font-size:9px;
+      padding-left:2px !important;
+      padding-right:2px !important;
+    }
 
-.th-min{
-  width:48px !important;
-  min-width:48px !important;
-  max-width:48px !important;
-}
+    .th-min{
+      width:48px !important;
+      min-width:48px !important;
+      max-width:48px !important;
+    }
 
-.th-mess{
-  width:120px !important;
-  min-width:120px !important;
-}
+    .th-mess{
+      width:120px !important;
+      min-width:120px !important;
+    }
 
-.th-versch{
-  width:78px !important;
-  min-width:78px !important;
-}
+    .th-versch{
+      width:78px !important;
+      min-width:78px !important;
+    }
 
-.th-anm{
-  width:40px !important;
-  min-width:40px !important;
-  max-width:40px !important;
-}
+    .th-anm{
+      width:40px !important;
+      min-width:40px !important;
+      max-width:40px !important;
+    }
 
-.mess-stage-pill{
-  font-size:9px !important;
-  line-height:1.1 !important;
-  padding:1px 2px !important;
-  border-radius:4px;
-}
+    .mess-stage-pill{
+      font-size:9px !important;
+      line-height:1.1 !important;
+      padding:1px 2px !important;
+      border-radius:4px;
+      background:rgba(255,255,255,.10) !important;
+      color:#fff !important;
+    }
 
-.mess-table .minute-cell{
-  min-width:52px;
-  display:flex;
-  align-items:center;
-  gap:3px;
-}
+    .mess-table .minute-cell{
+      min-width:52px;
+      display:flex;
+      align-items:center;
+      gap:3px;
+    }
 
-.mess-table .minute-input{
-  min-width:44px;
-  width:44px;
-}
+    .mess-table .minute-input{
+      min-width:44px;
+      width:44px;
+    }
 
-.mess-table [data-role="row-ablesung"]{
-  min-width:112px;
-  width:112px;
-  font-size:16px !important;
-  font-weight:700;
-}
+    .mess-table [data-role="row-ablesung"]{
+      min-width:112px;
+      width:112px;
+      font-size:16px !important;
+      font-weight:700;
+    }
 
-.mess-table [data-role="row-versch"]{
-  min-width:72px;
-  width:72px;
-}
+    .mess-table [data-role="row-versch"]{
+      min-width:72px;
+      width:72px;
+    }
 
-.mess-table [data-role="stage-druck"]{
-  width:100%;
-}
+    .mess-table [data-role="stage-druck"]{
+      width:100%;
+    }
 
-.zyklus-load-row{
-  display:flex;
-  gap:6px;
-  flex-wrap:wrap;
-}
+    .zyklus-load-row{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+    }
 
-.zyklus-load-row .field{
-  min-width:64px !important;
-  width:64px !important;
-}
+    .zyklus-load-row .field{
+      min-width:64px !important;
+      width:64px !important;
+    }
 
-.field--stage-druck .hint{
-  text-align:center !important;
-  font-size:10px !important;
-}
+    .field--stage-druck .hint{
+      text-align:center !important;
+      font-size:10px !important;
+    }
 
     .row-active td{
-      background: rgba(240,138,28,.12) !important;
+      background: rgba(255,255,255,.08) !important;
     }
 
     .row-active .mess-stage-pill{
-      background: rgba(240,138,28,.22);
-      box-shadow: 0 0 0 1px rgba(240,138,28,.45) inset;
+      background: rgba(255,255,255,.16) !important;
+      box-shadow: 0 0 0 1px rgba(255,255,255,.24) inset;
     }
 
     .current-measurement{
-      border:2px solid #f08a1c !important;
-      box-shadow:0 0 0 3px rgba(240,138,28,.22) !important;
-      background:rgba(255,180,90,.12) !important;
+      border:2px solid #d7d7dc !important;
+      box-shadow:0 0 0 3px rgba(255,255,255,.12) !important;
+      background:rgba(255,255,255,.08) !important;
       animation:currentFieldPulse 1.2s ease-in-out infinite;
     }
 
     @keyframes currentFieldPulse{
-      0%   { box-shadow:0 0 0 0 rgba(240,138,28,.35); }
-      70%  { box-shadow:0 0 0 6px rgba(240,138,28,0); }
-      100% { box-shadow:0 0 0 0 rgba(240,138,28,0); }
+      0%   { box-shadow:0 0 0 0 rgba(255,255,255,.22); }
+      70%  { box-shadow:0 0 0 6px rgba(255,255,255,0); }
+      100% { box-shadow:0 0 0 0 rgba(255,255,255,0); }
+    }
+
+    body[data-layout-mode="tablet"] .pane{
+      max-width:1100px;
+      margin:0 auto;
+      padding-left:10px;
+      padding-right:10px;
+    }
+
+    body[data-layout-mode="desktop"] .pane{
+      max-width:1440px;
+      margin:0 auto;
+      padding-left:14px;
+      padding-right:14px;
+    }
+
+    body[data-layout-mode="tablet"] .form-grid{
+      grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    body[data-layout-mode="desktop"] .form-grid{
+      grid-template-columns:repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    body[data-layout-mode="tablet"] .field--full,
+    body[data-layout-mode="desktop"] .field--full{
+      grid-column:1 / -1 !important;
+    }
+
+    body[data-layout-mode="tablet"] .photo-grid,
+    body[data-layout-mode="desktop"] .photo-grid{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:12px;
     }
   `;
 
   document.head.appendChild(style);
 }
-
 function setRequiredVisual(el, required){
   if(!el) return;
   el.classList.remove('field__input--required','field__select--required','field__textarea--required');
@@ -946,10 +1051,11 @@ function getInitialState(){
   return {
     activeTest:'eignung',
     evalTest:'eignung',
-    settings:{
-      alarmDurationSec:4,
-      alarmSoundEnabled:true
-    },
+   settings:{
+alarmDurationSec:4,
+alarmSoundEnabled:true,
+layoutMode:'auto'
+},
     meta: makeGlobalMeta(),
     tests:{
       eignung: makeTestState('eignung'),
@@ -1824,7 +1930,7 @@ function renderPhotoSection(testKey){
           </div>
 
           <div class="photo-box">
-            <div class="photo-box__title">Detailfoto</div>
+            <div class="photo-box__title">Übersichtsfoto / PDF-Cover</div>
             <div class="photo-preview">${photos.detail ? `<img src="${photos.detail}" alt="Detailfoto">` : 'Kein Bild'}</div>
             <div class="photo-actions">
               <button class="btn btn--ghost btn--small" data-role="photo-pick-detail" data-test="${testKey}" type="button">Foto wählen</button>
@@ -2669,6 +2775,305 @@ async function drawCoverPageAnker(pdf, ctx, testKey, snap){
     }
   }
 }
+/* ---------------- pdf template helpers ---------------- */
+function pdfSafeAnker(v){
+  return String(v ?? '')
+    .replace(/[–—]/g,'-')
+    .replace(/[•→]/g,'-')
+    .replace(/[\u0000-\u001F\u007F]/g,'');
+}
+
+function drawTextSafeAnker(page, text, options){
+  page.drawText(pdfSafeAnker(text), options);
+}
+
+async function loadPdfAssetsAnker(pdf){
+  const { StandardFonts } = window.PDFLib;
+
+  const fontR = await pdf.embedFont(StandardFonts.Helvetica);
+  const fontB = await pdf.embedFont(StandardFonts.HelveticaBold);
+
+  let logo = null;
+  try{
+    const b = await fetch(`${BASE_PATH}logo.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+    logo = await pdf.embedPng(b);
+  }catch{}
+
+  let fusszeile = null;
+  try{
+    const b = await fetch(`${BASE_PATH}Fu%C3%9Fzeile.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+    fusszeile = await pdf.embedPng(b);
+  }catch{
+    try{
+      const b = await fetch(`${BASE_PATH}Fusszeile.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+      fusszeile = await pdf.embedPng(b);
+    }catch{}
+  }
+
+  return { fontR, fontB, logo, fusszeile };
+}
+
+function getPdfCtxAnker(PDFLib, assets, currentMeta){
+  const { rgb } = PDFLib;
+  const PAGE_W = 595.28;
+  const PAGE_H = 841.89;
+  const mm = v => v * 72 / 25.4;
+  const K = rgb(0,0,0);
+  const GREY = rgb(0.90,0.90,0.90);
+  return { PAGE_W, PAGE_H, mm, K, GREY, rgb, ...assets, currentMeta };
+}
+
+function getFooterTextSingleLineAnker(meta, subtitle=''){
+  const fil = FILIALEN[meta?.filiale] || {};
+  return `HTB Baugesellschaft m.b.H. · ${fil.tel || ''} · ${fil.email || ''} · ${fil.adresse || ''}${subtitle ? ' · ' + subtitle : ''}`;
+}
+
+function getFooterFontSizeAnker(font, text, maxW, startSize=6.0, minSize=4.4){
+  let size = startSize;
+  const safe = pdfSafeAnker(text);
+  while(size > minSize && font.widthOfTextAtSize(safe, size) > maxW){
+    size -= 0.2;
+  }
+  return size;
+}
+
+function drawNewFooterFullAnker(page, ctx, subtitle=''){
+  const { PAGE_W, mm, fontR, K, fusszeile, currentMeta } = ctx;
+
+  let imgH = 0;
+  if(fusszeile){
+    const scale = PAGE_W / fusszeile.width;
+    imgH = fusszeile.height * scale;
+    page.drawImage(fusszeile, { x:0, y:0, width:PAGE_W, height:imgH });
+  }
+
+  const x = mm(8);
+  const maxW = PAGE_W - x - mm(8);
+  const text = getFooterTextSingleLineAnker(currentMeta || {}, subtitle);
+  const size = getFooterFontSizeAnker(fontR, text, maxW, 6.0, 4.4);
+
+  drawTextSafeAnker(page, text, {
+    x,
+    y: imgH + mm(3.4),
+    size,
+    font: fontR,
+    color: K
+  });
+
+  return imgH + mm(9.5);
+}
+
+function drawHeaderBarAnker(page, ctx, title, sub=''){
+  const { mm, fontR, fontB, K, GREY, logo, PAGE_W, PAGE_H } = ctx;
+  const margin = mm(8);
+  const W = PAGE_W - 2 * margin;
+  const H = PAGE_H - 2 * margin;
+  const hdrH = mm(13);
+
+  page.drawRectangle({
+    x: margin,
+    y: margin + H - hdrH,
+    width: W,
+    height: hdrH,
+    color: GREY,
+    borderColor: K,
+    borderWidth: 0.8
+  });
+
+  if(logo){
+    const lh = hdrH * 0.75;
+    const scale = lh / logo.height;
+    page.drawImage(logo, {
+      x: margin + mm(2),
+      y: margin + H - hdrH + (hdrH - lh) / 2,
+      width: logo.width * scale,
+      height: lh
+    });
+  }
+
+  drawTextSafeAnker(page, title, {
+    x: margin + mm(32),
+    y: margin + H - hdrH + mm(4.2),
+    size: 13,
+    font: fontB,
+    color: K
+  });
+
+  if(sub){
+    drawTextSafeAnker(page, sub, {
+      x: margin + mm(32),
+      y: margin + H - hdrH + mm(1.5),
+      size: 8,
+      font: fontR,
+      color: K
+    });
+  }
+}
+
+async function embedDataUrlImageAnker(pdf, dataUrl){
+  if(!dataUrl) return null;
+
+  const b64 = String(dataUrl).split(',')[1] || '';
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+
+  return /^data:image\/png/i.test(dataUrl)
+    ? await pdf.embedPng(bytes)
+    : await pdf.embedJpg(bytes);
+}
+
+async function drawCoverPageAnker(pdf, ctx, testKey, snap){
+  const { PAGE_W, PAGE_H, mm, fontR, fontB, K, logo, rgb } = ctx;
+  const page = pdf.addPage([PAGE_W, PAGE_H]);
+
+  const footerH = drawNewFooterFullAnker(page, ctx, TEST_LABELS[testKey]);
+  const contentBottom = footerH;
+
+  const margin  = mm(10);
+  const leftW   = PAGE_W * 0.52;
+  const rightX  = leftW + mm(6);
+  const rightW  = PAGE_W - rightX - margin;
+
+  const headerH    = mm(38);
+  const headerBotY = PAGE_H - margin - headerH;
+
+  page.drawRectangle({
+    x:0, y:headerBotY,
+    width:PAGE_W, height:headerH,
+    color:rgb(0.82,0.82,0.82)
+  });
+
+  page.drawLine({
+    start:{ x:0, y:headerBotY + headerH },
+    end:{ x:PAGE_W, y:headerBotY + headerH },
+    thickness:1.5,
+    color:K
+  });
+
+  let logoY = headerBotY + mm(10);
+  if(logo){
+    const maxLogoH = headerH - mm(14);
+    const scale = maxLogoH / logo.height;
+    const lw = logo.width * scale;
+    const lh = logo.height * scale;
+    logoY = headerBotY + mm(10);
+
+    page.drawImage(logo, {
+      x: margin,
+      y: logoY,
+      width: lw,
+      height: lh
+    });
+
+    drawTextSafeAnker(page, 'HTB Baugesellschaft m.b.H.', {
+      x: margin,
+      y: logoY - mm(5),
+      size: 7.5,
+      font: fontR,
+      color: K
+    });
+  }
+
+  drawTextSafeAnker(page, TEST_LABELS[testKey], {
+    x: rightX,
+    y: headerBotY + (headerH / 2) - mm(4),
+    size: 24,
+    font: fontB,
+    color: K
+  });
+
+  page.drawLine({
+    start:{ x:0, y:headerBotY },
+    end:{ x:PAGE_W, y:headerBotY },
+    thickness:1.5,
+    color:K
+  });
+
+  const test = snap.tests?.[testKey];
+  const fields = [
+    { label:'Bauvorhaben / Objekt', value:snap.meta?.bauvorhaben || '—', big:false },
+    { label:'Bauherr', value:snap.meta?.bauherr || '—', big:false },
+    { label:'Prüfart', value:TEST_LABELS[testKey], big:true },
+    { label:'Lage / Nummer', value:`${snap.meta?.lage || '—'} · ${snap.meta?.nummer || '—'}`, big:false },
+    { label:'Datum / Filiale', value:`${dateDE(snap.meta?.pruefdatum) || '—'} · ${snap.meta?.filiale || '—'}`, big:false }
+  ];
+
+  const lineLeft  = margin + mm(6);
+  const lineRight = rightX - mm(6);
+  const areaTop = headerBotY - mm(4);
+  const areaBottom = contentBottom + mm(4);
+  const areaH = areaTop - areaBottom;
+  const slotH = areaH / fields.length;
+
+  fields.forEach((field, i) => {
+    const slotTop = areaTop - i * slotH;
+    const slotBottom = slotTop - slotH;
+    const textY = slotBottom + slotH / 2;
+
+    if(field.label){
+      drawTextSafeAnker(page, field.label.toUpperCase(), {
+        x: lineLeft,
+        y: textY + mm(5),
+        size: 7,
+        font: fontR,
+        color: rgb(0.45,0.45,0.45)
+      });
+    }
+
+    drawTextSafeAnker(page, field.value, {
+      x: lineLeft,
+      y: textY - mm(2),
+      size: field.big ? 20 : 12,
+      font: fontB,
+      color: K
+    });
+
+    if(i < fields.length - 1){
+      page.drawLine({
+        start:{ x: lineLeft, y: slotBottom },
+        end:{ x: lineRight, y: slotBottom },
+        thickness:0.7,
+        color:K
+      });
+    }
+  });
+
+  const overview = test?.photos?.overview || '';
+  if(overview){
+    try{
+      const img = await embedDataUrlImageAnker(pdf, overview);
+      const photoTop   = headerBotY;
+      const photoAreaH = photoTop - contentBottom;
+
+      const ratio = img.width / img.height;
+      let dw = rightW;
+      let dh = dw / ratio;
+      if(dh > photoAreaH){
+        dh = photoAreaH;
+        dw = dh * ratio;
+      }
+
+      page.drawImage(img, {
+        x: rightX + (rightW - dw) / 2,
+        y: contentBottom,
+        width: dw,
+        height: dh
+      });
+    }catch(err){
+      console.warn('Cover-Foto konnte nicht eingebettet werden:', err);
+    }
+  }else{
+    page.drawRectangle({
+      x: rightX,
+      y: contentBottom,
+      width: rightW,
+      height: headerBotY - contentBottom,
+      borderColor: K,
+      borderWidth: 0.8
+    });
+
+    drawTextSafeAnker(page, 'Kein Übersichtsfoto vorhanden.', {
 /* ---------------- pdf export ---------------- */
 async function exportPdfForTest(testKey, snapshotState=null){
   if(!window.PDFLib){
@@ -4057,7 +4462,23 @@ function setEvalTest(testKey){
   renderAuswertung();
   saveDraftDebounced();
 }
+function getResolvedLayoutMode(){
+  const pref = state.settings?.layoutMode || 'auto';
 
+  if(pref === 'tablet') return 'tablet';
+  if(pref === 'desktop') return 'desktop';
+
+  const w = window.innerWidth || document.documentElement.clientWidth || 0;
+  if(w >= 1280) return 'desktop';
+  if(w >= 820) return 'tablet';
+  return 'mobile';
+}
+
+function applyLayoutMode(){
+  const resolved = getResolvedLayoutMode();
+  document.body.dataset.layoutMode = resolved;
+  document.documentElement.dataset.layoutMode = resolved;
+}
 /* ---------------- delegated ui without data-role ---------------- */
 document.addEventListener('click', async e => {
   const activeBtn = e.target.closest('[data-set-active-test]');
@@ -4164,6 +4585,62 @@ function bindStaticUi(){
     saveDraftDebounced();
     alert('Einstellungen gespeichert.');
   });
+  $('settings-layoutMode')?.addEventListener('change', e => {
+  state.settings.layoutMode = e.target.value || 'auto';
+  applyLayoutMode();
+  saveDraftDebounced();
+});
+
+$('btnExportTemplate')?.addEventListener('click', () => {
+  const testKey = getActiveTestKey();
+  const payload = buildTemplatePayload(testKey);
+  downloadJson(payload, `${dateTag()}_HTB_${testKey}_Vorlage.htbanker.json`);
+});
+
+$('btnImportTemplate')?.addEventListener('click', () => {
+  $('importTemplateGlobalInput')?.click();
+});
+
+$('importTemplateGlobalInput')?.addEventListener('change', async e => {
+  const file = e.target.files?.[0];
+  if(!file) return;
+
+  try{
+    await importTemplateFile(getActiveTestKey(), file);
+    alert('Vorlage importiert.');
+  }catch(err){
+    console.error(err);
+    alert('Vorlage konnte nicht importiert werden.');
+  }finally{
+    e.target.value = '';
+  }
+});
+
+$('btnExportFull')?.addEventListener('click', () => {
+  downloadJson(collectSnapshot(), `${dateTag()}_HTB_Ankerpruefung_Export.json`);
+});
+
+$('btnImportFull')?.addEventListener('click', () => {
+  $('importFullGlobalInput')?.click();
+});
+
+$('importFullGlobalInput')?.addEventListener('change', async e => {
+  const file = e.target.files?.[0];
+  if(!file) return;
+
+  try{
+    const txt = await file.text();
+    const snap = JSON.parse(txt);
+    applySnapshot(snap, true);
+    saveDraftDebounced();
+    alert('Vollständiger Import erfolgreich.');
+  }catch(err){
+    console.error(err);
+    alert('Datei konnte nicht importiert werden.');
+  }finally{
+    e.target.value = '';
+  }
+});
 $('btnExportTemplate')?.addEventListener('click', () => {
   const testKey = getActiveTestKey();
   const payload = buildTemplatePayload(testKey);
@@ -4240,7 +4717,10 @@ timeCloseBtn?.addEventListener('click', closeTimeAdjustModal);
     $(id)?.addEventListener('click', saveCurrentToHistory);
   });
 
-  window.addEventListener('resize', updateFloatingTimerWidget, { passive:true });
+  window.addEventListener('resize', () => {
+  applyLayoutMode();
+  updateFloatingTimerWidget();
+}, { passive:true });
   window.addEventListener('scroll', updateFloatingTimerWidget, { passive:true });
 
   document.addEventListener('visibilitychange', () => {
@@ -4323,7 +4803,11 @@ function initApp(){
   updateRequiredFieldStates();
   updateAllTimerUis();
   syncTestChoiceUi();
+  if($('settings-layoutMode')){
+  $('settings-layoutMode').value = state.settings.layoutMode || 'auto';
+}
 
+applyLayoutMode();
   if($('settings-alarmDuration')){
     $('settings-alarmDuration').value = String(
       clamp(Number(state.settings.alarmDurationSec || 4), 1, 30)
