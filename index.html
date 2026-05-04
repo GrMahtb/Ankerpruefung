@@ -7,9 +7,8 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Ankerprüfung" />
-
-  <title>HTB Ankerprüfung</title>
+  <meta name="apple-mobile-web-app-title" content="HTB Prüfungen" />
+  <title>HTB Prüfungen</title>
 
   <link rel="manifest" href="/Ankerpruefung/manifest.json?v=1" />
   <link rel="icon" type="image/svg+xml" href="/Ankerpruefung/icon.svg?v=1" />
@@ -37,8 +36,8 @@
           <button class="modal-adj-btn" data-adj="-60" type="button">-1 min</button>
           <button class="modal-adj-btn" data-adj="-10" type="button">-10 s</button>
           <input id="timeAdjustInput" class="modal-input" type="number" step="1" value="0" />
-          <button class="modal-adj-btn" data-adj="+10" type="button">+10 s</button>
-          <button class="modal-adj-btn" data-adj="+60" type="button">+1 min</button>
+          <button class="modal-adj-btn" data-adj="10" type="button">+10 s</button>
+          <button class="modal-adj-btn" data-adj="60" type="button">+1 min</button>
         </div>
         <div class="modal-preview" id="timeAdjustPreview">Neue Zeit: 00:00</div>
       </div>
@@ -57,14 +56,16 @@
              onerror="this.onerror=null;this.src='/Ankerpruefung/logo.png?v=1';" />
       </div>
       <div class="brand__info">
-        <div class="brand__company">Ankerprüfung</div>
+        <div class="brand__company">HTB Prüfungen</div>
         <div class="brand__subtitle">HTB Baugesellschaft m.b.H. · Spezialtiefbau</div>
       </div>
     </div>
   </header>
 
   <nav class="tabs" role="tablist" aria-label="Menü">
-    <button class="tab is-active" data-tab="formular" type="button">Formular</button>
+    <button class="tab is-active" data-tab="eignung" type="button">Eignungsprüfung</button>
+    <button class="tab" data-tab="auszieh" type="button">Ausziehversuch</button>
+    <button class="tab" data-tab="abnahme" type="button">Abnahmeprüfung</button>
     <button class="tab" data-tab="auswertung" type="button">Auswertung</button>
     <button class="tab" data-tab="verlauf" type="button">Verlauf</button>
     <button class="tab tab--icon" data-tab="settings" type="button" aria-label="Einstellungen">
@@ -76,285 +77,33 @@
     </button>
   </nav>
 
-  <!-- ========== FORMULAR ========== -->
-  <main id="tab-formular" class="pane is-active" role="tabpanel">
-
-    <!-- STAMMDATEN -->
-    <details class="card card--collapsible" open>
-      <summary class="card__title">Stammdaten</summary>
-      <div class="card__body">
-        <div class="form-grid">
-          <label class="field">
-            <span class="field__label">Niederlassung *</span>
-            <select id="meta-Niederlassung" class="field__select" required>
-              <option value="">Bitte wählen</option>
-              <option value="Arzl">Arzl</option>
-              <option value="Nüziders">Nüziders</option>
-              <option value="Zirl">Zirl</option>
-              <option value="Schwoich">Schwoich</option>
-              <option value="Fusch">Fusch</option>
-              <option value="Wels">Wels</option>
-              <option value="Klagenfurt">Klagenfurt</option>
-            </select>
-          </label>
-
-          <label class="field field--full">
-            <span class="field__label">Bauvorhaben</span>
-            <input id="meta-bauvorhaben" class="field__input" type="text" />
-          </label>
-
-          <label class="field">
-            <span class="field__label">Bauherr</span>
-            <input id="meta-bauherr" class="field__input" type="text" />
-          </label>
-
-          <label class="field">
-            <span class="field__label">Bauleitung</span>
-            <input id="meta-bauleitung" class="field__input" type="text" />
-          </label>
-
-          <label class="field">
-            <span class="field__label">Ankerlage</span>
-            <input id="meta-ankerlage" class="field__input" type="text" />
-          </label>
-
-          <label class="field">
-            <span class="field__label">Anker Nr.</span>
-            <input id="meta-ankerNr" class="field__input" type="text" />
-          </label>
-
-          <label class="field">
-            <span class="field__label">Blatt Nr.</span>
-            <input id="meta-blattNr" class="field__input" type="text" />
-          </label>
-
-          <label class="field">
-            <span class="field__label">Prüfdatum</span>
-            <input id="meta-pruefdatum" class="field__input" type="date" />
-          </label>
-
-          <label class="field">
-            <span class="field__label">Hydraulikpumpe Nr.</span>
-            <input id="meta-pumpeNr" class="field__input" type="text" />
-          </label>
-
-          <label class="field field--full">
-            <span class="field__label">Anmerkung</span>
-            <textarea id="meta-anmerkung" class="field__input field__textarea" rows="2"></textarea>
-          </label>
-        </div>
-      </div>
-    </details>
-
-   <!-- ═══════════════════ PRESSE ═══════════════════ -->
-
-<section class="card">
-  <div class="card__title">Presse / Kalibrierung</div>
-
-  <!-- Auswahl -->
-  <div class="form-grid">
-    <label class="field field--full">
-      <span class="field__label">Spannpresse auswählen</span>
-      <select id="presseSelect" class="field__select">
-        <option value="">— keine ausgewählt —</option>
-      </select>
-    </label>
-  </div>
-
-  <!-- Aktions-Buttons: Import / Export / LÖSCHEN -->
-  <div class="action-row" style="justify-content:flex-start; margin-top:12px; gap:8px; flex-wrap:wrap">
-    <button id="btnKalibImport" class="btn btn--ghost btn--small" type="button">📥 CSV importieren</button>
-    <button id="btnKalibExport" class="btn btn--ghost btn--small" type="button">📤 CSV exportieren / Vorlage</button>
-    <button id="btnKalibDelete" class="btn btn--danger btn--small" type="button">🗑 Kalibrierung löschen</button>
-    <input id="kalibImportInput" type="file" accept=".csv,text/csv" style="display:none" />
-  </div>
-
-  <p id="kalibEmptyHint" class="hint" style="text-align:left; margin-top:10px">
-    Noch keine Presse ausgewählt. CSV importieren oder Presse aus der Liste wählen.
-  </p>
-
-  <!-- Info-Box zur gewählten Kalibrierung -->
-  <div id="kalibInfoBox" class="settings-group" hidden style="margin-top:12px">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap">
-      <div>
-        <div id="kalibName" class="settings-group__title">—</div>
-        <div id="kalibSub" class="hint" style="text-align:left; margin-top:0">—</div>
-      </div>
-      <div id="kalibValidBadge" class="kalib-badge">—</div>
-    </div>
-
-    <div class="form-grid" style="margin-top:8px; font-size:13px">
-      <div class="field">
-        <span class="field__label">Pressentyp</span>
-        <span id="kInfo-presseTyp">—</span>
-      </div>
-      <div class="field">
-        <span class="field__label">Pressen-Nr.</span>
-        <span id="kInfo-presseNr">—</span>
-      </div>
-      <div class="field">
-        <span class="field__label">Manometertyp</span>
-        <span id="kInfo-manTyp">—</span>
-      </div>
-      <div class="field">
-        <span class="field__label">Manometer-Nr.</span>
-        <span id="kInfo-manNr">—</span>
-      </div>
-      <div class="field">
-        <span class="field__label">Kalibriert am</span>
-        <span id="kInfo-kalibAm">—</span>
-      </div>
-      <div class="field">
-        <span class="field__label">Gültig bis</span>
-        <span id="kInfo-gueltigBis">—</span>
-      </div>
-      <div class="field">
-        <span class="field__label">Stützpunkte</span>
-        <span id="kInfo-punkte">—</span>
-      </div>
-      <div class="field">
-        <span class="field__label">Max. Last</span>
-        <span id="kInfo-maxKn">—</span>
-      </div>
-    </div>
-
-    <!-- ═══ STÜTZPUNKTE-KONTROLLE (NEU) ═══ -->
-    <div id="kalibStuetzpunkteWrap" hidden style="margin-top:14px">
-      <div class="settings-group__title" style="margin-bottom:6px">
-         Stützpunkte-Kontrolle
-        <span style="font-weight:400; font-size:12px; color:rgba(220,235,250,.7)">
-          — exakte CSV-Werte, keine Interpolation
-        </span>
-      </div>
-
-      <label class="field">
-        <span class="field__label">Stützpunkt auswählen</span>
-        <select id="kalibStuetzpunkteSelect" class="field__select">
-          <option value="">Stützpunkt auswählen …</option>
-        </select>
-      </label>
-
-      <div id="kalibStuetzpunkteResult" class="stuetz-result"></div>
-    </div>
-    <!-- ═══ Ende Stützpunkte ═══ -->
-  </div>
-</section>
-
-<!-- Kalibrierungs-Vorschau (wird von renderKalibPreview() befüllt) -->
-<div id="kalibPreview" hidden style="margin-top:4px">
-  <div class="settings-group" style="margin-top:0">
-    <div class="settings-group__title">Druckvorschau für aktuelle Vorgaben</div>
-    <div id="kalibPreviewTable"></div>
-  </div>
-</div>
-    <!-- VORGABE -->
-    <details class="card card--collapsible" open>
-      <summary class="card__title">Vorgabe Anker</summary>
-      <div class="card__body">
-
-        <div class="select-grid">
-          <label class="select-card">
-            <input type="radio" name="bodenart" id="boden-nichtbindig" value="nichtbindig" checked />
-            <span><b>Nicht bindig / Fels</b><br><small>Beobachtung Pp: 60 min</small></span>
-          </label>
-          <label class="select-card">
-            <input type="radio" name="bodenart" id="boden-bindig" value="bindig" />
-            <span><b>Bindig</b><br><small>Beobachtung Pp: 180 min</small></span>
-          </label>
-        </div>
-
-        <div class="form-grid" style="margin-top:12px">
-          <label class="field"><span class="field__label">Ankertyp</span><input id="vor-ankertyp" class="field__input" type="text" /></label>
-          <label class="field"><span class="field__label">Ankerlänge L<sub>A</sub> [m]</span><input id="vor-LA" class="field__input" type="number" step="0.01" /></label>
-          <label class="field"><span class="field__label">Verank.länge L<sub>tb</sub> [m]</span><input id="vor-Ltb" class="field__input" type="number" step="0.01" /></label>
-          <label class="field"><span class="field__label">Freie Länge L<sub>tf</sub> [m]</span><input id="vor-Ltf" class="field__input" type="number" step="0.01" /></label>
-          <label class="field"><span class="field__label">Spannüberstand L<sub>e</sub> [m]</span><input id="vor-Le" class="field__input" type="number" step="0.01" /></label>
-          <label class="field"><span class="field__label">E-Modul E<sub>t</sub> [kN/mm²]</span><input id="vor-Et" class="field__input" type="number" step="0.1" value="195" /></label>
-          <label class="field"><span class="field__label">Querschnitt A<sub>t</sub> [mm²]</span><input id="vor-At" class="field__input" type="number" step="0.1" /></label>
-          <label class="field"><span class="field__label">Festlegekraft P<sub>0</sub> [kN]</span><input id="vor-P0" class="field__input" type="number" step="0.1" /></label>
-          <label class="field"><span class="field__label">Vorbelastung P<sub>a</sub> [kN]</span><input id="vor-Pa" class="field__input" type="number" step="0.1" value="0" /></label>
-
-          <label class="field">
-            <span class="field__label">Prüfkraft P<sub>p</sub> [kN]</span>
-            <input id="vor-Pp" class="field__input" type="number" step="0.1" />
-            <small id="hint-vor-Pp" class="field__hint"></small>
-          </label>
-
-          <label class="field"><span class="field__label">0,1%-Dehngrenze P<sub>t0,1k</sub> [kN]</span><input id="vor-Pt01k" class="field__input" type="number" step="0.1" /></label>
-
-          <label class="field">
-            <span class="field__label">Bemessung P<sub>d</sub> [kN]</span>
-            <input id="vor-Pd" class="field__input" type="number" step="0.1" />
-            <small id="hint-vor-Pd" class="field__hint"></small>
-          </label>
-
-          <label class="field"><span class="field__label">Teilsicherheit γ<sub>a</sub> [-]</span><input id="vor-gamma" class="field__input" type="number" step="0.01" value="1.1" /></label>
-        </div>
-
-        <div class="auto-grid">
-          <div class="auto-card">
-            <div class="auto-card__label">Pp aus Pd · γa</div>
-            <div id="calc-PpFromPd" class="auto-card__value">—</div>
-          </div>
-          <div class="auto-card">
-            <div class="auto-card__label">Pd aus Pp / γa</div>
-            <div id="calc-PdFromPp" class="auto-card__value">—</div>
-          </div>
-          <div class="auto-card">
-            <div class="auto-card__label">min. Lapp</div>
-            <div id="calc-minLapp" class="auto-card__value">—</div>
-          </div>
-          <div class="auto-card">
-            <div class="auto-card__label">max. Lapp</div>
-            <div id="calc-maxLapp" class="auto-card__value">—</div>
-          </div>
-          <div class="auto-card">
-            <div class="auto-card__label">s Grenzlinie b (Pp)</div>
-            <div id="calc-sGrenzB" class="auto-card__value">—</div>
-          </div>
-          <div class="auto-card">
-            <div class="auto-card__label">s Grenzlinie a (Pp)</div>
-            <div id="calc-sGrenzA" class="auto-card__value">—</div>
-          </div>
-        </div>
-
-        <div class="info-box">
-          <b>Automatisch berechnet</b><br>
-          Tatsächlich rechnerische freie Stahllänge L<sub>app</sub>: <b id="calc-LappMeasured">—</b><br>
-          Grenzwerte freie Stahllänge eingehalten: <span id="calc-LappCheck" class="inline-badge">—</span>
-        </div>
-
-      </div>
-    </details>
-
-    <!-- LASTZYKLEN -->
-    <details class="card card--collapsible" open>
-      <summary class="card__title">Lastzyklen Eignungsprüfung</summary>
-      <div class="card__body">
-        <div id="zyklenContainer"></div>
-
-        <div class="plus-wrap">
-          <button id="btnAddZyklus" class="btn-plus" type="button">+</button>
-          <div class="plus-label">Lastzyklus hinzufügen</div>
-        </div>
-      </div>
-    </details>
-
-    <!-- AKTIONEN -->
-    <section class="card card--actions card--actions-bottom">
-      <div class="action-row">
-        <button id="btnSaveFormular" class="btn btn--save btn--small" type="button">Speichern</button>
-        <button id="btnPdfFormular" class="btn btn--ghost btn--small" type="button">PDF Protokoll</button>
-        <button id="btnReset" class="btn btn--ghost btn--small" type="button">Reset</button>
-      </div>
-      <div class="hint">Speichern im Verlauf · PDF mit Niederlassung in Fußzeile</div>
-    </section>
+  <main id="tab-eignung" class="pane is-active" role="tabpanel">
+    <div id="content-eignung"></div>
   </main>
 
-  <!-- ========== AUSWERTUNG ========== -->
+  <main id="tab-auszieh" class="pane" role="tabpanel" hidden>
+    <div id="content-auszieh"></div>
+  </main>
+
+  <main id="tab-abnahme" class="pane" role="tabpanel" hidden>
+    <div id="content-abnahme"></div>
+  </main>
+
   <main id="tab-auswertung" class="pane" role="tabpanel" hidden>
     <section class="card">
-      <div class="card__title">Auswertung Eignungsprüfung</div>
+      <div class="card__title">Auswertung</div>
+
+      <div class="form-grid">
+        <label class="field">
+          <span class="field__label">Prüfung auswählen</span>
+          <select id="evalTestSelect" class="field__select">
+            <option value="eignung">Eignungsprüfung</option>
+            <option value="auszieh">Ausziehversuch</option>
+            <option value="abnahme">Abnahmeprüfung</option>
+          </select>
+        </label>
+      </div>
+
       <div id="auswertungContainer"></div>
     </section>
 
@@ -366,22 +115,14 @@
     </section>
   </main>
 
-  <!-- ========== VERLAUF ========== -->
   <main id="tab-verlauf" class="pane" role="tabpanel" hidden>
     <section class="card">
       <div class="card__title">Gespeicherte Protokolle</div>
       <div id="historyList" class="historyList"></div>
       <div class="hint">Neueste oben · lokal gespeichert · max. 30 Einträge</div>
     </section>
-
-    <section class="card card--actions card--actions-bottom">
-      <div class="action-row">
-        <button id="btnSaveVerlauf" class="btn btn--save btn--small" type="button">Speichern</button>
-      </div>
-    </section>
   </main>
 
-  <!-- ========== SETTINGS ========== -->
   <main id="tab-settings" class="pane" role="tabpanel" hidden>
     <section class="card">
       <div class="card__title">Einstellungen</div>
@@ -403,11 +144,27 @@
       </div>
 
       <div class="settings-group">
-        <div class="settings-group__title">Vorlage Export / Import</div>
-        <div class="action-row" style="justify-content:flex-start;gap:10px;flex-wrap:wrap">
+        <div class="settings-group__title">Vorlagen Export / Import</div>
+
+        <div class="form-grid">
+          <label class="field">
+            <span class="field__label">Prüfung</span>
+            <select id="settingsTemplateTarget" class="field__select">
+              <option value="eignung">Eignungsprüfung</option>
+              <option value="auszieh">Ausziehversuch</option>
+              <option value="abnahme">Abnahmeprüfung</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="action-row" style="justify-content:flex-start;gap:10px;flex-wrap:wrap; margin-top:10px">
           <button id="btnExportTemplate" class="btn btn--ghost btn--small" type="button">📤 Vorlage exportieren</button>
           <button id="btnImportTemplate" class="btn btn--ghost btn--small" type="button">📥 Vorlage importieren</button>
-          <input id="importFileInput" type="file" accept=".json,.htbanker.json" style="display:none" />
+          <input id="importFileInput" type="file" accept=".json" style="display:none" />
+        </div>
+
+        <div class="hint" style="text-align:left">
+          Die Stammdaten werden immer mit exportiert / importiert. Prüfungsdaten nur für die gewählte Prüfung.
         </div>
       </div>
 
@@ -429,11 +186,11 @@
   </main>
 
   <footer class="footer">
-    &copy; <b>HTB Baugesellschaft m.b.H.</b> – Ankerprüfung PWA
+    &copy; <b>HTB Baugesellschaft m.b.H.</b> – Prüf-App
     <br />
     <button id="btnInstall" class="btn btn--install" type="button" hidden>App installieren</button>
   </footer>
 
-  <script src="/Ankerpruefung/app.js?v=1"></script>
+  <script src="/Ankerpruefung/app.js?v=20"></script>
 </body>
 </html>
