@@ -146,95 +146,106 @@
       </div>
     </details>
 
-    <!-- PRESSE -->
-    <details class="card card--collapsible" open>
-      <summary class="card__title">Presse</summary>
-      <div class="card__body">
+   <!-- ═══════════════════ PRESSE ═══════════════════ -->
+<section class="card">
+  <div class="card__title">Presse / Kalibrierung</div>
 
-        <div class="form-grid">
-          <label class="field field--full">
-            <span class="field__label">Spannpresse / Kalibrierung</span>
-            <select id="presseSelect" class="field__select">
-              <option value="">— keine ausgewählt —</option>
-            </select>
-          </label>
-        </div>
+  <!-- Auswahl -->
+  <div class="form-grid">
+    <label class="field field--full">
+      <span class="field__label">Spannpresse auswählen</span>
+      <select id="presseSelect" class="field__select">
+        <option value="">— keine ausgewählt —</option>
+      </select>
+    </label>
+  </div>
 
-        <div class="action-row" style="justify-content:flex-start; margin-top:10px;">
-          <button id="btnKalibImport" class="btn btn--ghost btn--small" type="button">📥 CSV importieren</button>
-          <button id="btnKalibExport" class="btn btn--ghost btn--small" type="button">📤 CSV exportieren / Vorlage</button>
-        </div>
+  <!-- Aktions-Buttons: Import / Export / LÖSCHEN -->
+  <div class="action-row" style="justify-content:flex-start; margin-top:12px; gap:8px; flex-wrap:wrap">
+    <button id="btnKalibImport" class="btn btn--ghost btn--small" type="button">📥 CSV importieren</button>
+    <button id="btnKalibExport" class="btn btn--ghost btn--small" type="button">📤 CSV exportieren / Vorlage</button>
+    <button id="btnKalibDelete" class="btn btn--danger btn--small" type="button">🗑 Kalibrierung löschen</button>
+    <input id="kalibImportInput" type="file" accept=".csv,text/csv" style="display:none" />
+  </div>
 
-        <input id="kalibImportInput" type="file" accept=".csv,text/csv" style="display:none" />
+  <p id="kalibEmptyHint" class="hint" style="text-align:left; margin-top:10px">
+    Noch keine Presse ausgewählt. CSV importieren oder Presse aus der Liste wählen.
+  </p>
 
-        <div class="hint" style="text-align:left; margin-top:8px;">
-          CSV-Import für weitere Pressen. Wenn keine Presse ausgewählt ist, exportiert der Button eine Vorlage.
-        </div>
-
-        <div id="kalibEmptyHint" class="empty-state" style="padding:16px 8px;">
-          Noch keine Presse ausgewählt.
-        </div>
-
-        <div id="kalibInfoBox" class="settings-group" hidden>
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
-            <div>
-              <div id="kalibName" class="settings-group__title">Kalibrierung</div>
-              <div id="kalibSub" class="hint" style="text-align:left;margin-top:0">—</div>
-            </div>
-            <div id="kalibValidBadge" class="inline-badge">—</div>
-          </div>
-
-          <div class="form-grid" style="margin-top:10px;">
-            <div class="field">
-              <span class="field__label">Presse Typ</span>
-              <div id="kInfo-presseTyp" class="field__input" style="display:flex;align-items:center;">—</div>
-            </div>
-
-            <div class="field">
-              <span class="field__label">Presse Nr.</span>
-              <div id="kInfo-presseNr" class="field__input" style="display:flex;align-items:center;">—</div>
-            </div>
-
-            <div class="field">
-              <span class="field__label">Manometer Typ</span>
-              <div id="kInfo-manTyp" class="field__input" style="display:flex;align-items:center;">—</div>
-            </div>
-
-            <div class="field">
-              <span class="field__label">Manometer Nr.</span>
-              <div id="kInfo-manNr" class="field__input" style="display:flex;align-items:center;">—</div>
-            </div>
-
-            <div class="field">
-              <span class="field__label">Kalibriert am</span>
-              <div id="kInfo-kalibAm" class="field__input" style="display:flex;align-items:center;">—</div>
-            </div>
-
-            <div class="field">
-              <span class="field__label">Gültig bis</span>
-              <div id="kInfo-gueltigBis" class="field__input" style="display:flex;align-items:center;">—</div>
-            </div>
-
-            <div class="field">
-              <span class="field__label">Stützpunkte</span>
-              <div id="kInfo-punkte" class="field__input" style="display:flex;align-items:center;">—</div>
-            </div>
-
-            <div class="field">
-              <span class="field__label">Max. kN</span>
-              <div id="kInfo-maxKn" class="field__input" style="display:flex;align-items:center;">—</div>
-            </div>
-          </div>
-        </div>
-
-        <div id="kalibPreview" class="settings-group" hidden>
-          <div class="settings-group__title">Druckvorschau aus Kalibrierung</div>
-          <div id="kalibPreviewTable"></div>
-        </div>
-
+  <!-- Info-Box zur gewählten Kalibrierung -->
+  <div id="kalibInfoBox" class="settings-group" hidden style="margin-top:12px">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; flex-wrap:wrap">
+      <div>
+        <div id="kalibName" class="settings-group__title">—</div>
+        <div id="kalibSub" class="hint" style="text-align:left; margin-top:0">—</div>
       </div>
-    </details>
+      <div id="kalibValidBadge" class="kalib-badge">—</div>
+    </div>
 
+    <div class="form-grid" style="margin-top:8px; font-size:13px">
+      <div class="field">
+        <span class="field__label">Pressentyp</span>
+        <span id="kInfo-presseTyp">—</span>
+      </div>
+      <div class="field">
+        <span class="field__label">Pressen-Nr.</span>
+        <span id="kInfo-presseNr">—</span>
+      </div>
+      <div class="field">
+        <span class="field__label">Manometertyp</span>
+        <span id="kInfo-manTyp">—</span>
+      </div>
+      <div class="field">
+        <span class="field__label">Manometer-Nr.</span>
+        <span id="kInfo-manNr">—</span>
+      </div>
+      <div class="field">
+        <span class="field__label">Kalibriert am</span>
+        <span id="kInfo-kalibAm">—</span>
+      </div>
+      <div class="field">
+        <span class="field__label">Gültig bis</span>
+        <span id="kInfo-gueltigBis">—</span>
+      </div>
+      <div class="field">
+        <span class="field__label">Stützpunkte</span>
+        <span id="kInfo-punkte">—</span>
+      </div>
+      <div class="field">
+        <span class="field__label">Max. Last</span>
+        <span id="kInfo-maxKn">—</span>
+      </div>
+    </div>
+
+    <!-- ═══ STÜTZPUNKTE-KONTROLLE (NEU) ═══ -->
+    <div id="kalibStuetzpunkteWrap" hidden style="margin-top:14px">
+      <div class="settings-group__title" style="margin-bottom:6px">
+         Stützpunkte-Kontrolle
+        <span style="font-weight:400; font-size:12px; color:rgba(220,235,250,.7)">
+          — exakte CSV-Werte, keine Interpolation
+        </span>
+      </div>
+
+      <label class="field">
+        <span class="field__label">Stützpunkt auswählen</span>
+        <select id="kalibStuetzpunkteSelect" class="field__select">
+          <option value="">Stützpunkt auswählen …</option>
+        </select>
+      </label>
+
+      <div id="kalibStuetzpunkteResult" class="stuetz-result"></div>
+    </div>
+    <!-- ═══ Ende Stützpunkte ═══ -->
+  </div>
+</section>
+
+<!-- Kalibrierungs-Vorschau (wird von renderKalibPreview() befüllt) -->
+<div id="kalibPreview" hidden style="margin-top:4px">
+  <div class="settings-group" style="margin-top:0">
+    <div class="settings-group__title">Druckvorschau für aktuelle Vorgaben</div>
+    <div id="kalibPreviewTable"></div>
+  </div>
+</div>
     <!-- VORGABE -->
     <details class="card card--collapsible" open>
       <summary class="card__title">Vorgabe Anker</summary>
