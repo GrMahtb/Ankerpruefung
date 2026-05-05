@@ -3,9 +3,9 @@
 const BASE_PATH = '/Ankerpruefung/';
 console.log('HTB Prüf-App app.js loaded');
 
-const STORAGE_STATE = 'htb-pruef-app-v20';
-const STORAGE_HISTORY = 'htb-pruef-history-v20';
-const STORAGE_KALIB = 'htb-pruef-kalib-v20';
+const STORAGE_STATE = 'htb-pruef-app-v30';
+const STORAGE_HISTORY = 'htb-pruef-history-v30';
+const STORAGE_KALIB = 'htb-pruef-kalib-v30';
 const HISTORY_MAX = 30;
 
 const TEST_KEYS = ['eignung', 'auszieh', 'abnahme'];
@@ -140,12 +140,13 @@ const TYPE_LIBRARY = [
   { key:'IBO_R51_800', group:'IBO', label:'IBO R51-800', At:1150, lastStreck:640, lastStreck90:576, bruchlast:800, bruch80:640, nenndurchmesser:63, muffe:null, streckZug:null }
 ];
 
-/* ---------------- dom helpers ---------------- */
+/* =========================================================
+   DOM / HELPERS
+========================================================= */
 const $ = id => document.getElementById(id);
 const qs = (sel, root=document) => root.querySelector(sel);
 const qsa = (sel, root=document) => [...root.querySelectorAll(sel)];
 
-/* ---------------- generic helpers ---------------- */
 function clone(v){ return JSON.parse(JSON.stringify(v)); }
 
 function h(v){
@@ -156,6 +157,7 @@ function h(v){
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#39;');
 }
+
 function fmt(v, d=2){
   const n = Number(v);
   return Number.isFinite(n) ? n.toFixed(d).replace('.', ',') : '—';
@@ -229,7 +231,9 @@ function uid(){
   catch{ return `id_${Date.now()}_${Math.random().toString(16).slice(2)}`; }
 }
 
-/* ---------------- storage helpers ---------------- */
+/* =========================================================
+   STORAGE
+========================================================= */
 function readStorage(key, fallback=null){
   try{
     const raw = localStorage.getItem(key);
@@ -267,7 +271,9 @@ function writeUserKalibs(list){
   writeStorage(STORAGE_KALIB, Array.isArray(list) ? list : []);
 }
 
-/* ---------------- calibration helpers ---------------- */
+/* =========================================================
+   KALIBRIERUNG
+========================================================= */
 function sortKalibPunkte(punkte){
   return (Array.isArray(punkte) ? punkte : [])
     .map(p => ({ kN: toNumFlexible(p.kN), bar: toNumFlexible(p.bar) }))
@@ -368,14 +374,11 @@ function lookupStuetzpunkt(kN, punkte){
     return { bar: exact.bar, exact:true, oor:false, basisKn:exact.kN };
   }
 
-  // Prinzip: besser zu hoch geprüft als zu gering
-  // => immer auf den nächsthöheren verfügbaren Stützpunkt gehen
   const nextHigher = pts.find(p => p.kN >= value);
   if(nextHigher){
     return { bar: nextHigher.bar, exact:false, oor:false, basisKn:nextHigher.kN };
   }
 
-  // Oberhalb des größten Stützpunktes => außerhalb des Kalibrierbereichs
   return { bar:null, exact:false, oor:true, basisKn:null };
 }
 
@@ -480,6 +483,7 @@ function parseKalibCsvText(text){
   if(!safe.punkte.length){
     throw new Error('CSV enthält keine gültigen Stützpunkte.');
   }
+
   return safe;
 }
 
@@ -508,108 +512,17 @@ function handleKalibDelete(){
   removeKalibById(id);
   state.meta.selectedKalibId = '';
 }
-
-/* ---------------- dynamic style tweaks ---------------- */
+/* =========================================================
+   DYNAMIC UI HELPERS
+========================================================= */
 function ensureDynamicStyles(){
-  if(document.getElementById('app-dynamic-style-v20')) return;
+  if(document.getElementById('app-dynamic-style-v30')) return;
 
   const style = document.createElement('style');
-  style.id = 'app-dynamic-style-v20';
+  style.id = 'app-dynamic-style-v30';
   style.textContent = `
     html{
       -webkit-text-size-adjust:100%;
-      background:var(--app-html-bg,#eef2f6) !important;
-    }
-
-    body{
-      background:var(--app-page-bg,#eef2f6) !important;
-      color:var(--app-text,#111827) !important;
-    }
-
-    .brand,
-    .brand__bar,
-    .tabs,
-    .pane{
-      background:transparent !important;
-      color:var(--app-text,#111827) !important;
-      box-shadow:none !important;
-    }
-
-    .card,
-    .timer-box,
-    .modal-box,
-    .photo-box,
-    .settings-group,
-    .historyItem,
-    .auswertung-block,
-    .table-wrap,
-    .info-box,
-    .kalib-preview{
-      background:var(--app-surface,#ffffff) !important;
-      color:var(--app-text,#111827) !important;
-      border-color:var(--app-border,#d6dde6) !important;
-      box-shadow:0 1px 3px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.04) !important;
-    }
-
-    .brand__company,
-    .card__title,
-    .auswertung-block__title,
-    .settings-group__title,
-    .kalib-preview__title,
-    .kpi__value,
-    .auto-card__value,
-    .kalib-info__name,
-    .kalib-info__val,
-    .historyItem__title,
-    .modal-title,
-    .zyklus-title{
-      color:var(--app-heading,#111827) !important;
-    }
-
-    .brand__subtitle,
-    .hint,
-    .field__hint,
-    .timer-edit-hint,
-    .kalib-info__sub,
-    .field__label,
-    .kpi__label,
-    .auto-card__label{
-      color:var(--app-muted,#6b7280) !important;
-    }
-
-    .tab,
-    .btn,
-    .timer-btn,
-    .btn-plus{
-      border-color:var(--app-border,#d6dde6) !important;
-    }
-
-    .tab.is-active,
-    .btn--save,
-    .btn-plus{
-      background:var(--app-accent,#334155) !important;
-      color:#fff !important;
-      border-color:var(--app-accent,#334155) !important;
-    }
-
-    .timer-btn--start{
-      background:#22c55e !important;
-      color:#081420 !important;
-      border-color:#22c55e !important;
-    }
-
-    .timer-btn--stop{
-      background:#ef4444 !important;
-      color:#fff !important;
-      border-color:#ef4444 !important;
-    }
-
-    .btn--ghost,
-    .timer-btn--ghost,
-    .btn--danger{
-      background:var(--app-ghost-bg,#f8fafc) !important;
-      color:var(--app-text,#111827) !important;
-      border-color:var(--app-border,#d6dde6) !important;
     }
 
     .field__input,
@@ -618,87 +531,33 @@ function ensureDynamicStyles(){
     .mess-input,
     .modal-input{
       font-size:16px !important;
-      background:var(--app-input-bg,#ffffff) !important;
-      color:var(--app-input-text,#111827) !important;
-      border-color:var(--app-border,#d6dde6) !important;
     }
 
-    .field__select option{
-      background:var(--app-input-bg,#ffffff) !important;
-      color:var(--app-input-text,#111827) !important;
-    }
-
-    .field__input::placeholder{
-      color:var(--app-muted,#9ca3af) !important;
+    .field__input--required,
+    .field__select--required,
+    .field__textarea--required{
+      background:rgba(239,68,68,.06) !important;
+      border-color:rgba(239,68,68,.45) !important;
     }
 
     .field__input--computed{
-      color:var(--app-accent-strong,#111827) !important;
+      color:#16a34a !important;
       font-weight:800 !important;
-    }
-
-    .row-active td{
-      background:var(--app-row-active,rgba(15,23,42,.05)) !important;
-    }
-
-    .row-active .mess-stage-pill{
-      background:var(--app-stage-pill,rgba(100,116,139,.10)) !important;
-      box-shadow:0 0 0 1px var(--app-border,#d6dde6) inset;
-    }
-
-    .current-measurement{
-      border:2px solid var(--app-focus,#111827) !important;
-      box-shadow:0 0 0 3px var(--app-current-ring,rgba(17,24,39,.16)) !important;
-      background:var(--app-current-bg,rgba(17,24,39,.05)) !important;
-      animation:currentFieldPulse 1.2s ease-in-out infinite;
-    }
-
-    @keyframes currentFieldPulse{
-      0%   { box-shadow:0 0 0 0 var(--app-current-ring, rgba(17,24,39,.16)); }
-      70%  { box-shadow:0 0 0 6px rgba(0,0,0,0); }
-      100% { box-shadow:0 0 0 0 rgba(0,0,0,0); }
-    }
-
-    body[data-layout-mode="tablet"] .pane{
-      max-width:1100px;
-      margin:0 auto;
-      padding-left:10px;
-      padding-right:10px;
-    }
-
-    body[data-layout-mode="desktop"] .pane{
-      max-width:1440px;
-      margin:0 auto;
-      padding-left:14px;
-      padding-right:14px;
-    }
-
-    body[data-layout-mode="tablet"] .form-grid{
-      grid-template-columns:repeat(2, minmax(0, 1fr)) !important;
-    }
-
-    body[data-layout-mode="desktop"] .form-grid{
-      grid-template-columns:repeat(3, minmax(0, 1fr)) !important;
-    }
-
-    body[data-layout-mode="tablet"] .field--full,
-    body[data-layout-mode="desktop"] .field--full{
-      grid-column:1 / -1 !important;
-    }
-
-    body[data-layout-mode="tablet"] .photo-grid,
-    body[data-layout-mode="desktop"] .photo-grid{
-      display:grid;
-      grid-template-columns:repeat(2, minmax(0, 1fr));
-      gap:12px;
     }
   `;
 
   document.head.appendChild(style);
 }
+
 function setRequiredVisual(el, required){
   if(!el) return;
-  el.classList.remove('field__input--required','field__select--required','field__textarea--required');
+
+  el.classList.remove(
+    'field__input--required',
+    'field__select--required',
+    'field__textarea--required'
+  );
+
   if(required){
     if(el.classList.contains('field__select')) el.classList.add('field__select--required');
     else if(el.classList.contains('field__textarea')) el.classList.add('field__textarea--required');
@@ -711,7 +570,9 @@ function applyComputedVisual(el, computed){
   el.classList.toggle('field__input--computed', !!computed);
 }
 
-/* ---------------- state ---------------- */
+/* =========================================================
+   STATE
+========================================================= */
 function makeGlobalMeta(){
   return {
     filiale:'',
@@ -733,12 +594,15 @@ function makeSpec(testKey){
     return {
       bodenart:'nichtbindig',
       typKey:'',
+
       LA:'',
       Ltb:'',
       Ltf:'',
       Le:'',
+
       Et:'0,205',
       At:'',
+
       P0:'',
       Pa:'',
       Pd:'',
@@ -751,12 +615,15 @@ function makeSpec(testKey){
   return {
     bodenart:'nichtbindig',
     typKey:'',
+
     L:'',
     Lb:'',
     Ldb:'',
     Ueberstand:'',
+
     Et:'205',
     At:'',
+
     P0:'',
     Pd:'',
     k:'',
@@ -791,8 +658,15 @@ function makeStageDef(kind='factor', factor=0.4, intervals=[0,1]){
 function normalizeStageDef(stage){
   if(!stage) return makeStageDef('pa', 0, [1]);
 
-  const kind = stage.kind || (stage.label === 'P0' ? 'p0' : stage.label === 'Pa' ? 'pa' : 'factor');
-  const factor = kind === 'factor' ? Number(stage.factor || 0.4) : (kind === 'p0' ? -1 : 0);
+  const kind =
+    stage.kind ||
+    (stage.label === 'P0' ? 'p0' :
+    stage.label === 'Pa' ? 'pa' :
+    'factor');
+
+  const factor = kind === 'factor'
+    ? Number(stage.factor || 0.4)
+    : (kind === 'p0' ? -1 : 0);
 
   return {
     kind,
@@ -803,6 +677,9 @@ function normalizeStageDef(stage){
   };
 }
 
+/* =========================================================
+   NORMZYKLEN
+========================================================= */
 function buildEignungNormCycles(bodenart='nichtbindig'){
   const z5Intervals = bodenart === 'bindig'
     ? [0,1,2,3,4,5,7,10,15,20,30,45,60,90,120,150,180]
@@ -900,7 +777,9 @@ function buildAusziehOrAbnahmeNormCycles(testKey){
 }
 
 function makeCycleFromDef(def, oldCycle=null){
-  const oldRows = Object.fromEntries((oldCycle?.rows || []).map(r => [`${r.stageIdx}|${r.min}`, r]));
+  const oldRows = Object.fromEntries(
+    (oldCycle?.rows || []).map(r => [`${r.stageIdx}|${r.min}`, r])
+  );
 
   const stageDefs = (def.stageDefs || []).map((s, i) => {
     const old = oldCycle?.stageDefs?.[i];
@@ -915,13 +794,17 @@ function makeCycleFromDef(def, oldCycle=null){
     const ints = parseIntervalStr(stage.intervalsStr);
     ints.forEach(min => {
       const old = oldRows[`${stageIdx}|${min}`];
-      rows.push(old ? { ...old, stageIdx, min } : {
-        stageIdx,
-        min,
-        ablesung:'',
-        versch:'',
-        anm:''
-      });
+      rows.push(
+        old
+          ? { ...old, stageIdx, min }
+          : {
+              stageIdx,
+              min,
+              ablesung:'',
+              versch:'',
+              anm:''
+            }
+      );
     });
   });
 
@@ -962,12 +845,12 @@ function getInitialState(){
   return {
     activeTest:'eignung',
     evalTest:'eignung',
-   settings:{
-alarmDurationSec:4,
-alarmSoundEnabled:true,
-layoutMode:'auto',
-themeMode:'light'
-},
+    settings:{
+      alarmDurationSec:4,
+      alarmSoundEnabled:true,
+      layoutMode:'auto',
+      themeMode:'light'
+    },
     meta: makeGlobalMeta(),
     tests:{
       eignung: makeTestState('eignung'),
@@ -986,7 +869,9 @@ let _alarmReady = false;
 let _floatingRaf = null;
 let _timeAdjustCtx = null;
 
-/* ---------------- basic model helpers ---------------- */
+/* =========================================================
+   BASIC MODEL HELPERS
+========================================================= */
 function getTest(key){
   return state.tests[key];
 }
@@ -997,6 +882,7 @@ function getAnkertypByKey(key){
 
 function ensureActiveCycle(testKey){
   const test = getTest(testKey);
+
   if(!test.cycles.length){
     test.activeCycleId = '';
     return null;
@@ -1007,6 +893,7 @@ function ensureActiveCycle(testKey){
     c = test.cycles[0];
     test.activeCycleId = c.id;
   }
+
   return c;
 }
 
@@ -1025,7 +912,9 @@ function getActiveTestKey(){
 function getEvalTestKey(){
   return TEST_KEYS.includes(state.evalTest) ? state.evalTest : 'eignung';
 }
-/* ---------------- labels ---------------- */
+/* =========================================================
+   LABELS
+========================================================= */
 function getNumberLabel(testKey){
   if(testKey === 'eignung') return 'Anker Nr.';
   if(testKey === 'abnahme') return 'Pfahl Nr.';
@@ -1044,7 +933,9 @@ function getTypeLabel(testKey){
   return 'Nageltyp';
 }
 
-/* ---------------- type rendering ---------------- */
+/* =========================================================
+   TYPE RENDERING
+========================================================= */
 function renderTypeOptions(currentKey){
   const groups = {};
   TYPE_LIBRARY.forEach(t => {
@@ -1085,7 +976,9 @@ function renderTypeInfo(testKey){
   `;
 }
 
-/* ---------------- calculation helpers ---------------- */
+/* =========================================================
+   CALCULATION HELPERS
+========================================================= */
 function calcStageLoad(stage, testKey){
   const s = getTest(testKey).spec;
   const Pp = toNumFlexible(s.Pp);
@@ -1132,6 +1025,7 @@ function getMeasuredLappInfo(testKey){
 
     const dS = getCycleTotalDisplacement(cycle);
     const measuredLapp = calcLapp(dS, Pp, Pa, Et, At);
+
     if(Number.isFinite(measuredLapp)){
       return { measuredLapp, measuredCycle:cycle.nr };
     }
@@ -1178,12 +1072,12 @@ function getSpecSummary(testKey){
   const k = toNumFlexible(s.k);
   const calcPp = Number.isFinite(Pd) && Number.isFinite(k) ? Pd * k : NaN;
 
-  return {
-    calcPp
-  };
+  return { calcPp };
 }
 
-/* ---------------- pressure preview rendering ---------------- */
+/* =========================================================
+   KALIBRIERUNGS-VORSCHAU
+========================================================= */
 function getPreviewStages(testKey){
   const test = getTest(testKey);
   const out = [];
@@ -1197,8 +1091,9 @@ function getPreviewStages(testKey){
       seen.add(key);
 
       const kN = calcStageLoad(stage, testKey);
-      const lookup = findKalibById(state.meta.selectedKalibId)
-        ? lookupStuetzpunkt(kN, findKalibById(state.meta.selectedKalibId).punkte)
+      const kalib = findKalibById(state.meta.selectedKalibId);
+      const lookup = kalib
+        ? lookupStuetzpunkt(kN, kalib.punkte)
         : { bar:null, exact:false, oor:false, basisKn:null };
 
       out.push({
@@ -1220,7 +1115,7 @@ function renderStutzpunkteControl(testKey){
     <div id="kalibStuetzpunkteWrap-${testKey}" hidden style="margin-top:14px">
       <div class="settings-group__title" style="margin-bottom:6px">
         Stützpunkte-Kontrolle
-        <span style="font-weight:400; font-size:12px; color:rgba(220,235,250,.7)">
+        <span style="font-weight:400; font-size:12px; color:inherit; opacity:.72">
           — exakte CSV-Werte, keine Interpolation
         </span>
       </div>
@@ -1396,7 +1291,7 @@ function renderKalibInfo(testKey=null){
       badge.textContent =
         status === 'ok'   ? `✅ Gültig bis ${bisStr}` :
         status === 'warn' ? `⚠️ Läuft ab in ${diffDays} Tagen (${bisStr})` :
-                            `❌ Abgelaufen seit ${bisStr}`;
+        `❌ Abgelaufen seit ${bisStr}`;
       badge.className = `kalib-badge kalib-badge--${status}`;
     }
 
@@ -1459,7 +1354,9 @@ function renderKalibPreview(testKey=null){
   });
 }
 
-/* ---------------- meta rendering ---------------- */
+/* =========================================================
+   META RENDERING
+========================================================= */
 function renderMetaSection(testKey){
   const m = state.meta;
 
@@ -1526,16 +1423,20 @@ function renderMetaSection(testKey){
   `;
 }
 
-/* ---------------- spec rendering ---------------- */
+/* =========================================================
+   SPEC RENDERING
+========================================================= */
 function renderSpecSection(testKey){
   const test = getTest(testKey);
   const s = test.spec;
   const isEignung = testKey === 'eignung';
   const summary = getSpecSummary(testKey);
 
-  const lappCheck = Number.isFinite(summary.measuredLapp) && Number.isFinite(summary.minLapp) && Number.isFinite(summary.maxLapp)
-    ? (summary.measuredLapp >= summary.minLapp && summary.measuredLapp <= summary.maxLapp)
-    : null;
+  const lappCheck = Number.isFinite(summary.measuredLapp) &&
+    Number.isFinite(summary.minLapp) &&
+    Number.isFinite(summary.maxLapp)
+      ? (summary.measuredLapp >= summary.minLapp && summary.measuredLapp <= summary.maxLapp)
+      : null;
 
   return `
     <details class="card card--collapsible" open>
@@ -1637,17 +1538,61 @@ function renderSpecSection(testKey){
   `;
 }
 
-/* ---------------- timer rendering ---------------- */
+/* =========================================================
+   PHOTO RENDERING
+========================================================= */
+function renderPhotoSection(testKey){
+  const photos = getTest(testKey).photos;
+
+  return `
+    <details class="card card--collapsible" open>
+      <summary class="card__title">Fotos</summary>
+      <div class="card__body">
+        <div class="photo-grid">
+          <div class="photo-box">
+            <div class="photo-box__title">Übersichtsfoto / PDF-Cover</div>
+            <div class="photo-preview">${photos.overview ? `<img src="${photos.overview}" alt="Übersichtsfoto">` : 'Kein Bild'}</div>
+            <div class="photo-actions">
+              <button class="btn btn--ghost btn--small" data-role="photo-pick-overview" data-test="${testKey}" type="button">Foto wählen</button>
+              <button class="btn btn--ghost btn--small" data-role="photo-del-overview" data-test="${testKey}" type="button">Löschen</button>
+              <input data-role="photo-input-overview" data-test="${testKey}" type="file" accept="image/*" capture="environment" style="display:none">
+            </div>
+          </div>
+
+          <div class="photo-box">
+            <div class="photo-box__title">Detailfoto</div>
+            <div class="photo-preview">${photos.detail ? `<img src="${photos.detail}" alt="Detailfoto">` : 'Kein Bild'}</div>
+            <div class="photo-actions">
+              <button class="btn btn--ghost btn--small" data-role="photo-pick-detail" data-test="${testKey}" type="button">Foto wählen</button>
+              <button class="btn btn--ghost btn--small" data-role="photo-del-detail" data-test="${testKey}" type="button">Löschen</button>
+              <input data-role="photo-input-detail" data-test="${testKey}" type="file" accept="image/*" capture="environment" style="display:none">
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+  `;
+}
+/* =========================================================
+   TIMER RENDERING
+========================================================= */
 function buildTimerBox(testKey, cycle){
   return `
     <div id="globalTimerBox-${testKey}" class="timer-box" style="margin-bottom:12px">
       <div class="global-timer-head" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-        <div class="zyklus-title" style="font-weight:800">Stoppuhr ${h(TEST_LABELS[testKey])}</div>
+        <div class="zyklus-title" style="font-weight:800">${h(TEST_LABELS[testKey])}</div>
         <span id="activeZyklusBadge-${testKey}" class="zyklus-badge">${cycle ? cycle.title : '—'}</span>
       </div>
 
       <div class="timer-row" style="margin-bottom:8px">
-        <div class="timer-display" id="globalTimerDisplay-${testKey}" data-role="timer-display" data-test="${testKey}" title="Tippen zum Anpassen">${cycle ? formatElapsed(cycle.elapsedMs || 0) : '00:00'}</div>
+        <div
+          class="timer-display"
+          id="globalTimerDisplay-${testKey}"
+          data-role="timer-display"
+          data-test="${testKey}"
+          title="Tippen zum Anpassen"
+        >${cycle ? formatElapsed(cycle.elapsedMs || 0) : '00:00'}</div>
+
         <span class="timer-edit-hint">tippen = anpassen</span>
 
         <label class="field" style="min-width:170px">
@@ -1674,21 +1619,79 @@ function buildTimerBox(testKey, cycle){
         </div>
       </div>
 
-      <div class="timer-info" id="globalTimerStartzeit-${testKey}">${cycle?.startzeit ? `Startzeit: ${cycle.startzeit}` : 'Noch nicht gestartet'}</div>
-      <div class="timer-info timer-next" id="globalTimerNext-${testKey}">Nächste Messung: —</div>
+      <div class="timer-info" id="globalTimerStartzeit-${testKey}">
+        ${cycle?.startzeit ? `Startzeit: ${cycle.startzeit}` : 'Noch nicht gestartet'}
+      </div>
+
+      <div class="timer-info timer-next" id="globalTimerNext-${testKey}">
+        Nächste Messung: —
+      </div>
     </div>
   `;
 }
 
-/* ---------------- cycle rendering ---------------- */
+/* =========================================================
+   CYCLE / TABLE RENDERING
+========================================================= */
 function renderStageEditor(stage, idx, testKey, cycle){
   const isFree = getTest(testKey).mode === 'frei';
   const autoDruck = !!findKalibById(state.meta.selectedKalibId);
   const lastKn = calcStageLoad(stage, testKey);
 
   if(!isFree){
+    return `
+      <div class="field field--stage-druck">
+        <input
+          class="field__input ${autoDruck ? 'mess-input--auto' : ''}"
+          data-role="stage-druck"
+          data-test="${testKey}"
+          data-cycle="${cycle.id}"
+          data-stage="${idx}"
+          type="number"
+          step="0.1"
+          value="${h(stage.druck)}"
+          ${autoDruck ? 'readonly' : ''}
+          placeholder="${h(stage.label)}"
+        >
+        <span class="hint" style="font-size:11px;text-align:left;margin-top:2px">
+          ≈ ${Number.isFinite(lastKn) ? fmt(lastKn,1) : '—'} kN
+        </span>
+      </div>
+    `;
+  }
+
   return `
-    <div class="field field--stage-druck">
+    <div class="field" style="min-width:130px">
+      <span class="field__label">Stufe ${idx+1}</span>
+
+      <select class="field__select" data-role="stage-kind" data-test="${testKey}" data-cycle="${cycle.id}" data-stage="${idx}">
+        <option value="pa" ${stage.kind === 'pa' ? 'selected' : ''}>Pa</option>
+        <option value="factor" ${stage.kind === 'factor' ? 'selected' : ''}>X * Pp</option>
+        <option value="p0" ${stage.kind === 'p0' ? 'selected' : ''}>P0</option>
+      </select>
+
+      <input
+        class="field__input"
+        data-role="stage-factor"
+        data-test="${testKey}"
+        data-cycle="${cycle.id}"
+        data-stage="${idx}"
+        type="number"
+        step="0.05"
+        value="${stage.kind === 'factor' ? h(stage.factor) : ''}"
+        ${stage.kind === 'factor' ? '' : 'disabled'}
+      >
+
+      <input
+        class="field__input"
+        data-role="stage-intervals"
+        data-test="${testKey}"
+        data-cycle="${cycle.id}"
+        data-stage="${idx}"
+        type="text"
+        value="${h(stage.intervalsStr)}"
+      >
+
       <input
         class="field__input ${autoDruck ? 'mess-input--auto' : ''}"
         data-role="stage-druck"
@@ -1699,31 +1702,16 @@ function renderStageEditor(stage, idx, testKey, cycle){
         step="0.1"
         value="${h(stage.druck)}"
         ${autoDruck ? 'readonly' : ''}
-        placeholder="${h(stage.label)}"
       >
-      <span class="hint" style="font-size:11px;text-align:left;margin-top:2px">
-        ≈ ${Number.isFinite(lastKn) ? fmt(lastKn,1) : '—'} kN
-      </span>
-    </div>
-  `;
-}
 
-  return `
-    <div class="field" style="min-width:130px">
-      <span class="field__label">Stufe ${idx+1}</span>
-      <select class="field__select" data-role="stage-kind" data-test="${testKey}" data-cycle="${cycle.id}" data-stage="${idx}">
-        <option value="pa" ${stage.kind === 'pa' ? 'selected' : ''}>Pa</option>
-        <option value="factor" ${stage.kind === 'factor' ? 'selected' : ''}>X * Pp</option>
-        <option value="p0" ${stage.kind === 'p0' ? 'selected' : ''}>P0</option>
-      </select>
-      <input class="field__input" data-role="stage-factor" data-test="${testKey}" data-cycle="${cycle.id}" data-stage="${idx}" type="number" step="0.05" value="${stage.kind === 'factor' ? h(stage.factor) : ''}" ${stage.kind === 'factor' ? '' : 'disabled'}>
-      <input class="field__input" data-role="stage-intervals" data-test="${testKey}" data-cycle="${cycle.id}" data-stage="${idx}" type="text" value="${h(stage.intervalsStr)}">
-      <input class="field__input ${autoDruck ? 'mess-input--auto' : ''}" data-role="stage-druck" data-test="${testKey}" data-cycle="${cycle.id}" data-stage="${idx}" type="number" step="0.1" value="${h(stage.druck)}" ${autoDruck ? 'readonly' : ''}>
       <div class="action-row" style="justify-content:flex-start;margin-top:4px">
         <button class="timer-btn timer-btn--ghost" data-role="stage-del" data-test="${testKey}" data-cycle="${cycle.id}" data-stage="${idx}" type="button">−</button>
         ${idx === cycle.stageDefs.length - 1 ? `<button class="timer-btn timer-btn--ghost" data-role="stage-add" data-test="${testKey}" data-cycle="${cycle.id}" data-stage="${idx}" type="button">+</button>` : ''}
       </div>
-      <span class="hint" style="font-size:11px;text-align:left;margin-top:2px">${Number.isFinite(lastKn) ? `≈ ${fmt(lastKn,1)} kN` : '—'}</span>
+
+      <span class="hint" style="font-size:11px;text-align:left;margin-top:2px">
+        ${Number.isFinite(lastKn) ? `≈ ${fmt(lastKn,1)} kN` : '—'}
+      </span>
     </div>
   `;
 }
@@ -1746,25 +1734,83 @@ function buildMeasurementBody(cycle, testKey){
 
     const lastKn = calcStageLoad(stage, testKey);
 
-    html += `<tr data-row="${i}">`;
+    html += `<tr data-row="${i}" class="${i === 0 ? 'row-active' : ''}">`;
 
     if(isFirstInStage){
       html += `<td class="mess-stage-col" rowspan="${rowspan}"><span class="mess-stage-pill">${h(stage.label)}</span></td>`;
       html += `<td class="mess-load-col" rowspan="${rowspan}">${Number.isFinite(lastKn) ? fmt(lastKn,1) : '—'}</td>`;
-      html += `<td class="mess-druck-col" rowspan="${rowspan}"><input class="mess-input ${autoDruck ? 'mess-input--auto' : ''}" data-role="stage-druck" data-test="${testKey}" data-cycle="${cycle.id}" data-stage="${row.stageIdx}" type="number" step="0.1" value="${h(stage.druck)}" ${autoDruck ? 'readonly' : ''}></td>`;
+      html += `<td class="mess-druck-col" rowspan="${rowspan}">
+        <input
+          class="mess-input ${autoDruck ? 'mess-input--auto' : ''}"
+          data-role="stage-druck"
+          data-test="${testKey}"
+          data-cycle="${cycle.id}"
+          data-stage="${row.stageIdx}"
+          type="number"
+          step="0.1"
+          value="${h(stage.druck)}"
+          ${autoDruck ? 'readonly' : ''}
+        >
+      </td>`;
     }
 
     html += `
       <td>
         <div class="minute-cell">
-          <input class="mess-input minute-input" data-role="row-min" data-test="${testKey}" data-cycle="${cycle.id}" data-row="${i}" type="number" step="1" value="${h(row.min)}" ${isFree ? '' : 'readonly'}>
+          <input
+            class="mess-input minute-input"
+            data-role="row-min"
+            data-test="${testKey}"
+            data-cycle="${cycle.id}"
+            data-row="${i}"
+            type="number"
+            step="1"
+            value="${h(row.min)}"
+            ${isFree ? '' : 'readonly'}
+          >
           ${isFree && i === cycle.rows.length - 1 ? `<button class="row-plus" data-role="row-add" data-test="${testKey}" data-cycle="${cycle.id}" data-row="${i}" type="button">+</button>` : ''}
         </div>
       </td>
-      <td><input class="mess-input" data-role="row-ablesung" data-test="${testKey}" data-cycle="${cycle.id}" data-row="${i}" type="number" step="0.01" value="${h(row.ablesung)}"></td>
-      <td><input class="mess-input mess-input--auto" data-role="row-versch" data-test="${testKey}" data-cycle="${cycle.id}" data-row="${i}" type="number" step="0.01" value="${h(row.versch)}" readonly></td>
-      <td><button class="row-anm-btn ${row.anm ? 'has-anm' : ''}" data-role="row-anm" data-test="${testKey}" data-cycle="${cycle.id}" data-row="${i}" type="button">+</button></td>
+
+      <td>
+        <input
+          class="mess-input"
+          data-role="row-ablesung"
+          data-test="${testKey}"
+          data-cycle="${cycle.id}"
+          data-row="${i}"
+          type="number"
+          step="0.01"
+          value="${h(row.ablesung)}"
+        >
+      </td>
+
+      <td>
+        <input
+          class="mess-input mess-input--auto"
+          data-role="row-versch"
+          data-test="${testKey}"
+          data-cycle="${cycle.id}"
+          data-row="${i}"
+          type="number"
+          step="0.01"
+          value="${h(row.versch)}"
+          readonly
+        >
+      </td>
+
+      <td>
+        <button
+          class="row-anm-btn ${row.anm ? 'has-anm' : ''}"
+          data-role="row-anm"
+          data-test="${testKey}"
+          data-cycle="${cycle.id}"
+          data-row="${i}"
+          type="button"
+        >+</button>
+      </td>
     `;
+
     html += `</tr>`;
   }
 
@@ -1808,7 +1854,7 @@ function renderCycleCard(cycle, testKey){
               <th class="th-load">Last<br><small>kN</small></th>
               <th class="th-druck">Druck<br><small>bar</small></th>
               <th class="th-min">Min</th>
-              <th class="th-mess">Mess&shy;uhr<br><small>mm</small></th>
+              <th class="th-mess">Messuhr<br><small>mm</small></th>
               <th class="th-versch">Verschiebung<br><small>mm</small></th>
               <th class="th-anm">Anm.</th>
             </tr>
@@ -1822,41 +1868,9 @@ function renderCycleCard(cycle, testKey){
   `;
 }
 
-/* ---------------- photo rendering ---------------- */
-function renderPhotoSection(testKey){
-  const photos = getTest(testKey).photos;
-
-  return `
-    <details class="card card--collapsible" open>
-      <summary class="card__title">Fotos</summary>
-      <div class="card__body">
-        <div class="photo-grid">
-          <div class="photo-box">
-            <div class="photo-box__title">Übersichtsfoto / PDF-Cover</div>
-            <div class="photo-preview">${photos.overview ? `<img src="${photos.overview}" alt="Übersichtsfoto">` : 'Kein Bild'}</div>
-            <div class="photo-actions">
-              <button class="btn btn--ghost btn--small" data-role="photo-pick-overview" data-test="${testKey}" type="button">Foto wählen</button>
-              <button class="btn btn--ghost btn--small" data-role="photo-del-overview" data-test="${testKey}" type="button">Löschen</button>
-              <input data-role="photo-input-overview" data-test="${testKey}" type="file" accept="image/*" capture="environment" style="display:none">
-            </div>
-          </div>
-
-          <div class="photo-box">
-            <div class="photo-box__title">Detailfoto</div>
-            <div class="photo-preview">${photos.detail ? `<img src="${photos.detail}" alt="Detailfoto">` : 'Kein Bild'}</div>
-            <div class="photo-actions">
-              <button class="btn btn--ghost btn--small" data-role="photo-pick-detail" data-test="${testKey}" type="button">Foto wählen</button>
-              <button class="btn btn--ghost btn--small" data-role="photo-del-detail" data-test="${testKey}" type="button">Löschen</button>
-              <input data-role="photo-input-detail" data-test="${testKey}" type="file" accept="image/*" capture="environment" style="display:none">
-            </div>
-          </div>
-        </div>
-      </div>
-    </details>
-  `;
-}
-
-/* ---------------- test pane rendering ---------------- */
+/* =========================================================
+   TESTPANE RENDERING
+========================================================= */
 function renderTestPane(testKey){
   const host = $(`content-${testKey}`);
   if(!host) return;
@@ -1873,6 +1887,7 @@ function renderTestPane(testKey){
       <div class="card__body">
         ${buildTimerBox(testKey, activeCycle)}
         ${getTest(testKey).cycles.map(c => renderCycleCard(c, testKey)).join('')}
+
         <div class="plus-wrap">
           <button class="btn-plus" data-role="add-cycle" data-test="${testKey}" type="button">+</button>
           <div class="plus-label">Abschnitt hinzufügen (nur freie Eingabe)</div>
@@ -1891,7 +1906,7 @@ function renderTestPane(testKey){
         <button class="btn btn--ghost btn--small" data-role="reset-test" data-test="${testKey}" type="button">Reset</button>
         <input id="importFileInput-${testKey}" data-role="import-file" data-test="${testKey}" type="file" accept=".json,.htbanker.json,application/json" style="display:none">
       </div>
-      <div class="hint">Speichern im Verlauf · PDF mit Filiale in Fußzeile</div>
+      <div class="hint">Speichern im Verlauf · PDF im Browser öffnen</div>
     </section>
   `;
 }
@@ -1904,7 +1919,9 @@ function renderAllTests(){
   updateRequiredFieldStates();
 }
 
-/* ---------------- evaluation rendering ---------------- */
+/* =========================================================
+   AUSWERTUNG
+========================================================= */
 function buildSimpleCycleSvg(cycle, testKey){
   let cum = 0;
   const pts = cycle.rows
@@ -1949,6 +1966,7 @@ function buildSimpleCycleSvg(cycle, testKey){
     </svg>
   `;
 }
+
 function renderAuswertung(){
   const host = $('auswertungContainer');
   if(!host) return;
@@ -1964,12 +1982,29 @@ function renderAuswertung(){
   host.innerHTML = `
     <div class="auswertung-block">
       <div class="auswertung-block__title">${h(TEST_LABELS[testKey])}</div>
+
       <div class="kpi-grid">
-        <div class="kpi"><div class="kpi__label">Prüfung</div><div class="kpi__value">${h(TEST_LABELS[testKey])}</div></div>
-        <div class="kpi"><div class="kpi__label">Anzahl Abschnitte</div><div class="kpi__value">${test.cycles.length}</div></div>
-        <div class="kpi"><div class="kpi__label">Typ</div><div class="kpi__value">${h(getAnkertypByKey(test.typeKey)?.label || '—')}</div></div>
-        <div class="kpi"><div class="kpi__label">Pp</div><div class="kpi__value">${fmt(test.spec.Pp,2)} kN</div></div>
+        <div class="kpi">
+          <div class="kpi__label">Prüfung</div>
+          <div class="kpi__value">${h(TEST_LABELS[testKey])}</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Anzahl Abschnitte</div>
+          <div class="kpi__value">${test.cycles.length}</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Typ</div>
+          <div class="kpi__value">${h(getAnkertypByKey(test.typeKey)?.label || '—')}</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Pp</div>
+          <div class="kpi__value">${fmt(test.spec.Pp,2)} kN</div>
+        </div>
       </div>
+
       ${test.cycles.map(c => `
         <div class="diag-wrap">
           ${buildSimpleCycleSvg(c, testKey)}
@@ -1978,7 +2013,9 @@ function renderAuswertung(){
     </div>
   `;
 }
-/* ---------------- business logic ---------------- */
+/* =========================================================
+   BUSINESS LOGIC
+========================================================= */
 function applyTypePreset(testKey, typeKey, { overwrite=true } = {}){
   const test = getTest(testKey);
   const typ = getAnkertypByKey(typeKey);
@@ -2072,13 +2109,17 @@ function syncRowsFromStageDefs(cycle){
     ints.forEach(min => {
       const key = `${stageIdx}|${min}`;
       const old = oldMap[key];
-      nextRows.push(old ? { ...old, stageIdx, min } : {
-        stageIdx,
-        min,
-        ablesung:'',
-        versch:'',
-        anm:''
-      });
+      nextRows.push(
+        old
+          ? { ...old, stageIdx, min }
+          : {
+              stageIdx,
+              min,
+              ablesung:'',
+              versch:'',
+              anm:''
+            }
+      );
     });
   });
 
@@ -2139,8 +2180,15 @@ function syncPressureFromCalibration(testKey){
   saveDraftDebounced();
 }
 
+function syncPressureFromCalibrationAll(){
+  TEST_KEYS.forEach(testKey => {
+    syncPressureFromCalibration(testKey);
+  });
+}
+
 function updateRequiredFieldStates(){
   const metaRequiredRoles = ['meta-filiale'];
+
   metaRequiredRoles.forEach(role => {
     qsa(`[data-role="${role}"]`).forEach(el => {
       setRequiredVisual(el, !String(el.value || '').trim());
@@ -2169,7 +2217,9 @@ function updateRequiredFieldStates(){
   qsa('[data-role="spec-Pp"]').forEach(el => applyComputedVisual(el, true));
 }
 
-/* ---------------- file helpers ---------------- */
+/* =========================================================
+   FILE HELPERS
+========================================================= */
 function fileToDataUrl(file){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -2189,10 +2239,12 @@ function downloadJson(data, filename){
   setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
 
-/* ---------------- snapshot / state io ---------------- */
+/* =========================================================
+   SNAPSHOT / STATE IO
+========================================================= */
 function collectSnapshot(){
   return {
-    v: 20,
+    v: 30,
     savedAt: Date.now(),
     activeTest: state.activeTest,
     evalTest: state.evalTest,
@@ -2246,6 +2298,7 @@ function applySnapshot(snap, doRender=true){
     renderAuswertung();
     renderHistoryList();
     updateRequiredFieldStates();
+    syncTestChoiceUi();
   }
 }
 
@@ -2263,7 +2316,7 @@ function loadDraft(){
 
 function buildTemplatePayload(testKey){
   return {
-    v: 20,
+    v: 30,
     meta: clone(state.meta),
     settings: clone(state.settings),
     activeTest: testKey,
@@ -2311,6 +2364,9 @@ function importTemplatePayload(testKey, payload){
   }
 }
 
+/* =========================================================
+   HISTORY
+========================================================= */
 function buildHistoryTitle(testKey, snapshot){
   const meta = snapshot?.meta || state.meta;
   return `${TEST_LABELS[testKey]} · ${meta.nummer || '—'} · ${meta.bauvorhaben || '—'}`;
@@ -2319,12 +2375,14 @@ function buildHistoryTitle(testKey, snapshot){
 function saveTestToHistory(testKey){
   const snap = collectSnapshot();
   const list = readHistory();
+
   list.unshift({
     id: uid(),
     title: buildHistoryTitle(testKey, snap),
     savedAt: snap.savedAt,
     snapshot: snap
   });
+
   writeHistory(list);
 }
 
@@ -2333,7 +2391,6 @@ function saveCurrentToHistory(){
   renderHistoryList();
 }
 
-/* ---------------- history ui ---------------- */
 function renderHistoryList(){
   const host = $('historyList');
   if(!host) return;
@@ -2363,6 +2420,7 @@ function renderHistoryList(){
           Prüfung: <b>${h(TEST_LABELS[testKey])}</b><br>
           Typ: <b>${h(typ || '—')}</b><br>
           Abschnitte: <b>${test?.cycles?.length || 0}</b>
+
           <div class="historyBtns">
             <button data-role="history-load" data-id="${h(entry.id)}">Laden</button>
             <button data-role="history-pdf" data-id="${h(entry.id)}">PDF</button>
@@ -2374,7 +2432,10 @@ function renderHistoryList(){
     `;
   }).join('');
 }
-/* ---------------- pdf template helpers ---------------- */
+
+/* =========================================================
+   PDF HELPERS
+========================================================= */
 function pdfSafeAnker(v){
   return String(v ?? '')
     .replace(/[–—]/g,'-')
@@ -2386,26 +2447,6 @@ function drawTextSafeAnker(page, text, options){
   page.drawText(pdfSafeAnker(text), options);
 }
 
-function wrapPdfTextAnker(font, text, size, maxWidth){
-  const words = String(text || '').split(/\s+/).filter(Boolean);
-  const lines = [];
-  let line = '';
-
-  words.forEach(word => {
-    const test = line ? `${line} ${word}` : word;
-    const w = font.widthOfTextAtSize(pdfSafeAnker(test), size);
-    if(w <= maxWidth){
-      line = test;
-    }else{
-      if(line) lines.push(line);
-      line = word;
-    }
-  });
-
-  if(line) lines.push(line);
-  return lines.length ? lines : [''];
-}
-
 async function loadPdfAssetsAnker(pdf){
   const { StandardFonts } = window.PDFLib;
 
@@ -2414,21 +2455,21 @@ async function loadPdfAssetsAnker(pdf){
 
   let logo = null;
   try{
-    const b = await fetch(`${BASE_PATH}logo.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+    const b = await fetch(`${BASE_PATH}logo.png?v=30`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
     logo = await pdf.embedPng(b);
   }catch{}
 
   let coverPhoto = null;
   try{
-    const b = await fetch(`${BASE_PATH}cover-photo.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+    const b = await fetch(`${BASE_PATH}cover-photo.png?v=30`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
     coverPhoto = await pdf.embedPng(b);
   }catch{
     try{
-      const b = await fetch(`${BASE_PATH}cover-photo.jpg?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+      const b = await fetch(`${BASE_PATH}cover-photo.jpg?v=30`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
       coverPhoto = await pdf.embedJpg(b);
     }catch{
       try{
-        const b = await fetch(`${BASE_PATH}cover-photo.jpeg?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+        const b = await fetch(`${BASE_PATH}cover-photo.jpeg?v=30`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
         coverPhoto = await pdf.embedJpg(b);
       }catch{}
     }
@@ -2436,11 +2477,11 @@ async function loadPdfAssetsAnker(pdf){
 
   let fusszeile = null;
   try{
-    const b = await fetch(`${BASE_PATH}Fu%C3%9Fzeile.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+    const b = await fetch(`${BASE_PATH}Fu%C3%9Fzeile.png?v=30`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
     fusszeile = await pdf.embedPng(b);
   }catch{
     try{
-      const b = await fetch(`${BASE_PATH}Fusszeile.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+      const b = await fetch(`${BASE_PATH}Fusszeile.png?v=30`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
       fusszeile = await pdf.embedPng(b);
     }catch{}
   }
@@ -2525,12 +2566,7 @@ function drawSpecialFooterAnker(page, ctx){
   if(fusszeile){
     const scale = PAGE_W / fusszeile.width;
     const imgH = fusszeile.height * scale;
-    page.drawImage(fusszeile, {
-      x: 0,
-      y: 0,
-      width: PAGE_W,
-      height: imgH
-    });
+    page.drawImage(fusszeile, { x:0, y:0, width:PAGE_W, height:imgH });
     return imgH;
   }
 
@@ -2606,8 +2642,58 @@ async function embedDataUrlImageAnker(pdf, dataUrl){
     : await pdf.embedJpg(bytes);
 }
 
+async function drawImagePageAnker(pdf, ctx, title, subtitle, dataUrl){
+  const page = pdf.addPage([ctx.PAGE_W, ctx.PAGE_H]);
+  drawPageFrameAnker(page, ctx);
+  drawHeaderBarAnker(page, ctx, title, subtitle);
+  const footerH = drawStandardFooterAnker(page, ctx, pdf.getPageCount());
+
+  if(dataUrl){
+    try{
+      const img = await embedDataUrlImageAnker(pdf, dataUrl);
+      const areaX = ctx.mm(14);
+      const areaY = footerH + ctx.mm(10);
+      const areaW = ctx.PAGE_W - ctx.mm(28);
+      const areaH = ctx.PAGE_H - ctx.mm(46);
+
+      const ratio = img.width / img.height;
+      let dw = areaW;
+      let dh = dw / ratio;
+
+      if(dh > areaH){
+        dh = areaH;
+        dw = dh * ratio;
+      }
+
+      page.drawImage(img, {
+        x: areaX + (areaW - dw) / 2,
+        y: areaY + (areaH - dh) / 2,
+        width: dw,
+        height: dh
+      });
+    }catch(err){
+      console.error(err);
+      drawTextSafeAnker(page, 'Bild konnte nicht eingebettet werden.', {
+        x: ctx.mm(20),
+        y: ctx.PAGE_H / 2,
+        size: 10,
+        font: ctx.fontR,
+        color: ctx.K
+      });
+    }
+  }else{
+    drawTextSafeAnker(page, 'Kein Bild vorhanden.', {
+      x: ctx.mm(20),
+      y: ctx.PAGE_H / 2,
+      size: 10,
+      font: ctx.fontR,
+      color: ctx.K
+    });
+  }
+}
+
 async function drawCoverPageAnker(pdf, ctx, testKey, snap){
-  const { PAGE_W, PAGE_H, mm, fontR, fontB, K, GREY, coverPhoto, logo, rgb } = ctx;
+  const { PAGE_W, PAGE_H, mm, fontR, fontB, K, coverPhoto, logo, rgb } = ctx;
   const page = pdf.addPage([PAGE_W, PAGE_H]);
 
   drawPageFrameAnker(page, ctx);
@@ -2715,7 +2801,7 @@ async function drawCoverPageAnker(pdf, ctx, testKey, snap){
         start:{ x: lineLeft, y: slotBottom },
         end:{ x: lineRight, y: slotBottom },
         thickness:0.7,
-        color:K
+        color: K
       });
     }
   });
@@ -2748,7 +2834,7 @@ async function drawCoverPageAnker(pdf, ctx, testKey, snap){
       borderWidth: 0.8
     });
 
-    drawTextSafeAnker(page, 'cover-photo.png nicht gefunden.', {
+    drawTextSafeAnker(page, 'cover-photo nicht gefunden.', {
       x: rightX + mm(8),
       y: footerH + mm(40),
       size: 10,
@@ -2812,7 +2898,6 @@ function drawTocPageAnker(page, ctx, testKey, tocEntries){
     });
 
     y -= mm(7);
-    if(y < footerH + mm(20)) return;
   });
 }
 
@@ -2928,56 +3013,6 @@ function drawProtocolRowAnker(page, ctx, testKey, row, stage, y){
   return y - ctx.mm(4.8);
 }
 
-async function drawImagePageAnker(pdf, ctx, title, subtitle, dataUrl){
-  const page = pdf.addPage([ctx.PAGE_W, ctx.PAGE_H]);
-  drawPageFrameAnker(page, ctx);
-  drawHeaderBarAnker(page, ctx, title, subtitle);
-  const footerH = drawStandardFooterAnker(page, ctx, pdf.getPageCount());
-
-  if(dataUrl){
-    try{
-      const img = await embedDataUrlImageAnker(pdf, dataUrl);
-      const areaX = ctx.mm(14);
-      const areaY = footerH + ctx.mm(10);
-      const areaW = ctx.PAGE_W - ctx.mm(28);
-      const areaH = ctx.PAGE_H - ctx.mm(46);
-
-      const ratio = img.width / img.height;
-      let dw = areaW;
-      let dh = dw / ratio;
-
-      if(dh > areaH){
-        dh = areaH;
-        dw = dh * ratio;
-      }
-
-      page.drawImage(img, {
-        x: areaX + (areaW - dw) / 2,
-        y: areaY + (areaH - dh) / 2,
-        width: dw,
-        height: dh
-      });
-    }catch(err){
-      console.error(err);
-      drawTextSafeAnker(page, 'Bild konnte nicht eingebettet werden.', {
-        x: ctx.mm(20),
-        y: ctx.PAGE_H / 2,
-        size: 10,
-        font: ctx.fontR,
-        color: ctx.K
-      });
-    }
-  }else{
-    drawTextSafeAnker(page, 'Kein Bild vorhanden.', {
-      x: ctx.mm(20),
-      y: ctx.PAGE_H / 2,
-      size: 10,
-      font: ctx.fontR,
-      color: ctx.K
-    });
-  }
-}
-
 function drawCycleProtocolPagesAnker(pdf, ctx, testKey, snap, cycle){
   function createPage(){
     const page = pdf.addPage([ctx.PAGE_W, ctx.PAGE_H]);
@@ -3019,7 +3054,6 @@ function openPdfInBrowser(bytes, fileName='HTB_Ankerpruefung.pdf'){
   setTimeout(() => URL.revokeObjectURL(url), 120000);
 }
 
-/* ---------------- pdf export ---------------- */
 async function exportPdfForTest(testKey, snapshotState=null){
   if(!window.PDFLib){
     alert('PDF-Bibliothek nicht geladen.');
@@ -3067,7 +3101,10 @@ async function exportPdfForTest(testKey, snapshotState=null){
   const bytes = await pdf.save();
   openPdfInBrowser(bytes, `${dateTag()}_${testKey}_protokoll.pdf`);
 }
-/* ---------------- audio / alarm ---------------- */
+
+/* =========================================================
+   AUDIO / ALARM
+========================================================= */
 function getAlarmAudioContext(){
   if(!_audioCtx){
     try{
@@ -3203,36 +3240,9 @@ function updateAlarmSoundButton(){
   }
 }
 
-async function toggleAlarmSoundByUserGesture(){
-  const active = state.settings.alarmSoundEnabled !== false && _alarmReady;
-
-  if(active){
-    state.settings.alarmSoundEnabled = false;
-    _alarmReady = false;
-    updateAlarmSoundButton();
-    saveDraftDebounced();
-    return;
-  }
-
-  state.settings.alarmSoundEnabled = true;
-  const ok = await unlockAlarmAudio();
-
-  if(ok){
-    const ctx = getAlarmAudioContext();
-    const now = ctx.currentTime + 0.02;
-    scheduleBeep(ctx, now,      0.08, 2100, 0.42);
-    scheduleBeep(ctx, now+0.18, 0.10, 2550, 0.50);
-  }
-
-  updateAlarmSoundButton();
-  saveDraftDebounced();
-
-  if(!ok){
-    alert('Ton konnte nicht aktiviert werden. Lautstärke prüfen und erneut antippen.');
-  }
-}
-
-/* ---------------- timer helpers ---------------- */
+/* =========================================================
+   TIMER
+========================================================= */
 function getHoldStage(cycle){
   const idx = Number.isInteger(cycle?.holdStageIdx) ? cycle.holdStageIdx : 0;
   return cycle?.stageDefs?.[idx] || null;
@@ -3255,6 +3265,7 @@ function ensureTimer(cycleId, cycle){
       alarmCount:ints.filter(iv => iv > 0 && min >= iv).length
     };
   }
+
   return timerMap[cycleId];
 }
 
@@ -3262,15 +3273,6 @@ function getElapsedMs(cycleId, cycle){
   const t = timerMap[cycleId];
   if(!t) return Number(cycle?.elapsedMs || 0);
   return t.running ? t.accumulatedMs + (Date.now() - t.startMs) : t.accumulatedMs;
-}
-
-function stopAllOtherTimers(exceptCycleId){
-  Object.entries(timerMap).forEach(([id, timer]) => {
-    if(id !== exceptCycleId && timer?.running){
-      const ctx = getCycleContextById(id);
-      if(ctx) stopTimer(ctx.testKey, ctx.cycleId);
-    }
-  });
 }
 
 function getCycleContextById(cycleId){
@@ -3321,30 +3323,9 @@ function highlightActiveMeasurementRow(testKey, cycle){
 
   const strongHighlight = !!timerMap[cycle.id]?.running || Number(cycle.elapsedMs || 0) > 0;
   if(strongHighlight){
-    const ablesungInput = qs(`[data-role="row-ablesung"][data-row="${active._idx}"]`, card);
-    if(ablesungInput) ablesungInput.classList.add('current-measurement');
+    const input = qs(`[data-role="row-ablesung"][data-row="${active._idx}"]`, card);
+    if(input) input.classList.add('current-measurement');
   }
-}
-
-function triggerIntervalAlarm(testKey){
-  const display = $(`globalTimerDisplay-${testKey}`);
-
-  document.body.classList.remove('screen-flash');
-  void document.body.offsetWidth;
-  document.body.classList.add('screen-flash');
-
-  if(display){
-    display.classList.remove('timer-display--alarm');
-    void display.offsetWidth;
-    display.classList.add('timer-display--alarm');
-  }
-
-  void playIntervalBeep();
-
-  setTimeout(() => document.body.classList.remove('screen-flash'), 1800);
-  setTimeout(() => {
-    if(display) display.classList.remove('timer-display--alarm');
-  }, Math.max(2400, Number(state.settings.alarmDurationSec || 4) * 1000 + 600));
 }
 
 function updateTimerUi(testKey){
@@ -3396,6 +3377,27 @@ function updateAllTimerUis(){
   updateFloatingTimerWidget();
 }
 
+function triggerIntervalAlarm(testKey){
+  const display = $(`globalTimerDisplay-${testKey}`);
+
+  document.body.classList.remove('screen-flash');
+  void document.body.offsetWidth;
+  document.body.classList.add('screen-flash');
+
+  if(display){
+    display.classList.remove('timer-display--alarm');
+    void display.offsetWidth;
+    display.classList.add('timer-display--alarm');
+  }
+
+  void playIntervalBeep();
+
+  setTimeout(() => document.body.classList.remove('screen-flash'), 1800);
+  setTimeout(() => {
+    if(display) display.classList.remove('timer-display--alarm');
+  }, Math.max(2400, Number(state.settings.alarmDurationSec || 4) * 1000 + 600));
+}
+
 function tickTimer(testKey, cycleId){
   const cycle = getCycleById(testKey, cycleId);
   const t = timerMap[cycleId];
@@ -3416,18 +3418,28 @@ function tickTimer(testKey, cycleId){
   t.raf = requestAnimationFrame(() => tickTimer(testKey, cycleId));
 }
 
+function stopAllOtherTimers(exceptCycleId){
+  Object.entries(timerMap).forEach(([id, timer]) => {
+    if(id !== exceptCycleId && timer?.running){
+      const ctx = getCycleContextById(id);
+      if(ctx) stopTimer(ctx.testKey, ctx.cycleId);
+    }
+  });
+}
+
 function startTimer(testKey, cycleId){
   const cycle = getCycleById(testKey, cycleId);
   if(!cycle) return;
 
   if(state.settings.alarmSoundEnabled !== false) void unlockAlarmAudio();
-
   stopAllOtherTimers(cycleId);
 
   const t = ensureTimer(cycleId, cycle);
   if(t.running) return;
 
-  if(!cycle.startzeit) cycle.startzeit = new Date().toLocaleTimeString('de-DE');
+  if(!cycle.startzeit){
+    cycle.startzeit = new Date().toLocaleTimeString('de-DE');
+  }
 
   const ints = getCycleTimerIntervals(cycle).filter(n => n > 0);
   t.alarmCount = ints.filter(iv => t.accumulatedMs / 60000 >= iv).length;
@@ -3497,7 +3509,6 @@ function resetActiveTimer(testKey){
   }
 }
 
-/* ---------------- floating timer ---------------- */
 function isElementVisible(el){
   if(!el) return false;
   const r = el.getBoundingClientRect();
@@ -3547,7 +3558,6 @@ function stopFloatingLoopIfIdle(){
   }
 }
 
-/* ---------------- time adjust modal ---------------- */
 function openTimeAdjustModal(testKey, cycleId){
   const cycle = getCycleById(testKey, cycleId);
   if(!cycle) return;
@@ -3605,11 +3615,9 @@ function applyTimeAdjustment(){
   closeTimeAdjustModal();
 }
 
-/* ---------------- misc ui helpers ---------------- */
-function normalizeBottomActionCards(){
-  /* Sticky bleibt rein über CSS gesteuert */
-}
-/* ---------------- refresh helpers ---------------- */
+/* =========================================================
+   REFRESH HELPERS
+========================================================= */
 function updateCycleComputedUi(testKey, cycleId){
   const cycle = getCycleById(testKey, cycleId);
   const card = qs(`[data-cycle-card="${cycleId}"]`);
@@ -3642,28 +3650,6 @@ function refreshTestAfterChange(testKey, { renderAll=false } = {}){
     updateRequiredFieldStates();
   }
 
-  renderAuswertung();
-  saveDraftDebounced();
-}
-
-function syncPressureFromCalibrationAll(){
-  const hasKalib = !!findKalibById(state.meta.selectedKalibId);
-
-  if(hasKalib){
-    TEST_KEYS.forEach(testKey => {
-      const test = getTest(testKey);
-      test.cycles.forEach(cycle => {
-        cycle.stageDefs = cycle.stageDefs.map(normalizeStageDef);
-        cycle.stageDefs.forEach(stage => {
-          const kn = calcStageLoad(stage, testKey);
-          const lookup = lookupStuetzpunkt(kn, findKalibById(state.meta.selectedKalibId).punkte);
-          stage.druck = lookup.bar != null ? String(lookup.bar) : '';
-        });
-      });
-    });
-  }
-
-  renderAllTests();
   renderAuswertung();
   saveDraftDebounced();
 }
@@ -3713,7 +3699,203 @@ async function importKalibFile(file){
   syncPressureFromCalibrationAll();
 }
 
-/* ---------------- click delegation ---------------- */
+/* =========================================================
+   TAB / THEME / LAYOUT
+========================================================= */
+function switchMainTab(name){
+  const validSystemTabs = ['auswertung','verlauf','settings'];
+  const isTestTab = TEST_KEYS.includes(name);
+  const isSystemTab = validSystemTabs.includes(name);
+
+  if(!isTestTab && !isSystemTab){
+    name = getActiveTestKey();
+  }
+
+  if(isTestTab){
+    state.activeTest = name;
+  }
+
+  qsa('.tab').forEach(tab => {
+    const tabName = tab.dataset.testTab || tab.dataset.tab;
+    tab.classList.toggle('is-active', tabName === name);
+  });
+
+  qsa('.pane').forEach(pane => {
+    const shouldShow = pane.id === `tab-${name}`;
+    pane.hidden = !shouldShow;
+    pane.classList.toggle('is-active', shouldShow);
+  });
+
+  syncTestChoiceUi();
+
+  if(isTestTab){
+    renderTestPane(name);
+    updateTimerUi(name);
+  }
+
+  if(name === 'auswertung') renderAuswertung();
+  if(name === 'verlauf') renderHistoryList();
+
+  saveDraftDebounced();
+}
+
+function syncTestChoiceUi(){
+  qsa('[data-test-tab]').forEach(el => {
+    el.classList.toggle('is-active', el.dataset.testTab === state.activeTest);
+  });
+
+  qsa('[data-set-eval-test]').forEach(el => {
+    el.classList.toggle('is-active', el.dataset.setEvalTest === state.evalTest);
+  });
+
+  const activeSelect = $('activeTestSelect');
+  if(activeSelect) activeSelect.value = state.activeTest;
+
+  const evalSelect = $('evalTestSelect');
+  if(evalSelect) evalSelect.value = state.evalTest;
+}
+
+function setActiveTest(testKey){
+  if(!TEST_KEYS.includes(testKey)) return;
+  switchMainTab(testKey);
+}
+
+function setEvalTest(testKey){
+  if(!TEST_KEYS.includes(testKey)) return;
+  state.evalTest = testKey;
+  syncTestChoiceUi();
+  renderAuswertung();
+  saveDraftDebounced();
+}
+
+function getResolvedLayoutMode(){
+  const pref = state.settings?.layoutMode || 'auto';
+
+  if(pref === 'tablet') return 'tablet';
+  if(pref === 'desktop') return 'desktop';
+
+  const w = window.innerWidth || document.documentElement.clientWidth || 0;
+  if(w >= 1280) return 'desktop';
+  if(w >= 820) return 'tablet';
+  return 'mobile';
+}
+
+function applyLayoutMode(){
+  const resolved = getResolvedLayoutMode();
+  document.body.dataset.layoutMode = resolved;
+  document.documentElement.dataset.layoutMode = resolved;
+}
+
+function getResolvedThemeMode(){
+  const pref = state.settings?.themeMode || 'light';
+
+  if(pref === 'light') return 'light';
+  if(pref === 'dark') return 'dark';
+
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyThemeMode(){
+  const resolved = getResolvedThemeMode();
+  document.body.dataset.theme = resolved;
+  document.documentElement.dataset.theme = resolved;
+
+  const logo = $('brandLogo');
+  if(logo){
+    const src = resolved === 'dark'
+      ? `${BASE_PATH}logo_hell.svg?v=30`
+      : `${BASE_PATH}logo_dunkel.svg?v=30`;
+
+    logo.src = src;
+    logo.onerror = () => {
+      logo.onerror = null;
+      logo.src = `${BASE_PATH}logo.svg?v=30`;
+    };
+  }
+}
+
+/* =========================================================
+   DELEGATED UI WITHOUT DATA-ROLE
+========================================================= */
+document.addEventListener('click', async e => {
+  const evalBtn = e.target.closest('[data-set-eval-test]');
+  if(evalBtn){
+    setEvalTest(evalBtn.dataset.setEvalTest);
+    return;
+  }
+
+  const kalibImportBtn = e.target.closest('[id^="btnKalibImport-"]');
+  if(kalibImportBtn){
+    const testKey = kalibImportBtn.id.replace('btnKalibImport-', '');
+    $(`kalibImportInput-${testKey}`)?.click();
+    return;
+  }
+
+  const kalibExportBtn = e.target.closest('[id^="btnKalibExport-"]');
+  if(kalibExportBtn){
+    const kalib = findKalibById(state.meta.selectedKalibId);
+
+    if(!kalib){
+      const txt = buildKalibCsvTemplate();
+      const blob = new Blob([txt], { type:'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'HTB_Kalibrierung_Vorlage.csv';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+      return;
+    }
+
+    const txt = kalibToCsv(kalib);
+    const blob = new Blob([txt], { type:'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `HTB_Kalib_${kalib.presseNr}_${kalib.kalibriertAm}.csv`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    return;
+  }
+
+  const kalibDeleteBtn = e.target.closest('[id^="btnKalibDelete-"]');
+  if(kalibDeleteBtn){
+    handleKalibDelete();
+
+    if(findKalibById(state.meta.selectedKalibId)){
+      syncPressureFromCalibrationAll();
+    }else{
+      renderAllTests();
+      renderAuswertung();
+      saveDraftDebounced();
+    }
+    return;
+  }
+
+  const floatingTimer = e.target.closest('#floatingTimer');
+  if(floatingTimer){
+    const ctx = getFirstRunningCycleContext();
+    if(ctx) openTimeAdjustModal(ctx.testKey, ctx.cycleId);
+    return;
+  }
+});
+
+document.addEventListener('change', e => {
+  const activeSelect = e.target.closest('#activeTestSelect');
+  if(activeSelect){
+    setActiveTest(activeSelect.value);
+    return;
+  }
+
+  const evalSelect = e.target.closest('#evalTestSelect');
+  if(evalSelect){
+    setEvalTest(evalSelect.value);
+  }
+});
+
+/* =========================================================
+   CLICK / CHANGE / INPUT DELEGATION
+========================================================= */
 document.addEventListener('click', async e => {
   const el = e.target.closest('[data-role]');
   if(!el) return;
@@ -3899,14 +4081,14 @@ document.addEventListener('click', async e => {
   }
 
   if(role === 'history-load'){
-  const entry = readHistory().find(h => h.id === el.dataset.id);
-  if(entry){
-    applySnapshot(entry.snapshot, true);
-    switchMainTab(getActiveTestKey());
-    saveDraftDebounced();
+    const entry = readHistory().find(h => h.id === el.dataset.id);
+    if(entry){
+      applySnapshot(entry.snapshot, true);
+      switchMainTab(getActiveTestKey());
+      saveDraftDebounced();
+    }
+    return;
   }
-  return;
-}
 
   if(role === 'history-del'){
     if(!confirm('Eintrag löschen?')) return;
@@ -3935,7 +4117,6 @@ document.addEventListener('click', async e => {
   }
 });
 
-/* ---------------- change delegation ---------------- */
 document.addEventListener('change', async e => {
   const raw = e.target;
 
@@ -4149,7 +4330,6 @@ document.addEventListener('change', async e => {
   updateRequiredFieldStates();
 });
 
-/* ---------------- input delegation ---------------- */
 document.addEventListener('input', e => {
   const el = e.target.closest('[data-role]');
   if(!el) return;
@@ -4204,7 +4384,8 @@ document.addEventListener('input', e => {
     }
   }
 });
-/* ---------------- table enter navigation ---------------- */
+
+/* Enter -> nächste Zeile */
 document.addEventListener('keydown', e => {
   if(e.key !== 'Enter') return;
 
@@ -4227,186 +4408,10 @@ document.addEventListener('keydown', e => {
     next.select?.();
   }
 });
-/* ---------------- main tabs ---------------- */
-function switchMainTab(name){
-  const validSystemTabs = ['auswertung','verlauf','settings'];
-  const isTestTab = TEST_KEYS.includes(name);
-  const isSystemTab = validSystemTabs.includes(name);
 
-  if(!isTestTab && !isSystemTab){
-    name = getActiveTestKey();
-  }
-
-  if(isTestTab){
-    state.activeTest = name;
-  }
-
-  qsa('.tab').forEach(tab => {
-    const tabName = tab.dataset.testTab || tab.dataset.tab;
-    tab.classList.toggle('is-active', tabName === name);
-  });
-
-  qsa('.pane').forEach(pane => {
-    const shouldShow = pane.id === `tab-${name}`;
-    pane.hidden = !shouldShow;
-    pane.classList.toggle('is-active', shouldShow);
-  });
-
-  syncTestChoiceUi();
-
-  if(isTestTab){
-    renderTestPane(name);
-    updateTimerUi(name);
-  }
-
-  if(name === 'auswertung') renderAuswertung();
-  if(name === 'verlauf') renderHistoryList();
-
-  saveDraftDebounced();
-}
-/* ---------------- optional test selection ui ---------------- */
-function syncTestChoiceUi(){
-  qsa('[data-test-tab]').forEach(el => {
-    el.classList.toggle('is-active', el.dataset.testTab === state.activeTest);
-  });
-
-  qsa('[data-set-eval-test]').forEach(el => {
-    el.classList.toggle('is-active', el.dataset.setEvalTest === state.evalTest);
-  });
-
-  const activeSelect = $('activeTestSelect');
-  if(activeSelect) activeSelect.value = state.activeTest;
-
-  const evalSelect = $('evalTestSelect');
-  if(evalSelect) evalSelect.value = state.evalTest;
-}
-function setActiveTest(testKey){
-  if(!TEST_KEYS.includes(testKey)) return;
-  switchMainTab(testKey);
-}
-
-function setEvalTest(testKey){
-  if(!TEST_KEYS.includes(testKey)) return;
-  state.evalTest = testKey;
-  syncTestChoiceUi();
-  renderAuswertung();
-  saveDraftDebounced();
-}
-function getResolvedLayoutMode(){
-  const pref = state.settings?.layoutMode || 'auto';
-
-  if(pref === 'tablet') return 'tablet';
-  if(pref === 'desktop') return 'desktop';
-
-  const w = window.innerWidth || document.documentElement.clientWidth || 0;
-  if(w >= 1280) return 'desktop';
-  if(w >= 820) return 'tablet';
-  return 'mobile';
-}
-
-function applyLayoutMode(){
-  const resolved = getResolvedLayoutMode();
-  document.body.dataset.layoutMode = resolved;
-  document.documentElement.dataset.layoutMode = resolved;
-}
-function getResolvedThemeMode(){
-  const pref = state.settings?.themeMode || 'light';
-
-  if(pref === 'light') return 'light';
-  if(pref === 'dark') return 'dark';
-
-  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
-function applyThemeMode(){
-  const resolved = getResolvedThemeMode();
-  document.body.dataset.theme = resolved;
-  document.documentElement.dataset.theme = resolved;
-}
-/* ---------------- delegated ui without data-role ---------------- */
-document.addEventListener('click', async e => {
-  const activeBtn = e.target.closest('[data-set-active-test]');
-  if(activeBtn){
-    setActiveTest(activeBtn.dataset.setActiveTest);
-    return;
-  }
-
-  const evalBtn = e.target.closest('[data-set-eval-test]');
-  if(evalBtn){
-    setEvalTest(evalBtn.dataset.setEvalTest);
-    return;
-  }
-
-  const kalibImportBtn = e.target.closest('[id^="btnKalibImport-"]');
-  if(kalibImportBtn){
-    const testKey = kalibImportBtn.id.replace('btnKalibImport-', '');
-    $(`kalibImportInput-${testKey}`)?.click();
-    return;
-  }
-
-  const kalibExportBtn = e.target.closest('[id^="btnKalibExport-"]');
-  if(kalibExportBtn){
-    const kalib = findKalibById(state.meta.selectedKalibId);
-
-    if(!kalib){
-      const txt = buildKalibCsvTemplate();
-      const blob = new Blob([txt], { type:'text/csv;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'HTB_Kalibrierung_Vorlage.csv';
-      a.click();
-      setTimeout(() => URL.revokeObjectURL(url), 30000);
-      return;
-    }
-
-    const txt = kalibToCsv(kalib);
-    const blob = new Blob([txt], { type:'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `HTB_Kalib_${kalib.presseNr}_${kalib.kalibriertAm}.csv`;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 30000);
-    return;
-  }
-
-  const kalibDeleteBtn = e.target.closest('[id^="btnKalibDelete-"]');
-  if(kalibDeleteBtn){
-    handleKalibDelete();
-
-    if(findKalibById(state.meta.selectedKalibId)){
-      syncPressureFromCalibrationAll();
-    }else{
-      renderAllTests();
-      renderAuswertung();
-      saveDraftDebounced();
-    }
-    return;
-  }
-
-  const floatingTimer = e.target.closest('#floatingTimer');
-  if(floatingTimer){
-    const ctx = getFirstRunningCycleContext();
-    if(ctx) openTimeAdjustModal(ctx.testKey, ctx.cycleId);
-    return;
-  }
-});
-
-document.addEventListener('change', e => {
-  const activeSelect = e.target.closest('#activeTestSelect');
-  if(activeSelect){
-    setActiveTest(activeSelect.value);
-    return;
-  }
-
-  const evalSelect = e.target.closest('#evalTestSelect');
-  if(evalSelect){
-    setEvalTest(evalSelect.value);
-  }
-});
-
-/* ---------------- static ui bindings ---------------- */
+/* =========================================================
+   STATIC UI BINDINGS
+========================================================= */
 function bindStaticUi(){
   qsa('.tab').forEach(tab => {
     if(tab.dataset.bound === '1') return;
@@ -4430,21 +4435,22 @@ function bindStaticUi(){
     applyLayoutMode();
     saveDraftDebounced();
   });
-$('settings-themeMode')?.addEventListener('change', e => {
-  state.settings.themeMode = e.target.value || 'light';
-  applyThemeMode();
-  saveDraftDebounced();
-});
- $('btnSaveSettings')?.addEventListener('click', () => {
-  state.settings.alarmDurationSec = clamp(Number($('settings-alarmDuration')?.value || 4), 1, 30);
-  state.settings.layoutMode = $('settings-layoutMode')?.value || state.settings.layoutMode || 'auto';
-  state.settings.themeMode = $('settings-themeMode')?.value || state.settings.themeMode || 'light';
 
-  applyLayoutMode();
-  applyThemeMode();
-  saveDraftDebounced();
-  alert('Einstellungen gespeichert.');
-});
+  $('settings-themeMode')?.addEventListener('change', e => {
+    state.settings.themeMode = e.target.value || 'light';
+    applyThemeMode();
+    saveDraftDebounced();
+  });
+
+  $('btnSaveSettings')?.addEventListener('click', () => {
+    state.settings.alarmDurationSec = clamp(Number($('settings-alarmDuration')?.value || 4), 1, 30);
+    state.settings.layoutMode = $('settings-layoutMode')?.value || state.settings.layoutMode || 'auto';
+    state.settings.themeMode = $('settings-themeMode')?.value || state.settings.themeMode || 'light';
+    applyLayoutMode();
+    applyThemeMode();
+    saveDraftDebounced();
+    alert('Einstellungen gespeichert.');
+  });
 
   $('btnExportTemplate')?.addEventListener('click', () => {
     const testKey = getActiveTestKey();
@@ -4541,7 +4547,9 @@ $('settings-themeMode')?.addEventListener('change', e => {
   });
 }
 
-/* ---------------- normalization on startup ---------------- */
+/* =========================================================
+   NORMALIZATION / INIT
+========================================================= */
 function normalizeLoadedState(){
   TEST_KEYS.forEach(testKey => {
     if(!state.tests[testKey]){
@@ -4589,7 +4597,6 @@ function applyCalibrationToStateWithoutRender(){
   });
 }
 
-/* ---------------- init ---------------- */
 function initApp(){
   ensureDynamicStyles();
 
@@ -4612,16 +4619,18 @@ function initApp(){
   updateRequiredFieldStates();
   updateAllTimerUis();
   syncTestChoiceUi();
-if($('settings-layoutMode')){
-  $('settings-layoutMode').value = state.settings.layoutMode || 'auto';
-}
 
-if($('settings-themeMode')){
-  $('settings-themeMode').value = state.settings.themeMode || 'light';
-}
+  if($('settings-layoutMode')){
+    $('settings-layoutMode').value = state.settings.layoutMode || 'auto';
+  }
 
-applyLayoutMode();
-applyThemeMode();
+  if($('settings-themeMode')){
+    $('settings-themeMode').value = state.settings.themeMode || 'light';
+  }
+
+  applyLayoutMode();
+  applyThemeMode();
+
   if($('settings-alarmDuration')){
     $('settings-alarmDuration').value = String(
       clamp(Number(state.settings.alarmDurationSec || 4), 1, 30)
@@ -4629,16 +4638,18 @@ applyThemeMode();
   }
 
   updateAlarmSoundButton();
-  installAudioUnlock();
-  normalizeBottomActionCards();
 
-const initialTabEl = qs('.tab.is-active');
-const initialTab =
-  initialTabEl?.dataset.testTab ||
-  initialTabEl?.dataset.tab ||
-  getActiveTestKey();
+  if(state.settings.alarmSoundEnabled !== false){
+    installAudioUnlock();
+  }
 
-switchMainTab(initialTab);
+  const initialTabEl = qs('.tab.is-active');
+  const initialTab =
+    initialTabEl?.dataset.testTab ||
+    initialTabEl?.dataset.tab ||
+    getActiveTestKey();
+
+  switchMainTab(initialTab);
 }
 
 if(document.readyState === 'loading'){
