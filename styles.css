@@ -1697,7 +1697,7 @@ PATCH – Laststufe vertikal korrekt
 .th-stage{
   writing-mode:vertical-rl;
   text-orientation:mixed;
-  transform:rotate(180deg);
+  transform:rotate(90deg);
   line-height:1;
   font-size:10px;
 }
