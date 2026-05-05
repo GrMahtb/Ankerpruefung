@@ -1486,3 +1486,71 @@ body[data-theme="dark"] .floating-timer__label{
     grid-template-columns:1fr 70px 70px;
   }
 }
+/* =========================================================
+   PATCH: Pflicht / Berechnet / Theme Kontrast
+========================================================= */
+
+/* Pflichtfelder */
+.field__input--required,
+.field__select--required,
+.field__textarea--required{
+  background:rgba(239,68,68,.08) !important;
+  border:1px solid rgba(239,68,68,.55) !important;
+  color:inherit !important;
+}
+
+/* Berechnete / automatische Felder */
+.field__input--computed{
+  background:rgba(34,197,94,.08) !important;
+  border:1px solid rgba(34,197,94,.55) !important;
+  color:#15803d !important;
+  font-weight:800 !important;
+}
+
+body[data-theme="dark"] .field__input--computed{
+  color:#4ade80 !important;
+}
+
+/* Bindig / Nichtbindig auch im Hellmodus lesbar */
+.select-card,
+.select-card span,
+.select-card b,
+.select-card small{
+  color:var(--app-text) !important;
+}
+
+body[data-theme="light"] .select-card{
+  background:#ffffff !important;
+  border-color:var(--app-border) !important;
+}
+
+body[data-theme="light"] .select-card:has(input:checked){
+  background:#eef2f6 !important;
+  border-color:#111827 !important;
+}
+
+/* Alle Überschriften / Titel auf hellem Hintergrund schwarz */
+body[data-theme="light"] .card__title,
+body[data-theme="light"] .auswertung-block__title,
+body[data-theme="light"] .settings-group__title,
+body[data-theme="light"] .kalib-preview__title,
+body[data-theme="light"] .zyklus-title,
+body[data-theme="light"] .photo-box__title,
+body[data-theme="light"] .brand__company,
+body[data-theme="light"] .kpi__value,
+body[data-theme="light"] .auto-card__value,
+body[data-theme="light"] .kalib-info__name,
+body[data-theme="light"] .kalib-info__val,
+body[data-theme="light"] .historyItem__title{
+  color:#111827 !important;
+}
+
+/* Alle ehemals orangen Texte im Hellmodus schwarz */
+body[data-theme="light"] .timer-next,
+body[data-theme="light"] .floating-timer__label,
+body[data-theme="light"] .prev-bar,
+body[data-theme="light"] .stuetz-arr,
+body[data-theme="light"] .stuetz-bar,
+body[data-theme="light"] .historyItem__chevron{
+  color:#111827 !important;
+}
