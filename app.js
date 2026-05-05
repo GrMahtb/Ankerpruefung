@@ -1581,84 +1581,75 @@ function renderSpecSection(testKey){
             </select>
           </label>
 
-          ${isEignung ? `
-            <label class="field"><span class="field__label">Ankerlänge L<sub>A</sub> [m]</span><input class="field__input" data-role="spec-LA" data-test="${testKey}" type="number" step="0.01" value="${h(s.LA)}"></label>
-            <label class="field"><span class="field__label">Verank.länge L<sub>tb</sub> [m]</span><input class="field__input" data-role="spec-Ltb" data-test="${testKey}" type="number" step="0.01" value="${h(s.Ltb)}"></label>
-            <label class="field"><span class="field__label">Freie Länge L<sub>tf</sub> [m]</span><input class="field__input" data-role="spec-Ltf" data-test="${testKey}" type="number" step="0.01" value="${h(s.Ltf)}"></label>
-            <label class="field"><span class="field__label">Spannüberstand L<sub>e</sub> [m]</span><input class="field__input" data-role="spec-Le" data-test="${testKey}" type="number" step="0.01" value="${h(s.Le)}"></label>
-            <label class="field"><span class="field__label">E-Modul E<sub>t</sub> [kN/mm²]</span><input class="field__input" data-role="spec-Et" data-test="${testKey}" type="number" step="0.001" value="${h(s.Et)}"></label>
-            <label class="field"><span class="field__label">Querschnitt A<sub>t</sub> [mm²]</span><input class="field__input" data-role="spec-At" data-test="${testKey}" type="number" step="0.1" value="${h(s.At)}"></label>
-            <label class="field"><span class="field__label">Festlegekraft P<sub>0</sub> [kN]</span><input class="field__input" data-role="spec-P0" data-test="${testKey}" type="number" step="0.1" value="${h(s.P0)}"></label>
-            <label class="field"><span class="field__label">Vorbelastung P<sub>a</sub> [kN]</span><input class="field__input" data-role="spec-Pa" data-test="${testKey}" type="number" step="0.1" value="${h(s.Pa)}"></label>
-            <label class="field"><span class="field__label">Prüfkraft P<sub>p</sub> [kN]</span><input class="field__input field__input--computed" data-role="spec-Pp" data-test="${testKey}" type="number" step="0.01" value="${h(s.Pp)}" readonly></label>
-            <label class="field"><span class="field__label">0,1%-Dehngrenze P<sub>t0,1k</sub> [kN]</span><input class="field__input" data-role="spec-Pt01k" data-test="${testKey}" type="number" step="0.1" value="${h(s.Pt01k)}"></label>
-            <label class="field"><span class="field__label">Bemessung P<sub>d</sub> [kN]</span><input class="field__input" data-role="spec-Pd" data-test="${testKey}" type="number" step="0.01" value="${h(s.Pd)}"></label>
-            <label class="field"><span class="field__label">Teilsicherheit γ<sub>a</sub> [-]</span><input class="field__input" data-role="spec-gamma" data-test="${testKey}" type="number" step="0.01" value="${h(s.gamma)}"></label>
-          ` : `
-            <label class="field"><span class="field__label">${testKey === 'abnahme' ? 'Pfahllänge L [m]' : 'Nagellänge L [m]'}</span><input class="field__input" data-role="spec-L" data-test="${testKey}" type="number" step="0.01" value="${h(s.L)}"></label>
-            <label class="field"><span class="field__label">Einbindungslänge L<sub>b</sub> [m]</span><input class="field__input" data-role="spec-Lb" data-test="${testKey}" type="number" step="0.01" value="${h(s.Lb)}"></label>
-            <label class="field"><span class="field__label">Ungebundene Länge L<sub>db</sub> [m]</span><input class="field__input" data-role="spec-Ldb" data-test="${testKey}" type="number" step="0.01" value="${h(s.Ldb)}"></label>
-            <label class="field"><span class="field__label">Überstand [m]</span><input class="field__input" data-role="spec-Ueberstand" data-test="${testKey}" type="number" step="0.01" value="${h(s.Ueberstand)}"></label>
-            <label class="field"><span class="field__label">Elastizitätsmodul E<sub>t</sub> [kN/mm²]</span><input class="field__input" data-role="spec-Et" data-test="${testKey}" type="number" step="0.1" value="${h(s.Et)}"></label>
-            <label class="field"><span class="field__label">Querschnitt Stab A<sub>t</sub> [mm²]</span><input class="field__input" data-role="spec-At" data-test="${testKey}" type="number" step="0.1" value="${h(s.At)}"></label>
-            <label class="field"><span class="field__label">Vorbelastung P<sub>0</sub> [kN]</span><input class="field__input" data-role="spec-P0" data-test="${testKey}" type="number" step="0.1" value="${h(s.P0)}"></label>
-            <label class="field"><span class="field__label">Bemessungslast P<sub>d</sub> [kN]</span><input class="field__input" data-role="spec-Pd" data-test="${testKey}" type="number" step="0.1" value="${h(s.Pd)}"></label>
-            <label class="field"><span class="field__label">Prüffaktor k [-]</span><input class="field__input" data-role="spec-k" data-test="${testKey}" type="number" step="0.01" value="${h(s.k)}"></label>
-            <label class="field"><span class="field__label">Prüfkraft P<sub>p</sub> [kN]</span><input class="field__input field__input--computed" data-role="spec-Pp" data-test="${testKey}" type="number" step="0.01" value="${h(s.Pp)}" readonly></label>
-            <label class="field"><span class="field__label">Materiallast / Streckgrenze [kN]</span><input class="field__input" data-role="spec-Pt01k" data-test="${testKey}" type="number" step="0.1" value="${h(s.Pt01k)}"></label>
-          `}
+          ${
+            isEignung
+              ? `
+                <label class="field"><span class="field__label">Ankerlänge L<sub>A</sub> [m]</span><input class="field__input" data-role="spec-LA" data-test="${testKey}" type="number" step="0.01" value="${h(s.LA)}"></label>
+                <label class="field"><span class="field__label">Verank.länge L<sub>tb</sub> [m]</span><input class="field__input" data-role="spec-Ltb" data-test="${testKey}" type="number" step="0.01" value="${h(s.Ltb)}"></label>
+                <label class="field"><span class="field__label">Freie Länge L<sub>tf</sub> [m]</span><input class="field__input" data-role="spec-Ltf" data-test="${testKey}" type="number" step="0.01" value="${h(s.Ltf)}"></label>
+                <label class="field"><span class="field__label">Spannüberstand L<sub>e</sub> [m]</span><input class="field__input" data-role="spec-Le" data-test="${testKey}" type="number" step="0.01" value="${h(s.Le)}"></label>
+                <label class="field"><span class="field__label">Querschnitt A<sub>t</sub> [mm²]</span><input class="field__input field__input--computed" data-role="spec-At" data-test="${testKey}" type="number" step="0.1" value="${h(s.At)}" readonly></label>
+              `
+              : `
+                <label class="field"><span class="field__label">${testKey === 'abnahme' ? 'Pfahllänge L [m]' : 'Nagellänge L [m]'}</span><input class="field__input" data-role="spec-L" data-test="${testKey}" type="number" step="0.01" value="${h(s.L)}"></label>
+                <label class="field"><span class="field__label">Einbindungslänge L<sub>b</sub> [m]</span><input class="field__input" data-role="spec-Lb" data-test="${testKey}" type="number" step="0.01" value="${h(s.Lb)}"></label>
+                <label class="field"><span class="field__label">Ungebundene Länge L<sub>db</sub> [m]</span><input class="field__input" data-role="spec-Ldb" data-test="${testKey}" type="number" step="0.01" value="${h(s.Ldb)}"></label>
+                <label class="field"><span class="field__label">Überstand [m]</span><input class="field__input" data-role="spec-Ueberstand" data-test="${testKey}" type="number" step="0.01" value="${h(s.Ueberstand)}"></label>
+                <label class="field"><span class="field__label">Querschnitt Stab A<sub>t</sub> [mm²]</span><input class="field__input field__input--computed" data-role="spec-At" data-test="${testKey}" type="number" step="0.1" value="${h(s.At)}" readonly></label>
+              `
+          }
         </div>
 
         ${renderTypeInfo(testKey)}
 
-        ${isEignung ? `
-          <div class="auto-grid">
-            <div class="auto-card">
-              <div class="auto-card__label">Prüfkraft Pp</div>
-              <div class="auto-card__value">${Number.isFinite(summary.calcPp) ? `${fmt(summary.calcPp,2)} kN` : '—'}</div>
-            </div>
-            <div class="auto-card">
-              <div class="auto-card__label">min. Lapp</div>
-              <div class="auto-card__value">${Number.isFinite(summary.minLapp) ? `${fmt(summary.minLapp,2)} m` : '—'}</div>
-            </div>
-            <div class="auto-card">
-              <div class="auto-card__label">max. Lapp</div>
-              <div class="auto-card__value">${Number.isFinite(summary.maxLapp) ? `${fmt(summary.maxLapp,2)} m` : '—'}</div>
-            </div>
-            <div class="auto-card">
-              <div class="auto-card__label">s Grenzlinie a (Pp)</div>
-              <div class="auto-card__value">${Number.isFinite(summary.sGrenzA) ? `${fmt(summary.sGrenzA,2)} mm` : '—'}</div>
-            </div>
-            <div class="auto-card">
-              <div class="auto-card__label">s Grenzlinie b (Pp)</div>
-              <div class="auto-card__value">${Number.isFinite(summary.sGrenzB) ? `${fmt(summary.sGrenzB,2)} mm` : '—'}</div>
-            </div>
-          </div>
-
-          <div class="info-box">
-            <b>Automatisch berechnet</b><br>
-            Tatsächlich rechnerische freie Stahllänge L<sub>app</sub>:
-            <b>${Number.isFinite(summary.measuredLapp) ? `${fmt(summary.measuredLapp,2)} m${summary.measuredCycle ? ` (Zyklus ${summary.measuredCycle})` : ''}` : '—'}</b><br>
-            Grenzwerte freie Stahllänge eingehalten:
-            <span class="inline-badge ${lappCheck === true ? 'inline-badge--good' : lappCheck === false ? 'inline-badge--bad' : ''}">
-              ${lappCheck === true ? 'OK' : lappCheck === false ? 'nicht OK' : '—'}
-            </span>
-          </div>
-        ` : `
-          <div class="info-box">
-            <b>Automatisch berechnet</b><br>
-            Prüfkraft P<sub>p</sub> = P<sub>d</sub> · k = <b>${Number.isFinite(summary.calcPp) ? `${fmt(summary.calcPp,2)} kN` : '—'}</b>
-          </div>
-        `}
+        ${
+          isEignung
+            ? `
+              <div class="info-box">
+                <b>Automatisch berechnet</b><br>
+                Tatsächlich rechnerische freie Stahllänge L<sub>app</sub>:
+                <b>${Number.isFinite(summary.measuredLapp) ? `${fmt(summary.measuredLapp,2)} m${summary.measuredCycle ? ` (Zyklus ${summary.measuredCycle})` : ''}` : '—'}</b><br>
+                Grenzwerte freie Stahllänge eingehalten:
+                <span class="inline-badge ${lappCheck === true ? 'inline-badge--good' : lappCheck === false ? 'inline-badge--bad' : ''}">
+                  ${lappCheck === true ? 'OK' : lappCheck === false ? 'nicht OK' : '—'}
+                </span>
+              </div>
+            `
+            : ''
+        }
       </div>
     </details>
   `;
 }
 function renderStagePlanSection(testKey){
   const test = getTest(testKey);
+  const s = test.spec;
   ensureStageCatalog(testKey);
 
   const kalib = findKalibById(state.meta.selectedKalibId);
+
+  const parameterBlock = testKey === 'eignung'
+    ? `
+      <div class="form-grid" style="margin-bottom:12px">
+        <label class="field"><span class="field__label">E-Modul E<sub>t</sub> [kN/mm²]</span><input class="field__input" data-role="spec-Et" data-test="${testKey}" type="number" step="0.001" value="${h(s.Et)}"></label>
+        <label class="field"><span class="field__label">Festlegekraft P<sub>0</sub> [kN]</span><input class="field__input" data-role="spec-P0" data-test="${testKey}" type="number" step="0.1" value="${h(s.P0)}"></label>
+        <label class="field"><span class="field__label">Vorbelastung P<sub>a</sub> [kN]</span><input class="field__input" data-role="spec-Pa" data-test="${testKey}" type="number" step="0.1" value="${h(s.Pa)}"></label>
+        <label class="field"><span class="field__label">Bemessung P<sub>d</sub> [kN]</span><input class="field__input" data-role="spec-Pd" data-test="${testKey}" type="number" step="0.01" value="${h(s.Pd)}"></label>
+        <label class="field"><span class="field__label">Teilsicherheit γ<sub>a</sub> [-]</span><input class="field__input" data-role="spec-gamma" data-test="${testKey}" type="number" step="0.01" value="${h(s.gamma)}"></label>
+        <label class="field"><span class="field__label">Prüfkraft P<sub>p</sub> [kN]</span><input class="field__input field__input--computed" data-role="spec-Pp" data-test="${testKey}" type="number" step="0.01" value="${h(s.Pp)}" readonly></label>
+        <label class="field"><span class="field__label">0,1%-Dehngrenze P<sub>t0,1k</sub> [kN]</span><input class="field__input" data-role="spec-Pt01k" data-test="${testKey}" type="number" step="0.1" value="${h(s.Pt01k)}"></label>
+      </div>
+    `
+    : `
+      <div class="form-grid" style="margin-bottom:12px">
+        <label class="field"><span class="field__label">Elastizitätsmodul E<sub>t</sub> [kN/mm²]</span><input class="field__input" data-role="spec-Et" data-test="${testKey}" type="number" step="0.1" value="${h(s.Et)}"></label>
+        <label class="field"><span class="field__label">Vorbelastung P<sub>0</sub> [kN]</span><input class="field__input" data-role="spec-P0" data-test="${testKey}" type="number" step="0.1" value="${h(s.P0)}"></label>
+        <label class="field"><span class="field__label">Bemessungslast P<sub>d</sub> [kN]</span><input class="field__input" data-role="spec-Pd" data-test="${testKey}" type="number" step="0.1" value="${h(s.Pd)}"></label>
+        <label class="field"><span class="field__label">Prüffaktor k [-]</span><input class="field__input" data-role="spec-k" data-test="${testKey}" type="number" step="0.01" value="${h(s.k)}"></label>
+        <label class="field"><span class="field__label">Prüfkraft P<sub>p</sub> [kN]</span><input class="field__input field__input--computed" data-role="spec-Pp" data-test="${testKey}" type="number" step="0.01" value="${h(s.Pp)}" readonly></label>
+        <label class="field"><span class="field__label">Materiallast / Streckgrenze [kN]</span><input class="field__input" data-role="spec-Pt01k" data-test="${testKey}" type="number" step="0.1" value="${h(s.Pt01k)}"></label>
+      </div>
+    `;
 
   const rows = test.stageCatalog.map((stage, idx) => {
     const kn = calcStageLoad(stage, testKey);
@@ -1672,13 +1663,13 @@ function renderStagePlanSection(testKey){
           ${
             stage.kind === 'factor'
               ? `<input class="mess-input" data-role="catalog-factor" data-test="${testKey}" data-idx="${idx}" type="number" step="0.05" value="${h(stage.factor)}">`
-              : `<input class="mess-input mess-input--auto" type="text" value="${h(stage.kind === 'pa' ? 'Pa' : 'P0')}" readonly>`
+              : `<input class="mess-input mess-input--auto field__input--computed" type="text" value="${h(stage.kind === 'pa' ? 'Pa' : 'P0')}" readonly>`
           }
         </td>
-        <td><input class="mess-input mess-input--auto" type="text" value="${Number.isFinite(kn) ? fmt(kn,1) : '—'}" readonly></td>
+        <td><input class="mess-input mess-input--auto field__input--computed" type="text" value="${Number.isFinite(kn) ? fmt(kn,1) : '—'}" readonly></td>
         <td>
           <input
-            class="mess-input ${autoDruck != null ? 'mess-input--auto' : ''}"
+            class="mess-input ${autoDruck != null ? 'mess-input--auto field__input--computed' : ''}"
             data-role="catalog-druck"
             data-test="${testKey}"
             data-idx="${idx}"
@@ -1696,6 +1687,8 @@ function renderStagePlanSection(testKey){
     <details class="card card--collapsible" open>
       <summary class="card__title">Vorgabe Laststufen</summary>
       <div class="card__body">
+        ${parameterBlock}
+
         <div class="table-wrap">
           <table class="mess-table">
             <thead>
@@ -1709,6 +1702,7 @@ function renderStagePlanSection(testKey){
             <tbody>${rows}</tbody>
           </table>
         </div>
+
         <div class="hint" style="text-align:left;margin-top:8px">
           Diese Tabelle definiert die Laststufen zentral. Die Zyklen referenzieren diese Vorgaben.
         </div>
@@ -1728,7 +1722,7 @@ function renderPhotoSection(testKey){
       <div class="card__body">
         <div class="photo-grid">
           <div class="photo-box">
-            <div class="photo-box__title">Übersichtsfoto / PDF-Cover</div>
+           <div class="photo-box__title">Übersichtsfoto</div>
             <div class="photo-preview">${photos.overview ? `<img src="${photos.overview}" alt="Übersichtsfoto">` : 'Kein Bild'}</div>
             <div class="photo-actions">
               <button class="btn btn--ghost btn--small" data-role="photo-pick-overview" data-test="${testKey}" type="button">Foto wählen</button>
@@ -1980,7 +1974,7 @@ function buildMeasurementBody(cycle, testKey){
 }
 
 function renderCycleCard(cycle, testKey){
-  const isFree = getTest(testKey).mode === 'frei';
+ const isFree = false;
   const badgeText = `${testKey === 'eignung' ? 'Zyklus' : 'Abschnitt'} ${cycle.nr}`;
   const secondaryTitle = cycle.title && cycle.title !== badgeText ? cycle.title : '';
 
@@ -2328,25 +2322,37 @@ function applyNormToTest(testKey){
 }
 
 function recalcDisplacement(testKey, cycleId){
-  const cycle = getCycleById(testKey, cycleId);
-  if(!cycle) return;
-
-  cycle.rows.forEach((row, idx) => {
-    const a = toNumFlexible(row.ablesung);
-    if(idx === 0){
-      row.versch = Number.isFinite(a) ? '0' : '';
-      return;
-    }
-
-    const prev = toNumFlexible(cycle.rows[idx - 1].ablesung);
-    row.versch = Number.isFinite(a) && Number.isFinite(prev)
-      ? formatInputNumber(a - prev, 2)
-      : '';
-  });
+  recalcAllDisplacements(testKey);
 }
 
 function recalcAllDisplacements(testKey){
-  getTest(testKey).cycles.forEach(c => recalcDisplacement(testKey, c.id));
+  const test = getTest(testKey);
+  let prevReading = NaN;
+  let firstAssigned = false;
+
+  test.cycles.forEach(cycle => {
+    cycle.rows.forEach(row => {
+      const a = toNumFlexible(row.ablesung);
+
+      if(!Number.isFinite(a)){
+        row.versch = '';
+        return;
+      }
+
+      if(!firstAssigned){
+        row.versch = '0';
+        prevReading = a;
+        firstAssigned = true;
+        return;
+      }
+
+      row.versch = Number.isFinite(prevReading)
+        ? formatInputNumber(a - prevReading, 2)
+        : '0';
+
+      prevReading = a;
+    });
+  });
 }
 
 function syncPressureFromCalibration(testKey){
@@ -2399,7 +2405,18 @@ function updateRequiredFieldStates(){
       setRequiredVisual(el, otherRequired.includes(role) && !String(el.value || '').trim());
     }
   });
+qsa('[data-role="catalog-factor"]').forEach(el => {
+  setRequiredVisual(el, !String(el.value || '').trim());
+});
 
+qsa('[data-role="catalog-druck"]').forEach(el => {
+  const readonly = el.hasAttribute('readonly');
+  setRequiredVisual(el, !readonly && !String(el.value || '').trim());
+});
+
+qsa('[data-role="catalog-druck"][readonly]').forEach(el => {
+  applyComputedVisual(el, true);
+});
   qsa('[data-role="spec-At"],[data-role="spec-Pt01k"],[data-role="spec-Pp"]').forEach(el => {
     setRequiredVisual(el, false);
   });
