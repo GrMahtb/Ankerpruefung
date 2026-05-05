@@ -1679,33 +1679,70 @@ body[data-theme="light"] .th-versch{
   min-width:78px !important;
 }
 /* =========================================================
-   PATCH – Laststufen-Spalte vertikal
+PATCH – Laststufe vertikal korrekt
 ========================================================= */
 
-/* Header "Laststufe" */
-.th-load {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(180deg);
-  vertical-align: middle;
-  line-height: 1;
+/* Laststufe-Spalte: Header + Zelle */
+.th-stage,
+.mess-stage-col{
+  width:48px !important;
+  min-width:48px !important;
+  max-width:48px !important;
+  text-align:center;
+  vertical-align:middle;
+  padding:2px !important;
 }
 
-/* Zellen der Laststufen-Spalte */
-.mess-load-col {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: rotate(180deg);
-  vertical-align: middle;
-  text-align: center;
-  line-height: 1;
+/* Header "Laststufe" vertikal */
+.th-stage{
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  transform:rotate(180deg);
+  line-height:1;
+  font-size:10px;
 }
 
-/* Optional: etwas mehr Platz für Lesbarkeit */
+/* Inhalt der Laststufe-Spalte vertikal */
+.mess-stage-col{
+  font-size:10px;
+}
+
+.mess-stage-pill{
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  transform:rotate(180deg);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:56px;
+  line-height:1;
+  white-space:nowrap;
+}
+
+/* Last und Druck wieder horizontal lassen */
 .th-load,
-.mess-load-col {
-  width: 48px !important;
-  min-width: 48px !important;
-  max-width: 48px !important;
-  font-size: 10px;
+.mess-load-col,
+.th-druck,
+.mess-druck-col{
+  writing-mode:horizontal-tb !important;
+  text-orientation:initial !important;
+  transform:none !important;
+  vertical-align:middle;
+  text-align:center;
+}
+
+.th-load,
+.mess-load-col{
+  width:48px !important;
+  min-width:48px !important;
+  max-width:48px !important;
+  font-size:10px;
+}
+
+.th-druck,
+.mess-druck-col{
+  width:48px !important;
+  min-width:48px !important;
+  max-width:48px !important;
+  font-size:10px;
 }
