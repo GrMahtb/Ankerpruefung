@@ -1749,12 +1749,15 @@ PATCH – Laststufe vertikal korrekt
 PATCH – Dunkelmodus final überschreiben
 ========================================================= */
 
+/* =========================================================
+PATCH – Dunkelmodus final
+========================================================= */
+
 body[data-theme="dark"]{
   background:#2f3136 !important;
   color:#f5f5f5 !important;
 }
 
-/* Header / Tabs / Seitenhintergrund */
 body[data-theme="dark"] .brand{
   background:linear-gradient(180deg,#2f3136 0%, #2f3136 100%) !important;
   border-bottom:1px solid rgba(255,255,255,.12) !important;
@@ -1767,12 +1770,32 @@ body[data-theme="dark"] .pane{
   color:#f5f5f5 !important;
 }
 
-body[data-theme="dark"] .brand__company{
+body[data-theme="dark"] .brand__company,
+body[data-theme="dark"] .card__title,
+body[data-theme="dark"] .auswertung-block__title,
+body[data-theme="dark"] .settings-group__title,
+body[data-theme="dark"] .kalib-preview__title,
+body[data-theme="dark"] .zyklus-title,
+body[data-theme="dark"] .photo-box__title,
+body[data-theme="dark"] .kpi__value,
+body[data-theme="dark"] .auto-card__value,
+body[data-theme="dark"] .kalib-info__name,
+body[data-theme="dark"] .kalib-info__val,
+body[data-theme="dark"] .historyItem__title,
+body[data-theme="dark"] .modal-title{
   color:#ffffff !important;
 }
 
-body[data-theme="dark"] .brand__subtitle{
-  color:rgba(255,255,255,.70) !important;
+body[data-theme="dark"] .brand__subtitle,
+body[data-theme="dark"] .field__label,
+body[data-theme="dark"] .hint,
+body[data-theme="dark"] .field__hint,
+body[data-theme="dark"] .timer-edit-hint,
+body[data-theme="dark"] .kalib-info__sub,
+body[data-theme="dark"] .kpi__label,
+body[data-theme="dark"] .auto-card__label,
+body[data-theme="dark"] .historyItem__date{
+  color:rgba(255,255,255,.72) !important;
 }
 
 body[data-theme="dark"] .tab{
@@ -1786,7 +1809,6 @@ body[data-theme="dark"] .tab.is-active{
   border-bottom:2px solid #f2c94c !important;
 }
 
-/* Flächen */
 body[data-theme="dark"] .card,
 body[data-theme="dark"] .timer-box,
 body[data-theme="dark"] .modal-box,
@@ -1804,34 +1826,6 @@ body[data-theme="dark"] .kalib-info{
   box-shadow:none !important;
 }
 
-/* Schriften */
-body[data-theme="dark"] .card__title,
-body[data-theme="dark"] .auswertung-block__title,
-body[data-theme="dark"] .settings-group__title,
-body[data-theme="dark"] .kalib-preview__title,
-body[data-theme="dark"] .zyklus-title,
-body[data-theme="dark"] .photo-box__title,
-body[data-theme="dark"] .kpi__value,
-body[data-theme="dark"] .auto-card__value,
-body[data-theme="dark"] .kalib-info__name,
-body[data-theme="dark"] .kalib-info__val,
-body[data-theme="dark"] .historyItem__title,
-body[data-theme="dark"] .modal-title{
-  color:#ffffff !important;
-}
-
-body[data-theme="dark"] .field__label,
-body[data-theme="dark"] .hint,
-body[data-theme="dark"] .field__hint,
-body[data-theme="dark"] .timer-edit-hint,
-body[data-theme="dark"] .kalib-info__sub,
-body[data-theme="dark"] .kpi__label,
-body[data-theme="dark"] .auto-card__label,
-body[data-theme="dark"] .historyItem__date{
-  color:rgba(255,255,255,.70) !important;
-}
-
-/* Inputs / Tabellen */
 body[data-theme="dark"] .field__input,
 body[data-theme="dark"] .field__select,
 body[data-theme="dark"] .field__textarea,
@@ -1845,14 +1839,6 @@ body[data-theme="dark"] .modal-input{
 body[data-theme="dark"] .field__select option{
   background:#181b1f !important;
   color:#ffffff !important;
-}
-
-body[data-theme="dark"] .table-wrap{
-  background:#1f2227 !important;
-}
-
-body[data-theme="dark"] .mess-table{
-  background:#1f2227 !important;
 }
 
 body[data-theme="dark"] .mess-table th{
@@ -1878,7 +1864,6 @@ body[data-theme="dark"] .mess-input--auto{
   border-color:rgba(255,255,255,.18) !important;
 }
 
-/* Buttons */
 body[data-theme="dark"] .btn--ghost,
 body[data-theme="dark"] .timer-btn--ghost{
   background:#262a30 !important;
@@ -1897,12 +1882,6 @@ body[data-theme="dark"] .btn-plus{
   color:#111827 !important;
 }
 
-body[data-theme="dark"] .btn--install{
-  background:#f2c94c !important;
-  color:#111827 !important;
-}
-
-/* Timer / Floating */
 body[data-theme="dark"] .timer-display{
   background:#000 !important;
   color:#ffffff !important;
@@ -1921,8 +1900,4 @@ body[data-theme="dark"] .floating-timer{
   background:#111315 !important;
   color:#ffffff !important;
   border-color:#f2c94c !important;
-}
-
-body[data-theme="dark"] .floating-timer__display{
-  color:#ffffff !important;
 }
