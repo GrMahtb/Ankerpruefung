@@ -1682,7 +1682,11 @@ body[data-theme="light"] .th-versch{
 PATCH – Laststufe vertikal korrekt
 ========================================================= */
 
-/* Laststufe-Spalte: Header + Zelle */
+/* =========================================================
+PATCH – Laststufe vertikal korrekt
+========================================================= */
+
+/* Nur Laststufe vertikal */
 .th-stage,
 .mess-stage-col{
   width:48px !important;
@@ -1693,33 +1697,28 @@ PATCH – Laststufe vertikal korrekt
   padding:2px !important;
 }
 
-/* Header "Laststufe" vertikal */
 .th-stage{
   writing-mode:vertical-rl;
   text-orientation:mixed;
-  transform:rotate(90deg);
+  transform:none !important; /* nicht auf dem Kopf */
   line-height:1;
-  font-size:10px;
-}
-
-/* Inhalt der Laststufe-Spalte vertikal */
-.mess-stage-col{
   font-size:10px;
 }
 
 .mess-stage-pill{
   writing-mode:vertical-rl;
   text-orientation:mixed;
-  transform:rotate(180deg);
+  transform:none !important; /* nicht drehen */
   display:inline-flex;
   align-items:center;
   justify-content:center;
   min-height:56px;
   line-height:1;
   white-space:nowrap;
+  font-weight:700;
 }
 
-/* Last und Druck wieder horizontal lassen */
+/* Last und Druck bleiben horizontal */
 .th-load,
 .mess-load-col,
 .th-druck,
