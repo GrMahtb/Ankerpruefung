@@ -2512,14 +2512,20 @@ async function loadPdfAssetsAnker(pdf){
   }catch{}
 
   let coverPhoto = null;
+try{
+  const b = await fetch(`${BASE_PATH}cover-photo.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+  coverPhoto = await pdf.embedPng(b);
+}catch{
   try{
-    const b = await fetch(`${BASE_PATH}cover-photo.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+    const b = await fetch(`${BASE_PATH}cover-photo.jpg?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
     coverPhoto = await pdf.embedJpg(b);
   }catch{
     try{
       const b = await fetch(`${BASE_PATH}cover-photo.jpeg?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
       coverPhoto = await pdf.embedJpg(b);
     }catch{}
+  }
+}ch{}
   }
 
   let fusszeile = null;
@@ -3987,13 +3993,14 @@ document.addEventListener('click', async e => {
   }
 
   if(role === 'history-load'){
-    const entry = readHistory().find(h => h.id === el.dataset.id);
-    if(entry){
-      applySnapshot(entry.snapshot, true);
-      saveDraftDebounced();
-    }
-    return;
+  const entry = readHistory().find(h => h.id === el.dataset.id);
+  if(entry){
+    applySnapshot(entry.snapshot, true);
+    switchMainTab(getActiveTestKey());
+    saveDraftDebounced();
   }
+  return;
+}
 
   if(role === 'history-del'){
     if(!confirm('Eintrag löschen?')) return;
@@ -4316,7 +4323,13 @@ document.addEventListener('keydown', e => {
 });
 /* ---------------- main tabs ---------------- */
 function switchMainTab(name){
+  const validSystemTabs = ['auswertung','verlauf','settings'];
   const isTestTab = TEST_KEYS.includes(name);
+  const isSystemTab = validSystemTabs.includes(name);
+
+  if(!isTestTab && !isSystemTab){
+    name = getActiveTestKey();
+  }
 
   if(isTestTab){
     state.activeTest = name;
@@ -4328,19 +4341,16 @@ function switchMainTab(name){
   });
 
   qsa('.pane').forEach(pane => {
-    const show = isTestTab
-      ? pane.id === 'tab-formular'
-      : pane.id === `tab-${name}`;
-
-    pane.hidden = !show;
-    pane.classList.toggle('is-active', show);
+    const shouldShow = pane.id === `tab-${name}`;
+    pane.hidden = !shouldShow;
+    pane.classList.toggle('is-active', shouldShow);
   });
 
   syncTestChoiceUi();
 
   if(isTestTab){
-    renderTestPane(state.activeTest);
-    updateTimerUi(state.activeTest);
+    renderTestPane(name);
+    updateTimerUi(name);
   }
 
   if(name === 'auswertung') renderAuswertung();
@@ -4354,16 +4364,8 @@ function syncTestChoiceUi(){
     el.classList.toggle('is-active', el.dataset.testTab === state.activeTest);
   });
 
-  qsa('[data-set-active-test]').forEach(el => {
-    el.classList.toggle('is-active', el.dataset.setActiveTest === state.activeTest);
-  });
-
   qsa('[data-set-eval-test]').forEach(el => {
     el.classList.toggle('is-active', el.dataset.setEvalTest === state.evalTest);
-  });
-
-  qsa('[data-test-pane]').forEach(el => {
-    el.hidden = el.dataset.testPane !== state.activeTest;
   });
 
   const activeSelect = $('activeTestSelect');
@@ -4372,12 +4374,9 @@ function syncTestChoiceUi(){
   const evalSelect = $('evalTestSelect');
   if(evalSelect) evalSelect.value = state.evalTest;
 }
-
 function setActiveTest(testKey){
   if(!TEST_KEYS.includes(testKey)) return;
-  state.activeTest = testKey;
-  syncTestChoiceUi();
-  saveDraftDebounced();
+  switchMainTab(testKey);
 }
 
 function setEvalTest(testKey){
@@ -4493,9 +4492,9 @@ function bindStaticUi(){
     if(tab.dataset.bound === '1') return;
     tab.dataset.bound = '1';
 
-  tab.addEventListener('click', () => {
-  const tabName = tab.dataset.testTab || tab.dataset.tab;
-  switchMainTab(tabName);
+    tab.addEventListener('click', () => {
+      const tabName = tab.dataset.testTab || tab.dataset.tab;
+      if(tabName) switchMainTab(tabName);
     });
   });
 
@@ -4506,117 +4505,82 @@ function bindStaticUi(){
     saveDraftDebounced();
   });
 
+  $('settings-layoutMode')?.addEventListener('change', e => {
+    state.settings.layoutMode = e.target.value || 'auto';
+    applyLayoutMode();
+    saveDraftDebounced();
+  });
+
   $('btnSaveSettings')?.addEventListener('click', () => {
     state.settings.alarmDurationSec = clamp(Number($('settings-alarmDuration')?.value || 4), 1, 30);
+    state.settings.layoutMode = $('settings-layoutMode')?.value || state.settings.layoutMode || 'auto';
+    applyLayoutMode();
     saveDraftDebounced();
     alert('Einstellungen gespeichert.');
   });
-  $('settings-layoutMode')?.addEventListener('change', e => {
-  state.settings.layoutMode = e.target.value || 'auto';
-  applyLayoutMode();
-  saveDraftDebounced();
-});
 
-$('btnExportTemplate')?.addEventListener('click', () => {
-  const testKey = getActiveTestKey();
-  const payload = buildTemplatePayload(testKey);
-  downloadJson(payload, `${dateTag()}_HTB_${testKey}_Vorlage.htbanker.json`);
-});
+  $('btnExportTemplate')?.addEventListener('click', () => {
+    const testKey = getActiveTestKey();
+    const payload = buildTemplatePayload(testKey);
+    downloadJson(payload, `${dateTag()}_HTB_${testKey}_Vorlage.htbanker.json`);
+  });
 
-$('btnImportTemplate')?.addEventListener('click', () => {
-  $('importTemplateGlobalInput')?.click();
-});
+  $('btnImportTemplate')?.addEventListener('click', () => {
+    $('importTemplateGlobalInput')?.click();
+  });
 
-$('importTemplateGlobalInput')?.addEventListener('change', async e => {
-  const file = e.target.files?.[0];
-  if(!file) return;
+  $('importTemplateGlobalInput')?.addEventListener('change', async e => {
+    const file = e.target.files?.[0];
+    if(!file) return;
 
-  try{
-    await importTemplateFile(getActiveTestKey(), file);
-    alert('Vorlage importiert.');
-  }catch(err){
-    console.error(err);
-    alert('Vorlage konnte nicht importiert werden.');
-  }finally{
-    e.target.value = '';
-  }
-});
+    try{
+      await importTemplateFile(getActiveTestKey(), file);
+      switchMainTab(getActiveTestKey());
+      alert('Vorlage importiert.');
+    }catch(err){
+      console.error(err);
+      alert('Vorlage konnte nicht importiert werden.');
+    }finally{
+      e.target.value = '';
+    }
+  });
 
-$('btnExportFull')?.addEventListener('click', () => {
-  downloadJson(collectSnapshot(), `${dateTag()}_HTB_Ankerpruefung_Export.json`);
-});
+  $('btnExportFull')?.addEventListener('click', () => {
+    downloadJson(collectSnapshot(), `${dateTag()}_HTB_Ankerpruefung_Export.json`);
+  });
 
-$('btnImportFull')?.addEventListener('click', () => {
-  $('importFullGlobalInput')?.click();
-});
+  $('btnImportFull')?.addEventListener('click', () => {
+    $('importFullGlobalInput')?.click();
+  });
 
-$('importFullGlobalInput')?.addEventListener('change', async e => {
-  const file = e.target.files?.[0];
-  if(!file) return;
+  $('importFullGlobalInput')?.addEventListener('change', async e => {
+    const file = e.target.files?.[0];
+    if(!file) return;
 
-  try{
-    const txt = await file.text();
-    const snap = JSON.parse(txt);
-    applySnapshot(snap, true);
-    saveDraftDebounced();
-    alert('Vollständiger Import erfolgreich.');
-  }catch(err){
-    console.error(err);
-    alert('Datei konnte nicht importiert werden.');
-  }finally{
-    e.target.value = '';
-  }
-});
+    try{
+      const txt = await file.text();
+      const snap = JSON.parse(txt);
+      applySnapshot(snap, true);
+      switchMainTab(getActiveTestKey());
+      saveDraftDebounced();
+      alert('Vollständiger Import erfolgreich.');
+    }catch(err){
+      console.error(err);
+      alert('Datei konnte nicht importiert werden.');
+    }finally{
+      e.target.value = '';
+    }
+  });
 
-$('importTemplateGlobalInput')?.addEventListener('change', async e => {
-  const file = e.target.files?.[0];
-  if(!file) return;
+  $('timeAdjustInput')?.addEventListener('input', updateTimeAdjustPreview);
 
-  try{
-    await importTemplateFile(getActiveTestKey(), file);
-    alert('Vorlage importiert.');
-  }catch(err){
-    console.error(err);
-    alert('Vorlage konnte nicht importiert werden.');
-  }finally{
-    e.target.value = '';
-  }
-});
+  const timeApplyBtn = $('btnTimeAdjustApply') || $('timeAdjustApply');
+  const timeCancelBtn = $('btnTimeAdjustCancel') || $('timeAdjustCancel');
+  const timeCloseBtn = $('btnTimeAdjustClose');
 
-$('btnExportFull')?.addEventListener('click', () => {
-  downloadJson(collectSnapshot(), `${dateTag()}_HTB_Ankerpruefung_Export.json`);
-});
-
-$('btnImportFull')?.addEventListener('click', () => {
-  $('importFullGlobalInput')?.click();
-});
-
-$('importFullGlobalInput')?.addEventListener('change', async e => {
-  const file = e.target.files?.[0];
-  if(!file) return;
-
-  try{
-    const txt = await file.text();
-    const snap = JSON.parse(txt);
-    applySnapshot(snap, true);
-    saveDraftDebounced();
-    alert('Vollständiger Import erfolgreich.');
-  }catch(err){
-    console.error(err);
-    alert('Datei konnte nicht importiert werden.');
-  }finally{
-    e.target.value = '';
-  }
-});
- $('timeAdjustInput')?.addEventListener('input', updateTimeAdjustPreview);
-
-const timeApplyBtn = $('btnTimeAdjustApply') || $('timeAdjustApply');
-const timeCancelBtn = $('btnTimeAdjustCancel') || $('timeAdjustCancel');
-const timeCloseBtn = $('btnTimeAdjustClose');
-
-timeApplyBtn?.addEventListener('click', applyTimeAdjustment);
-timeCancelBtn?.addEventListener('click', closeTimeAdjustModal);
-timeCloseBtn?.addEventListener('click', closeTimeAdjustModal);
+  timeApplyBtn?.addEventListener('click', applyTimeAdjustment);
+  timeCancelBtn?.addEventListener('click', closeTimeAdjustModal);
+  timeCloseBtn?.addEventListener('click', closeTimeAdjustModal);
 
   $('timeAdjustModal')?.addEventListener('click', e => {
     if(e.target === $('timeAdjustModal')){
@@ -4635,9 +4599,10 @@ timeCloseBtn?.addEventListener('click', closeTimeAdjustModal);
   });
 
   window.addEventListener('resize', () => {
-  applyLayoutMode();
-  updateFloatingTimerWidget();
-}, { passive:true });
+    applyLayoutMode();
+    updateFloatingTimerWidget();
+  }, { passive:true });
+
   window.addEventListener('scroll', updateFloatingTimerWidget, { passive:true });
 
   document.addEventListener('visibilitychange', () => {
