@@ -1678,3 +1678,34 @@ body[data-theme="light"] .th-versch{
   width:78px !important;
   min-width:78px !important;
 }
+/* =========================================================
+   PATCH – Laststufen-Spalte vertikal
+========================================================= */
+
+/* Header "Laststufe" */
+.th-load {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* Zellen der Laststufen-Spalte */
+.mess-load-col {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  vertical-align: middle;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Optional: etwas mehr Platz für Lesbarkeit */
+.th-load,
+.mess-load-col {
+  width: 48px !important;
+  min-width: 48px !important;
+  max-width: 48px !important;
+  font-size: 10px;
+}
