@@ -1931,19 +1931,24 @@ function buildSimpleCycleSvg(cycle, testKey){
   const ty = v => mt + ph - ((v - yMin) / ((yMax - yMin) || 1)) * ph;
   const poly = pts.map(p => `${tx(p.min)},${ty(p.s)}`).join(' ');
 
+  const isLight = (document.body.dataset.theme || 'light') !== 'dark';
+  const bg = isLight ? '#ffffff' : '#0b1725';
+  const axis = isLight ? '#111827' : '#ffffff';
+  const grid = isLight ? 'rgba(17,24,39,.18)' : 'rgba(255,255,255,.18)';
+  const curve = isLight ? '#111827' : '#56b7ff';
+
   return `
     <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-      <rect x="0" y="0" width="${W}" height="${H}" rx="8" fill="#0b1725"/>
-      <rect x="${ml}" y="${mt}" width="${pw}" height="${ph}" fill="none" stroke="rgba(255,255,255,.18)"/>
-      ${poly ? `<polyline points="${poly}" fill="none" stroke="#f08a1c" stroke-width="2"/>` : ''}
-      ${pts.map(p => `<circle cx="${tx(p.min)}" cy="${ty(p.s)}" r="3" fill="#f08a1c"/>`).join('')}
-      <text x="${W/2}" y="14" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">${h(TEST_LABELS[testKey])} · ${h(cycle.title)}</text>
-      <text x="${W/2}" y="${H-6}" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Zeit [min]</text>
-      <text x="14" y="${mt + ph/2}" transform="rotate(-90 14 ${mt + ph/2})" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Verschiebung [mm]</text>
+      <rect x="0" y="0" width="${W}" height="${H}" rx="8" fill="${bg}"/>
+      <rect x="${ml}" y="${mt}" width="${pw}" height="${ph}" fill="none" stroke="${grid}"/>
+      ${poly ? `<polyline points="${poly}" fill="none" stroke="${curve}" stroke-width="2"/>` : ''}
+      ${pts.map(p => `<circle cx="${tx(p.min)}" cy="${ty(p.s)}" r="3" fill="${curve}"/>`).join('')}
+      <text x="${W/2}" y="14" text-anchor="middle" fill="${axis}" font-size="11" font-weight="700">${h(TEST_LABELS[testKey])} · ${h(cycle.title)}</text>
+      <text x="${W/2}" y="${H-6}" text-anchor="middle" fill="${axis}" font-size="11" font-weight="700">Zeit [min]</text>
+      <text x="14" y="${mt + ph/2}" transform="rotate(-90 14 ${mt + ph/2})" text-anchor="middle" fill="${axis}" font-size="11" font-weight="700">Verschiebung [mm]</text>
     </svg>
   `;
 }
-
 function renderAuswertung(){
   const host = $('auswertungContainer');
   if(!host) return;
