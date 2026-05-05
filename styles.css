@@ -487,3 +487,218 @@ body{padding-bottom:env(safe-area-inset-bottom)}
   font-weight:400;
   margin-left:auto;
 }
+/* =========================================================
+   THEME MODES – wissenschaftlich hell / Baustelle dunkel
+========================================================= */
+
+:root{
+  --app-html-bg:#eef2f6;
+  --app-page-bg:#eef2f6;
+  --app-surface:#ffffff;
+  --app-surface-2:#f8fafc;
+  --app-border:#d6dde6;
+  --app-text:#1f2937;
+  --app-muted:#6b7280;
+  --app-accent:#64748b;
+  --app-accent-strong:#0d2f4f;
+  --app-ghost-bg:#f8fafc;
+  --app-input-bg:#ffffff;
+  --app-input-text:#111827;
+  --app-row-active:rgba(15,23,42,.05);
+  --app-stage-pill:rgba(100,116,139,.10);
+  --app-focus:#0d2f4f;
+  --app-current-bg:rgba(13,47,79,.05);
+  --app-current-ring:rgba(13,47,79,.20);
+}
+
+body[data-theme="dark"]{
+  --app-html-bg:#0d2f4f;
+  --app-page-bg:#0d2f4f;
+  --app-surface:#0b1725;
+  --app-surface-2:#081a2c;
+  --app-border:rgba(255,255,255,.14);
+  --app-text:#eaf2fa;
+  --app-muted:rgba(220,235,250,.72);
+  --app-accent:#56b7ff;
+  --app-accent-strong:#56b7ff;
+  --app-ghost-bg:#1a2636;
+  --app-input-bg:#081a2c;
+  --app-input-text:#ffffff;
+  --app-row-active:rgba(255,255,255,.06);
+  --app-stage-pill:rgba(86,183,255,.12);
+  --app-focus:#56b7ff;
+  --app-current-bg:rgba(86,183,255,.10);
+  --app-current-ring:rgba(86,183,255,.20);
+}
+
+body[data-theme="light"]{
+  --app-html-bg:#eef2f6;
+  --app-page-bg:#eef2f6;
+  --app-surface:#ffffff;
+  --app-surface-2:#f8fafc;
+  --app-border:#d6dde6;
+  --app-text:#1f2937;
+  --app-muted:#6b7280;
+  --app-accent:#64748b;
+  --app-accent-strong:#0d2f4f;
+  --app-ghost-bg:#f8fafc;
+  --app-input-bg:#ffffff;
+  --app-input-text:#111827;
+  --app-row-active:rgba(15,23,42,.05);
+  --app-stage-pill:rgba(100,116,139,.10);
+  --app-focus:#0d2f4f;
+  --app-current-bg:rgba(13,47,79,.05);
+  --app-current-ring:rgba(13,47,79,.20);
+}
+
+/* Header/Tabs – orange Linien raus */
+body[data-theme="light"] .brand{
+  background:linear-gradient(180deg,#f9fafb 0%, #eef2f6 100%);
+  border-bottom:1px solid var(--app-border);
+}
+
+body[data-theme="light"] .brand__company{
+  color:var(--app-text);
+}
+
+body[data-theme="light"] .brand__subtitle{
+  color:var(--app-muted);
+}
+
+body[data-theme="light"] .tabs{
+  background:transparent;
+  border-bottom:1px solid var(--app-border);
+}
+
+body[data-theme="light"] .tab{
+  color:var(--app-muted);
+}
+
+body[data-theme="light"] .tab.is-active{
+  background:#fff;
+  color:var(--app-text);
+  border-bottom:2px solid var(--app-accent-strong);
+}
+
+/* Cards / Inputs / Tabellen */
+body[data-theme="light"] .card,
+body[data-theme="light"] .historyItem,
+body[data-theme="light"] .settings-group,
+body[data-theme="light"] .timer-box,
+body[data-theme="light"] .table-wrap,
+body[data-theme="light"] .diag-wrap,
+body[data-theme="light"] .kpi,
+body[data-theme="light"] .auto-card,
+body[data-theme="light"] .info-box,
+body[data-theme="light"] .kalib-info,
+body[data-theme="light"] .kalib-preview,
+body[data-theme="light"] .modal-box{
+  background:#fff;
+  color:var(--app-text);
+  border-color:var(--app-border);
+  box-shadow:0 1px 3px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.04);
+}
+
+body[data-theme="light"] .card__title,
+body[data-theme="light"] .auswertung-block__title{
+  color:var(--app-text);
+  border-left:4px solid #cbd5e1;
+}
+
+body[data-theme="light"] .field__label,
+body[data-theme="light"] .hint,
+body[data-theme="light"] .field__hint,
+body[data-theme="light"] .kpi__label,
+body[data-theme="light"] .auto-card__label,
+body[data-theme="light"] .kalib-info__label,
+body[data-theme="light"] .historyItem__date{
+  color:var(--app-muted);
+}
+
+body[data-theme="light"] .field__input,
+body[data-theme="light"] .field__select,
+body[data-theme="light"] .field__textarea,
+body[data-theme="light"] .mess-input,
+body[data-theme="light"] .modal-input{
+  background:#fff;
+  color:var(--app-input-text);
+  border-color:var(--app-border);
+}
+
+body[data-theme="light"] .field__input:focus,
+body[data-theme="light"] .field__select:focus{
+  outline:2px solid #94a3b8;
+  border-color:#94a3b8;
+}
+
+body[data-theme="light"] .mess-table th{
+  background:#f8fafc;
+  color:var(--app-text);
+  border-bottom:1px solid var(--app-border);
+}
+
+body[data-theme="light"] .mess-table td{
+  border-bottom:1px solid #e5e7eb;
+}
+
+body[data-theme="light"] .mess-input--auto{
+  background:#f8fafc;
+  color:#475569;
+  border-color:#cbd5e1;
+}
+
+body[data-theme="light"] .mess-stage-pill{
+  background:#e2e8f0;
+  color:#334155;
+}
+
+body[data-theme="light"] .row-anm-btn{
+  color:#64748b;
+  border-color:#cbd5e1;
+}
+
+/* Buttons */
+body[data-theme="light"] .btn--ghost,
+body[data-theme="light"] .timer-btn--ghost{
+  background:#f8fafc;
+  color:var(--app-text);
+  border:1px solid var(--app-border);
+}
+
+body[data-theme="light"] .btn--save{
+  background:#64748b;
+  color:#fff;
+}
+
+body[data-theme="light"] .btn-plus{
+  background:#64748b;
+  color:#fff;
+}
+
+body[data-theme="light"] .btn--install{
+  background:#64748b;
+  color:#fff;
+}
+
+/* Auswertungsbereich explizit wissenschaftlicher */
+body[data-theme="light"] #auswertungContainer .auswertung-block{
+  background:#fff;
+  border:1px solid var(--app-border);
+  border-radius:12px;
+  padding:14px;
+}
+
+body[data-theme="light"] #auswertungContainer .diag-wrap{
+  background:#fff;
+  border:1px solid #d9e1ea;
+}
+
+body[data-theme="light"] #auswertungContainer .kpi{
+  background:#f9fafb;
+  border:1px solid #d9e1ea;
+}
+
+body[data-theme="light"] .footer{
+  color:var(--app-muted);
+  border-top:1px solid var(--app-border);
+}
