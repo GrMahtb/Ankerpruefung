@@ -841,7 +841,6 @@ body[data-theme="dark"] .mess-stage-pill{
   max-width:42px !important;
   text-align:center;
   font-size:9px;
-  transform: rotate(180deg);
 }
 
 .th-druck,
