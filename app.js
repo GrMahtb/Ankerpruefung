@@ -518,20 +518,20 @@ function ensureDynamicStyles(){
   style.textContent = `
     html{
       -webkit-text-size-adjust:100%;
-      background:#0d2f4f !important;
+      background:var(--app-html-bg, #f3f4f6) !important;
     }
 
     body{
-      background:#0d2f4f !important;
-      color:#fff !important;
+      background:var(--app-page-bg, #f3f4f6) !important;
+      color:var(--app-text, #111827) !important;
     }
 
     .brand,
     .brand__bar,
     .tabs,
     .pane{
-      background:#0d2f4f !important;
-      color:#fff !important;
+      background:transparent !important;
+      color:var(--app-text, #111827) !important;
       box-shadow:none !important;
     }
 
@@ -545,217 +545,101 @@ function ensureDynamicStyles(){
     .table-wrap,
     .info-box,
     .kalib-preview{
-      background:#0b1725 !important;
-      color:#fff !important;
-      border-color:rgba(255,255,255,.14) !important;
+      background:var(--app-surface, #ffffff) !important;
+      color:var(--app-text, #111827) !important;
+      border-color:var(--app-border, #d4d9e1) !important;
+      box-shadow:0 1px 3px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.04) !important;
     }
 
     .brand__subtitle,
     .hint,
     .field__hint,
     .timer-edit-hint,
-    .kalib-info__sub{
-      color:rgba(220,240,255,.72) !important;
+    .kalib-info__sub,
+    .field__label{
+      color:var(--app-muted, #6b7280) !important;
     }
 
     .tab,
     .btn,
     .timer-btn,
     .btn-plus{
-      border-color:rgba(255,255,255,.18) !important;
+      border-color:var(--app-border, #d4d9e1) !important;
     }
 
     .tab.is-active,
     .btn--save,
     .btn-plus{
-    background:#56b7ff !important;
-    color:#081420 !important;
-    border-color:#56b7ff !important;
-}
+      background:var(--app-accent, #64748b) !important;
+      color:#fff !important;
+      border-color:var(--app-accent, #64748b) !important;
+    }
 
-.timer-btn--start{
-  background:#22c55e !important;
-  color:#081420 !important;
-  border-color:#22c55e !important;
-}
+    .timer-btn--start{
+      background:#22c55e !important;
+      color:#081420 !important;
+      border-color:#22c55e !important;
+    }
+
+    .timer-btn--stop{
+      background:#ef4444 !important;
+      color:#fff !important;
+      border-color:#ef4444 !important;
+    }
+
     .btn--ghost,
-.timer-btn--ghost,
-.btn--danger{
-  background:#1a2636 !important;
-  color:#fff !important;
-  border-color:rgba(255,255,255,.18) !important;
-}
+    .timer-btn--ghost,
+    .btn--danger{
+      background:var(--app-ghost-bg, #f8fafc) !important;
+      color:var(--app-text, #111827) !important;
+      border-color:var(--app-border, #d4d9e1) !important;
+    }
 
-.timer-btn--stop{
-  background:#ef4444 !important;
-  color:#fff !important;
-  border-color:#ef4444 !important;
-}
     .field__input,
     .field__select,
     .field__textarea,
     .mess-input,
     .modal-input{
       font-size:16px !important;
-      background:rgba(255,255,255,.05) !important;
-      color:#fff !important;
-      border-color:rgba(255,255,255,.18) !important;
-    }
-.field__select option{
-  background:#0b1725 !important;
-  color:#fff !important;
-}
-    .field__input::placeholder{
-      color:rgba(220,240,255,.42) !important;
+      background:var(--app-input-bg, #ffffff) !important;
+      color:var(--app-input-text, #111827) !important;
+      border-color:var(--app-border, #d4d9e1) !important;
     }
 
-    .field__input--required, .field__select--required, .field__textarea--required{
-      background: rgba(255,80,80,.10) !important;
-      border-color: rgba(255,120,120,.45) !important;
+    .field__select option{
+      background:var(--app-input-bg, #ffffff) !important;
+      color:var(--app-input-text, #111827) !important;
+    }
+
+    .field__input::placeholder{
+      color:var(--app-muted, #9ca3af) !important;
     }
 
     .field__input--computed{
-      color:#56b7ff !important;
+      color:var(--app-accent-strong, #0d2f4f) !important;
       font-weight:800 !important;
     }
 
-    .mess-table{
-      width:100%;
-      table-layout:fixed;
-      border-collapse:collapse;
-    }
-
-    .mess-table th,
-    .mess-table td{
-      padding:2px 3px !important;
-      vertical-align:middle;
-    }
-
-    .mess-stage-col, .th-stage{
-      width:30px !important;
-      min-width:30px !important;
-      max-width:30px !important;
-      text-align:center;
-      font-size:9px;
-      padding-left:2px !important;
-      padding-right:2px !important;
-    }
-
-    .mess-load-col, .th-load{
-      width:42px !important;
-      min-width:42px !important;
-      max-width:42px !important;
-      text-align:center;
-      font-size:9px;
-      padding-left:2px !important;
-      padding-right:2px !important;
-    }
-
-    .mess-druck-col, .th-druck{
-      width:48px !important;
-      min-width:48px !important;
-      max-width:48px !important;
-      text-align:center;
-      font-size:9px;
-      padding-left:2px !important;
-      padding-right:2px !important;
-    }
-
-    .th-min{
-      width:48px !important;
-      min-width:48px !important;
-      max-width:48px !important;
-    }
-
-    .th-mess{
-      width:120px !important;
-      min-width:120px !important;
-    }
-
-    .th-versch{
-      width:78px !important;
-      min-width:78px !important;
-    }
-
-    .th-anm{
-      width:40px !important;
-      min-width:40px !important;
-      max-width:40px !important;
-    }
-
-    .mess-stage-pill{
-      font-size:9px !important;
-      line-height:1.1 !important;
-      padding:1px 2px !important;
-      border-radius:4px;
-      background:rgba(86,183,255,.12) !important;
-      color:#fff !important;
-    }
-
-    .mess-table .minute-cell{
-      min-width:52px;
-      display:flex;
-      align-items:center;
-      gap:3px;
-    }
-
-    .mess-table .minute-input{
-      min-width:44px;
-      width:44px;
-    }
-
-    .mess-table [data-role="row-ablesung"]{
-      min-width:112px;
-      width:112px;
-      font-size:16px !important;
-      font-weight:700;
-    }
-
-    .mess-table [data-role="row-versch"]{
-      min-width:72px;
-      width:72px;
-    }
-
-    .mess-table [data-role="stage-druck"]{
-      width:100%;
-    }
-
-    .zyklus-load-row{
-      display:flex;
-      gap:6px;
-      flex-wrap:wrap;
-    }
-
-    .zyklus-load-row .field{
-      min-width:64px !important;
-      width:64px !important;
-    }
-
-    .field--stage-druck .hint{
-      text-align:center !important;
-      font-size:10px !important;
-    }
-
     .row-active td{
-      background: rgba(240,138,28,.10) !important;
+      background:var(--app-row-active, rgba(15,23,42,.06)) !important;
     }
 
     .row-active .mess-stage-pill{
-      background: rgba(240,138,28,.20) !important;
-      box-shadow: 0 0 0 1px rgba(240,138,28,.42) inset;
+      background:var(--app-stage-pill, rgba(100,116,139,.12)) !important;
+      box-shadow: 0 0 0 1px var(--app-border, #d4d9e1) inset;
     }
 
     .current-measurement{
-      border:2px solid #f08a1c !important;
-      box-shadow:0 0 0 3px rgba(240,138,28,.18) !important;
-      background:rgba(255,180,90,.10) !important;
+      border:2px solid var(--app-focus, #0d2f4f) !important;
+      box-shadow:0 0 0 3px var(--app-current-ring, rgba(13,47,79,.18)) !important;
+      background:var(--app-current-bg, rgba(13,47,79,.06)) !important;
       animation:currentFieldPulse 1.2s ease-in-out infinite;
     }
 
     @keyframes currentFieldPulse{
-      0%   { box-shadow:0 0 0 0 rgba(240,138,28,.35); }
-      70%  { box-shadow:0 0 0 6px rgba(240,138,28,0); }
-      100% { box-shadow:0 0 0 0 rgba(240,138,28,0); }
+      0%   { box-shadow:0 0 0 0 var(--app-current-ring, rgba(13,47,79,.20)); }
+      70%  { box-shadow:0 0 0 6px rgba(0,0,0,0); }
+      100% { box-shadow:0 0 0 0 rgba(0,0,0,0); }
     }
 
     body[data-layout-mode="tablet"] .pane{
