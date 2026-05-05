@@ -844,6 +844,29 @@ function makeDefaultStageCatalog(testKey){
   ];
 }
 
+function makeDefaultStageCatalog(testKey){
+  if(testKey === 'eignung'){
+    return [
+      { key:'pa',   kind:'pa',     factor:0,    label:'Pa',      druck:'' },
+      { key:'f040', kind:'factor', factor:0.40, label:'0,40*Pp', druck:'' },
+      { key:'f055', kind:'factor', factor:0.55, label:'0,55*Pp', druck:'' },
+      { key:'f070', kind:'factor', factor:0.70, label:'0,70*Pp', druck:'' },
+      { key:'f085', kind:'factor', factor:0.85, label:'0,85*Pp', druck:'' },
+      { key:'f100', kind:'factor', factor:1.00, label:'Pp',      druck:'' },
+      { key:'p0',   kind:'p0',     factor:-1,   label:'P0',      druck:'' }
+    ];
+  }
+
+  return [
+    { key:'p0',   kind:'p0',     factor:-1,   label:'P0',      druck:'' },
+    { key:'f020', kind:'factor', factor:0.20, label:'0,20*Pp', druck:'' },
+    { key:'f040', kind:'factor', factor:0.40, label:'0,40*Pp', druck:'' },
+    { key:'f060', kind:'factor', factor:0.60, label:'0,60*Pp', druck:'' },
+    { key:'f080', kind:'factor', factor:0.80, label:'0,80*Pp', druck:'' },
+    { key:'f100', kind:'factor', factor:1.00, label:'Pp',      druck:'' }
+  ];
+}
+
 function makeTestState(key){
   const defs = key === 'eignung'
     ? buildEignungNormCycles('nichtbindig')
@@ -862,6 +885,42 @@ function makeTestState(key){
       detail:null
     }
   };
+}
+function stageCatalogKeyFromStage(stage){
+  const s = normalizeStageDef(stage);
+  if(s.kind === 'pa') return 'pa';
+  if(s.kind === 'p0') return 'p0';
+  return `f${Math.round(Number(s.factor || 0) * 100).toString().padStart(3,'0')}`;
+}
+
+function ensureStageCatalog(testKey){
+  const test = getTest(testKey);
+  if(!Array.isArray(test.stageCatalog) || !test.stageCatalog.length){
+    test.stageCatalog = makeDefaultStageCatalog(testKey);
+  }
+}
+
+function syncCyclesFromStageCatalog(testKey){
+  const test = getTest(testKey);
+  ensureStageCatalog(testKey);
+
+  test.cycles.forEach(cycle => {
+    cycle.stageDefs = (cycle.stageDefs || []).map(raw => {
+      const stage = normalizeStageDef(raw);
+      const key = stageCatalogKeyFromStage(stage);
+      const ref = test.stageCatalog.find(s => s.key === key);
+
+      if(!ref) return stage;
+
+      return {
+        ...stage,
+        kind: ref.kind,
+        factor: ref.factor,
+        label: ref.label,
+        druck: ref.druck || ''
+      };
+    });
+  });
 }
 function stageCatalogKeyFromStage(stage){
   const s = normalizeStageDef(stage);
@@ -1600,6 +1659,7 @@ function renderStagePlanSection(testKey){
   ensureStageCatalog(testKey);
 
   const kalib = findKalibById(state.meta.selectedKalibId);
+
   const rows = test.stageCatalog.map((stage, idx) => {
     const kn = calcStageLoad(stage, testKey);
     const autoDruck = kalib ? lookupStuetzpunkt(kn, kalib.punkte).bar : null;
@@ -1609,9 +1669,10 @@ function renderStagePlanSection(testKey){
       <tr>
         <td>${h(stage.label)}</td>
         <td>
-          ${stage.kind === 'factor'
-            ? `<input class="mess-input" data-role="catalog-factor" data-test="${testKey}" data-idx="${idx}" type="number" step="0.05" value="${h(stage.factor)}">`
-            : `<input class="mess-input mess-input--auto" type="text" value="${h(stage.kind === 'pa' ? 'Pa' : 'P0')}" readonly>`
+          ${
+            stage.kind === 'factor'
+              ? `<input class="mess-input" data-role="catalog-factor" data-test="${testKey}" data-idx="${idx}" type="number" step="0.05" value="${h(stage.factor)}">`
+              : `<input class="mess-input mess-input--auto" type="text" value="${h(stage.kind === 'pa' ? 'Pa' : 'P0')}" readonly>`
           }
         </td>
         <td><input class="mess-input mess-input--auto" type="text" value="${Number.isFinite(kn) ? fmt(kn,1) : '—'}" readonly></td>
@@ -1712,14 +1773,6 @@ function buildTimerBox(testKey, cycle){
 
         <span class="timer-edit-hint">tippen = anpassen</span>
 
-        <label class="field" style="min-width:170px; margin-left:auto">
-          <span class="field__label">${testKey === 'eignung' ? 'Aktiver Zyklus' : 'Aktiver Abschnitt'}</span>
-          <select class="field__select" data-role="active-cycle" data-test="${testKey}">
-            ${getTest(testKey).cycles.map(c => `
-              <option value="${h(c.id)}" ${getTest(testKey).activeCycleId === c.id ? 'selected' : ''}>${h(c.title)}</option>
-            `).join('')}
-          </select>
-        </label>
 
         <div class="timer-buttons">
           <button class="timer-btn timer-btn--start" data-role="timer-start" data-test="${testKey}" type="button">Start</button>
@@ -1995,6 +2048,7 @@ function renderTestPane(testKey){
     if(activeEl.dataset.cycle) parts.push(`[data-cycle="${activeEl.dataset.cycle}"]`);
     if(activeEl.dataset.stage) parts.push(`[data-stage="${activeEl.dataset.stage}"]`);
     if(activeEl.dataset.row)   parts.push(`[data-row="${activeEl.dataset.row}"]`);
+    if(activeEl.dataset.idx)   parts.push(`[data-idx="${activeEl.dataset.idx}"]`);
     focusSelector = parts.join('');
   }
 
