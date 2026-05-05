@@ -519,11 +519,11 @@ function ensureDynamicStyles(){
   style.textContent = `
     html{
       -webkit-text-size-adjust:100%;
-      background:#6d6d72 !important;
+      background:#0d2f4f !important;
     }
 
     body{
-      background:#6d6d72 !important;
+      background:#0d2f4f !important;
       color:#fff !important;
     }
 
@@ -531,7 +531,7 @@ function ensureDynamicStyles(){
     .brand__bar,
     .tabs,
     .pane{
-      background:#6d6d72 !important;
+      background:#0d2f4f !important;
       color:#fff !important;
       box-shadow:none !important;
     }
@@ -546,7 +546,7 @@ function ensureDynamicStyles(){
     .table-wrap,
     .info-box,
     .kalib-preview{
-      background:rgba(54,54,58,.92) !important;
+      background:#0b1725 !important;
       color:#fff !important;
       border-color:rgba(255,255,255,.14) !important;
     }
@@ -556,7 +556,7 @@ function ensureDynamicStyles(){
     .field__hint,
     .timer-edit-hint,
     .kalib-info__sub{
-      color:rgba(255,255,255,.74) !important;
+      color:rgba(220,240,255,.72) !important;
     }
 
     .tab,
@@ -570,18 +570,18 @@ function ensureDynamicStyles(){
     .btn--save,
     .timer-btn--start,
     .btn-plus{
-      background:#3d3d41 !important;
-      color:#fff !important;
-      border-color:#d4d4d8 !important;
+      background:#56b7ff !important;
+      color:#081420 !important;
+      border-color:#56b7ff !important;
     }
 
     .btn--ghost,
     .timer-btn--ghost,
     .timer-btn--stop,
     .btn--danger{
-      background:#4a4a4f !important;
+      background:#1a2636 !important;
       color:#fff !important;
-      border-color:#d4d4d8 !important;
+      border-color:rgba(255,255,255,.18) !important;
     }
 
     .field__input,
@@ -590,22 +590,22 @@ function ensureDynamicStyles(){
     .mess-input,
     .modal-input{
       font-size:16px !important;
-      background:rgba(255,255,255,.06) !important;
+      background:rgba(255,255,255,.05) !important;
       color:#fff !important;
       border-color:rgba(255,255,255,.18) !important;
     }
 
     .field__input::placeholder{
-      color:rgba(255,255,255,.48) !important;
+      color:rgba(220,240,255,.42) !important;
     }
 
     .field__input--required, .field__select--required, .field__textarea--required{
-      background: rgba(255,255,255,.08) !important;
-      border-color: rgba(255,255,255,.42) !important;
+      background: rgba(255,80,80,.10) !important;
+      border-color: rgba(255,120,120,.45) !important;
     }
 
     .field__input--computed{
-      color:#f2f2f4 !important;
+      color:#56b7ff !important;
       font-weight:800 !important;
     }
 
@@ -678,7 +678,7 @@ function ensureDynamicStyles(){
       line-height:1.1 !important;
       padding:1px 2px !important;
       border-radius:4px;
-      background:rgba(255,255,255,.10) !important;
+      background:rgba(86,183,255,.12) !important;
       color:#fff !important;
     }
 
@@ -727,25 +727,25 @@ function ensureDynamicStyles(){
     }
 
     .row-active td{
-      background: rgba(255,255,255,.08) !important;
+      background: rgba(240,138,28,.10) !important;
     }
 
     .row-active .mess-stage-pill{
-      background: rgba(255,255,255,.16) !important;
-      box-shadow: 0 0 0 1px rgba(255,255,255,.24) inset;
+      background: rgba(240,138,28,.20) !important;
+      box-shadow: 0 0 0 1px rgba(240,138,28,.42) inset;
     }
 
     .current-measurement{
-      border:2px solid #d7d7dc !important;
-      box-shadow:0 0 0 3px rgba(255,255,255,.12) !important;
-      background:rgba(255,255,255,.08) !important;
+      border:2px solid #f08a1c !important;
+      box-shadow:0 0 0 3px rgba(240,138,28,.18) !important;
+      background:rgba(255,180,90,.10) !important;
       animation:currentFieldPulse 1.2s ease-in-out infinite;
     }
 
     @keyframes currentFieldPulse{
-      0%   { box-shadow:0 0 0 0 rgba(255,255,255,.22); }
-      70%  { box-shadow:0 0 0 6px rgba(255,255,255,0); }
-      100% { box-shadow:0 0 0 0 rgba(255,255,255,0); }
+      0%   { box-shadow:0 0 0 0 rgba(240,138,28,.35); }
+      70%  { box-shadow:0 0 0 6px rgba(240,138,28,0); }
+      100% { box-shadow:0 0 0 0 rgba(240,138,28,0); }
     }
 
     body[data-layout-mode="tablet"] .pane{
