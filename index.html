@@ -133,80 +133,80 @@
 
   <!-- ================= SETTINGS ================= -->
   <main id="tab-settings" class="pane" role="tabpanel" hidden>
-    <section class="card">
-      <div class="card__title">Einstellungen</div>
+  <section class="card">
+    <div class="card__title">Einstellungen</div>
 
-      <div class="settings-group">
-        <div class="settings-group__title">Darstellung</div>
+    <div class="settings-group">
+      <div class="settings-group__title">Darstellung</div>
 
-        <label class="field" style="margin-top:10px">
-          <span class="field__label">Layout-Modus</span>
-          <select id="settings-layoutMode" class="field__select">
-            <option value="auto">Automatisch</option>
-            <option value="tablet">Tablet</option>
-            <option value="desktop">Desktop</option>
-          </select>
-        </label>
+      <label class="field" style="margin-top:10px">
+        <span class="field__label">Layout-Modus</span>
+        <select id="settings-layoutMode" class="field__select">
+          <option value="auto">Automatisch</option>
+          <option value="tablet">Tablet</option>
+          <option value="desktop">Desktop</option>
+        </select>
+      </label>
 
-        <label class="field" style="margin-top:10px">
-          <span class="field__label">Farbmodus</span>
-          <select id="settings-themeMode" class="field__select">
-            <option value="light">Hell</option>
-            <option value="dark">Dunkel</option>
-            <option value="auto">Automatisch</option>
-          </select>
-        </label>
+      <label class="field" style="margin-top:10px">
+        <span class="field__label">Farbmodus</span>
+        <select id="settings-themeMode" class="field__select">
+          <option value="light">Hell</option>
+          <option value="dark">Dunkel</option>
+          <option value="auto">Automatisch</option>
+        </select>
+      </label>
 
-        <div class="hint" style="text-align:left; margin-top:8px;">
-          Hell = wissenschaftlich/weiß · Dunkel = Baustelle/Nacht · Automatisch = Systemvorgabe
-        </div>
+      <div class="hint" style="text-align:left; margin-top:8px;">
+        Hell = wissenschaftlich/weiß · Dunkel = Baustelle/Nacht · Automatisch = Systemvorgabe
+      </div>
+    </div>
+
+    <div class="settings-group">
+      <div class="settings-group__title">Alarm</div>
+
+      <div class="action-row" style="justify-content:flex-start; margin-top:6px;">
+        <button id="btnAlarmSoundToggle" class="btn btn--ghost btn--small" type="button">Ton einschalten</button>
       </div>
 
-      <div class="settings-group">
-        <div class="settings-group__title">Alarm</div>
+      <label class="field" style="margin-top:10px">
+        <span class="field__label">Alarmdauer [Sekunden]</span>
+        <input id="settings-alarmDuration" class="field__input" type="number" min="1" max="30" step="1" value="4" />
+      </label>
 
-        <div class="action-row" style="justify-content:flex-start; margin-top:6px;">
-          <button id="btnAlarmSoundToggle" class="btn btn--ghost btn--small" type="button">Ton einschalten</button>
-        </div>
-
-        <label class="field" style="margin-top:10px">
-          <span class="field__label">Alarmdauer [Sekunden]</span>
-          <input id="settings-alarmDuration" class="field__input" type="number" min="1" max="30" step="1" value="4" />
-        </label>
-
-        <div id="alarmSoundStatus" class="hint" style="text-align:left; margin-top:8px;">
-          Für iPhone: Ton einmal hier aktivieren oder vor dem Start testen.
-        </div>
+      <div id="alarmSoundStatus" class="hint" style="text-align:left; margin-top:8px;">
+        Für iPhone: Ton einmal hier aktivieren oder vor dem Start testen.
       </div>
+    </div>
 
-      <div class="settings-group">
-        <div class="settings-group__title">Vorlage Export / Import</div>
-        <div class="action-row" style="justify-content:flex-start; gap:10px; flex-wrap:wrap">
-          <button id="btnExportTemplate" class="btn btn--ghost btn--small" type="button">📤 Vorlage exportieren</button>
-          <button id="btnImportTemplate" class="btn btn--ghost btn--small" type="button">📥 Vorlage importieren</button>
-          <input id="importTemplateGlobalInput" type="file" accept=".json,.htbanker.json,application/json" style="display:none" />
-        </div>
-        <div class="hint" style="text-align:left; margin-top:8px;">
-          Bezieht sich auf die aktuell geöffnete Prüfart.
-        </div>
+    <div class="settings-group">
+      <div class="settings-group__title">Vorlage Export / Import</div>
+      <div class="action-row" style="justify-content:flex-start; gap:10px; flex-wrap:wrap">
+        <button id="btnExportTemplate" class="btn btn--ghost btn--small" type="button">📤 Vorlage exportieren</button>
+        <button id="btnImportTemplate" class="btn btn--ghost btn--small" type="button">📥 Vorlage importieren</button>
+        <input id="importTemplateGlobalInput" type="file" accept=".json,.htbanker.json,application/json" style="display:none" />
       </div>
+      <div class="hint" style="text-align:left; margin-top:8px;">
+        Bezieht sich auf die aktuell geöffnete Prüfart.
+      </div>
+    </div>
 
-      <div class="settings-group">
-        <div class="settings-group__title">Vollständiger Export / Import</div>
-        <div class="action-row" style="justify-content:flex-start; gap:10px; flex-wrap:wrap">
-          <button id="btnExportFull" class="btn btn--ghost btn--small" type="button">📦 Export</button>
-          <button id="btnImportFull" class="btn btn--ghost btn--small" type="button">📦 Import</button>
-          <input id="importFullGlobalInput" type="file" accept=".json,application/json" style="display:none" />
-        </div>
+    <div class="settings-group">
+      <div class="settings-group__title">Vollständiger Export / Import</div>
+      <div class="action-row" style="justify-content:flex-start; gap:10px; flex-wrap:wrap">
+        <button id="btnExportFull" class="btn btn--ghost btn--small" type="button">📦 Export</button>
+        <button id="btnImportFull" class="btn btn--ghost btn--small" type="button">📦 Import</button>
+        <input id="importFullGlobalInput" type="file" accept=".json,application/json" style="display:none" />
       </div>
-    </section>
+    </div>
+  </section>
 
-    <section class="card card--actions card--actions-bottom">
-      <div class="action-row">
-        <button id="btnSaveSettings" class="btn btn--save btn--small" type="button">Speichern</button>
-      </div>
-    </section>
-  </main>
+  <section class="card card--actions card--actions-bottom">
+    <div class="action-row">
+      <button id="btnSaveSettings" class="btn btn--save btn--small" type="button">Speichern</button>
+    </div>
+  </section>
+</main>
 
   <footer class="footer">
     &copy; <b>HTB Baugesellschaft m.b.H.</b> – Ankerprüfung PWA
