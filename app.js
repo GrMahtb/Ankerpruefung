@@ -2512,20 +2512,19 @@ async function loadPdfAssetsAnker(pdf){
   }catch{}
 
   let coverPhoto = null;
-try{
-  const b = await fetch(`${BASE_PATH}cover-photo.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
-  coverPhoto = await pdf.embedPng(b);
-}catch{
   try{
-    const b = await fetch(`${BASE_PATH}cover-photo.jpg?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
-    coverPhoto = await pdf.embedJpg(b);
+    const b = await fetch(`${BASE_PATH}cover-photo.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+    coverPhoto = await pdf.embedPng(b);
   }catch{
     try{
-      const b = await fetch(`${BASE_PATH}cover-photo.jpeg?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+      const b = await fetch(`${BASE_PATH}cover-photo.jpg?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
       coverPhoto = await pdf.embedJpg(b);
-    }catch{}
-  }
-}ch{}
+    }catch{
+      try{
+        const b = await fetch(`${BASE_PATH}cover-photo.jpeg?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+        coverPhoto = await pdf.embedJpg(b);
+      }catch{}
+    }
   }
 
   let fusszeile = null;
