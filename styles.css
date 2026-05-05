@@ -33,34 +33,34 @@
 }
 
 body[data-theme="dark"]{
-  --app-html-bg:#0d2f4f;
-  --app-page-bg:#0d2f4f;
-  --app-surface:#0b1725;
-  --app-surface-2:#081a2c;
+  --app-html-bg:#2f3136;
+  --app-page-bg:#2f3136;
+  --app-surface:#1f2227;
+  --app-surface-2:#262a30;
   --app-border:rgba(255,255,255,.14);
   --app-border-strong:rgba(255,255,255,.24);
 
-  --app-text:#eaf2fa;
+  --app-text:#f5f5f5;
   --app-heading:#ffffff;
-  --app-muted:rgba(220,235,250,.72);
+  --app-muted:rgba(255,255,255,.72);
 
-  --app-accent:#56b7ff;
-  --app-accent-soft:#56b7ff;
-  --app-accent-strong:#56b7ff;
+  --app-accent:#f2c94c;
+  --app-accent-soft:#f2c94c;
+  --app-accent-strong:#f2c94c;
 
-  --app-input-bg:#081a2c;
+  --app-input-bg:#181b1f;
   --app-input-text:#ffffff;
   --app-input-border:rgba(255,255,255,.18);
 
   --app-row-active:rgba(255,255,255,.06);
-  --app-stage-pill:rgba(86,183,255,.12);
-  --app-focus:#56b7ff;
-  --app-current-bg:rgba(86,183,255,.10);
-  --app-current-ring:rgba(86,183,255,.20);
+  --app-stage-pill:rgba(242,201,76,.12);
+  --app-focus:#f2c94c;
+  --app-current-bg:rgba(242,201,76,.10);
+  --app-current-ring:rgba(242,201,76,.20);
 
-  --app-shadow:none;
+  --app-good:#22c55e;
+  --app-bad:#ef4444;
 }
-
 *{
   box-sizing:border-box;
 }
@@ -1592,4 +1592,89 @@ body[data-theme="light"] .select-card{
 body[data-theme="light"] .select-card:has(input:checked){
   background:#eef2f6 !important;
   border-color:#111827 !important;
+}
+/* =========================================================
+   PATCH – Wissenschaftliche Lastzyklus-Tabelle
+========================================================= */
+
+body[data-theme="light"] .table-wrap{
+  background:#ffffff !important;
+  border:1px solid #111827 !important;
+}
+
+body[data-theme="light"] .mess-table{
+  background:#ffffff !important;
+}
+
+body[data-theme="light"] .mess-table th{
+  background:#ffffff !important;
+  color:#111827 !important;
+  border:1px solid #111827 !important;
+}
+
+body[data-theme="light"] .mess-table td{
+  background:#ffffff !important;
+  color:#111827 !important;
+  border:1px solid #111827 !important;
+}
+
+body[data-theme="light"] .mess-input{
+  background:#ffffff !important;
+  color:#111827 !important;
+  border:1px solid #111827 !important;
+}
+
+body[data-theme="light"] .mess-input--auto{
+  background:#f8fafc !important;
+  color:#111827 !important;
+  border:1px solid #111827 !important;
+}
+
+body[data-theme="light"] .mess-stage-pill{
+  background:#ffffff !important;
+  color:#111827 !important;
+  border:0 !important;
+  padding:0 !important;
+  font-weight:700;
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  transform:rotate(180deg);
+  display:inline-block;
+  min-height:52px;
+}
+
+body[data-theme="light"] .th-stage{
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  transform:rotate(180deg);
+  vertical-align:middle;
+}
+
+body[data-theme="light"] .mess-stage-col,
+body[data-theme="light"] .th-stage,
+body[data-theme="light"] .mess-load-col,
+body[data-theme="light"] .th-load,
+body[data-theme="light"] .mess-druck-col,
+body[data-theme="light"] .th-druck{
+  width:48px !important;
+  min-width:48px !important;
+  max-width:48px !important;
+  text-align:center;
+  font-size:10px;
+}
+
+body[data-theme="light"] .th-min{
+  width:48px !important;
+  min-width:48px !important;
+  max-width:48px !important;
+}
+
+body[data-theme="light"] .th-mess{
+  width:128px !important;
+  min-width:128px !important;
+}
+
+body[data-theme="light"] .th-versch{
+  width:78px !important;
+  min-width:78px !important;
 }
