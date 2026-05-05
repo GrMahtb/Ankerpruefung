@@ -821,6 +821,29 @@ function makeCycleFromDef(def, oldCycle=null){
   };
 }
 
+function makeDefaultStageCatalog(testKey){
+  if(testKey === 'eignung'){
+    return [
+      { key:'pa',   kind:'pa',     factor:0,    label:'Pa',      druck:'' },
+      { key:'f040', kind:'factor', factor:0.40, label:'0,40*Pp', druck:'' },
+      { key:'f055', kind:'factor', factor:0.55, label:'0,55*Pp', druck:'' },
+      { key:'f070', kind:'factor', factor:0.70, label:'0,70*Pp', druck:'' },
+      { key:'f085', kind:'factor', factor:0.85, label:'0,85*Pp', druck:'' },
+      { key:'f100', kind:'factor', factor:1.00, label:'Pp',      druck:'' },
+      { key:'p0',   kind:'p0',     factor:-1,   label:'P0',      druck:'' }
+    ];
+  }
+
+  return [
+    { key:'p0',   kind:'p0',     factor:-1,   label:'P0',      druck:'' },
+    { key:'f020', kind:'factor', factor:0.20, label:'0,20*Pp', druck:'' },
+    { key:'f040', kind:'factor', factor:0.40, label:'0,40*Pp', druck:'' },
+    { key:'f060', kind:'factor', factor:0.60, label:'0,60*Pp', druck:'' },
+    { key:'f080', kind:'factor', factor:0.80, label:'0,80*Pp', druck:'' },
+    { key:'f100', kind:'factor', factor:1.00, label:'Pp',      druck:'' }
+  ];
+}
+
 function makeTestState(key){
   const defs = key === 'eignung'
     ? buildEignungNormCycles('nichtbindig')
@@ -830,9 +853,9 @@ function makeTestState(key){
 
   return {
     typeKey:'',
-    mode:'norm',
-    activeCycleId: cycles[0]?.id || '',
     spec: makeSpec(key),
+    stageCatalog: makeDefaultStageCatalog(key),
+    activeCycleId: cycles[0]?.id || '',
     cycles,
     photos:{
       overview:null,
@@ -840,7 +863,42 @@ function makeTestState(key){
     }
   };
 }
+function stageCatalogKeyFromStage(stage){
+  const s = normalizeStageDef(stage);
+  if(s.kind === 'pa') return 'pa';
+  if(s.kind === 'p0') return 'p0';
+  return `f${Math.round(Number(s.factor || 0) * 100).toString().padStart(3,'0')}`;
+}
 
+function ensureStageCatalog(testKey){
+  const test = getTest(testKey);
+  if(!Array.isArray(test.stageCatalog) || !test.stageCatalog.length){
+    test.stageCatalog = makeDefaultStageCatalog(testKey);
+  }
+}
+
+function syncCyclesFromStageCatalog(testKey){
+  const test = getTest(testKey);
+  ensureStageCatalog(testKey);
+
+  test.cycles.forEach(cycle => {
+    cycle.stageDefs = (cycle.stageDefs || []).map(raw => {
+      const stage = normalizeStageDef(raw);
+      const key = stageCatalogKeyFromStage(stage);
+      const ref = test.stageCatalog.find(s => s.key === key);
+
+      if(!ref) return stage;
+
+      return {
+        ...stage,
+        kind: ref.kind,
+        factor: ref.factor,
+        label: ref.label,
+        druck: ref.druck || ''
+      };
+    });
+  });
+}
 function getInitialState(){
   return {
     activeTest:'eignung',
@@ -868,7 +926,7 @@ let _alarmGain = null;
 let _alarmReady = false;
 let _floatingRaf = null;
 let _timeAdjustCtx = null;
-
+const paneUiState = {};
 /* =========================================================
    BASIC MODEL HELPERS
 ========================================================= */
@@ -1537,7 +1595,66 @@ function renderSpecSection(testKey){
     </details>
   `;
 }
+function renderStagePlanSection(testKey){
+  const test = getTest(testKey);
+  ensureStageCatalog(testKey);
 
+  const kalib = findKalibById(state.meta.selectedKalibId);
+  const rows = test.stageCatalog.map((stage, idx) => {
+    const kn = calcStageLoad(stage, testKey);
+    const autoDruck = kalib ? lookupStuetzpunkt(kn, kalib.punkte).bar : null;
+    const druck = autoDruck != null ? autoDruck : stage.druck;
+
+    return `
+      <tr>
+        <td>${h(stage.label)}</td>
+        <td>
+          ${stage.kind === 'factor'
+            ? `<input class="mess-input" data-role="catalog-factor" data-test="${testKey}" data-idx="${idx}" type="number" step="0.05" value="${h(stage.factor)}">`
+            : `<input class="mess-input mess-input--auto" type="text" value="${h(stage.kind === 'pa' ? 'Pa' : 'P0')}" readonly>`
+          }
+        </td>
+        <td><input class="mess-input mess-input--auto" type="text" value="${Number.isFinite(kn) ? fmt(kn,1) : '—'}" readonly></td>
+        <td>
+          <input
+            class="mess-input ${autoDruck != null ? 'mess-input--auto' : ''}"
+            data-role="catalog-druck"
+            data-test="${testKey}"
+            data-idx="${idx}"
+            type="number"
+            step="0.1"
+            value="${h(druck ?? '')}"
+            ${autoDruck != null ? 'readonly' : ''}
+          >
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  return `
+    <details class="card card--collapsible" open>
+      <summary class="card__title">Vorgabe Laststufen</summary>
+      <div class="card__body">
+        <div class="table-wrap">
+          <table class="mess-table">
+            <thead>
+              <tr>
+                <th>Stufe</th>
+                <th>Faktor / Art</th>
+                <th>Last [kN]</th>
+                <th>Druck [bar]</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <div class="hint" style="text-align:left;margin-top:8px">
+          Diese Tabelle definiert die Laststufen zentral. Die Zyklen referenzieren diese Vorgaben.
+        </div>
+      </div>
+    </details>
+  `;
+}
 /* =========================================================
    PHOTO RENDERING
 ========================================================= */
@@ -1594,14 +1711,6 @@ function buildTimerBox(testKey, cycle){
         >${cycle ? formatElapsed(cycle.elapsedMs || 0) : '00:00'}</div>
 
         <span class="timer-edit-hint">tippen = anpassen</span>
-
-        <label class="field" style="min-width:170px">
-          <span class="field__label">Modus</span>
-          <select class="field__select" data-role="test-mode" data-test="${testKey}">
-            <option value="norm" ${getTest(testKey).mode === 'norm' ? 'selected' : ''}>Norm / Vorlage</option>
-            <option value="frei" ${getTest(testKey).mode === 'frei' ? 'selected' : ''}>Freie Eingabe</option>
-          </select>
-        </label>
 
         <label class="field" style="min-width:170px; margin-left:auto">
           <span class="field__label">${testKey === 'eignung' ? 'Aktiver Zyklus' : 'Aktiver Abschnitt'}</span>
@@ -1842,9 +1951,7 @@ function renderCycleCard(cycle, testKey){
         </div>
       ` : ''}
 
-      <div class="zyklus-load-row">
-        ${cycle.stageDefs.map((s, i) => renderStageEditor(s, i, testKey, cycle)).join('')}
-      </div>
+  
 
       <div class="table-wrap">
         <table class="mess-table">
@@ -1877,21 +1984,37 @@ function renderTestPane(testKey){
 
   const activeCycle = getActiveCycle(testKey);
 
+  const prevDetails = qsa('details.card--collapsible', host).map(d => d.open);
+  const prevScrollY = window.scrollY;
+
+  let focusSelector = null;
+  const activeEl = document.activeElement;
+  if(activeEl && host.contains(activeEl) && activeEl.dataset?.role){
+    const parts = [`[data-role="${activeEl.dataset.role}"]`];
+    if(activeEl.dataset.test)  parts.push(`[data-test="${activeEl.dataset.test}"]`);
+    if(activeEl.dataset.cycle) parts.push(`[data-cycle="${activeEl.dataset.cycle}"]`);
+    if(activeEl.dataset.stage) parts.push(`[data-stage="${activeEl.dataset.stage}"]`);
+    if(activeEl.dataset.row)   parts.push(`[data-row="${activeEl.dataset.row}"]`);
+    focusSelector = parts.join('');
+  }
+
+  paneUiState[testKey] = {
+    prevDetails,
+    prevScrollY,
+    focusSelector
+  };
+
   host.innerHTML = `
     ${renderMetaSection(testKey)}
     ${renderPressSection(testKey)}
     ${renderSpecSection(testKey)}
+    ${renderStagePlanSection(testKey)}
 
     <details class="card card--collapsible" open>
       <summary class="card__title">Lastzyklen ${h(TEST_LABELS[testKey])}</summary>
       <div class="card__body">
         ${buildTimerBox(testKey, activeCycle)}
         ${getTest(testKey).cycles.map(c => renderCycleCard(c, testKey)).join('')}
-
-        <div class="plus-wrap">
-          <button class="btn-plus" data-role="add-cycle" data-test="${testKey}" type="button">+</button>
-          <div class="plus-label">Abschnitt hinzufügen (nur freie Eingabe)</div>
-        </div>
       </div>
     </details>
 
@@ -1909,16 +2032,29 @@ function renderTestPane(testKey){
       <div class="hint">Speichern im Verlauf · PDF im Browser öffnen</div>
     </section>
   `;
-}
 
-function renderAllTests(){
-  TEST_KEYS.forEach(renderTestPane);
-  renderPresseDropdown();
-  renderKalibInfo();
-  renderKalibPreview();
-  updateRequiredFieldStates();
-}
+  const ui = paneUiState[testKey];
 
+  qsa('details.card--collapsible', host).forEach((d, i) => {
+    if(ui?.prevDetails?.[i] === false){
+      d.open = false;
+    }
+  });
+
+  if(getActiveTestKey() === testKey){
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: ui?.prevScrollY ?? 0, left:0, behavior:'auto' });
+
+      if(ui?.focusSelector){
+        const target = qs(ui.focusSelector, host);
+        if(target){
+          target.focus({ preventScroll:true });
+          target.select?.();
+        }
+      }
+    });
+  }
+}
 /* =========================================================
    AUSWERTUNG
 ========================================================= */
@@ -3633,7 +3769,9 @@ function updateCycleComputedUi(testKey, cycleId){
 
 function refreshTestAfterChange(testKey, { renderAll=false } = {}){
   ensureActiveCycle(testKey);
+  ensureStageCatalog(testKey);
   recomputePp(testKey);
+  syncCyclesFromStageCatalog(testKey);
   recalcAllDisplacements(testKey);
 
   if(findKalibById(state.meta.selectedKalibId)){
@@ -3653,7 +3791,6 @@ function refreshTestAfterChange(testKey, { renderAll=false } = {}){
   renderAuswertung();
   saveDraftDebounced();
 }
-
 async function applyPhotoInput(testKey, kind, file){
   if(!file) return;
   const dataUrl = await fileToDataUrl(file);
@@ -4199,7 +4336,32 @@ document.addEventListener('change', async e => {
     saveDraftDebounced();
     return;
   }
+if(role === 'catalog-factor'){
+  const test = getTest(testKey);
+  const idx = Number(el.dataset.idx);
+  const factor = Number(el.value);
 
+  if(test.stageCatalog[idx] && Number.isFinite(factor)){
+    test.stageCatalog[idx].factor = factor;
+    test.stageCatalog[idx].label = Math.abs(factor - 1) < 1e-9 ? 'Pp' : `${formatInputNumber(factor,2).replace('.',',')}*Pp`;
+    refreshTestAfterChange(testKey);
+  }
+  return;
+}
+
+if(role === 'catalog-druck'){
+  const test = getTest(testKey);
+  const idx = Number(el.dataset.idx);
+
+  if(test.stageCatalog[idx]){
+    test.stageCatalog[idx].druck = el.value || '';
+    syncCyclesFromStageCatalog(testKey);
+    renderTestPane(testKey);
+    renderAuswertung();
+    saveDraftDebounced();
+  }
+  return;
+}
   if(role === 'typeKey'){
     applyTypePreset(testKey, el.value);
     return;
@@ -4630,7 +4792,14 @@ function initApp(){
 
   applyLayoutMode();
   applyThemeMode();
-
+if(window.matchMedia){
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  mq.addEventListener?.('change', () => {
+    if((state.settings.themeMode || 'light') === 'auto'){
+      applyThemeMode();
+    }
+  });
+}
   if($('settings-alarmDuration')){
     $('settings-alarmDuration').value = String(
       clamp(Number(state.settings.alarmDurationSec || 4), 1, 30)
