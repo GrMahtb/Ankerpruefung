@@ -17,25 +17,8 @@
   <script defer src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 
   <style>
-    .test-switcher{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      margin-top:8px;
-    }
-
-    .test-switcher .btn.is-active{
-      background:#0d2f4f;
-      color:#fff;
-      border-color:#0d2f4f;
-    }
-
     .test-pane[hidden]{
       display:none !important;
-    }
-
-    .test-pane{
-      margin-top:12px;
     }
   </style>
 </head>
@@ -88,70 +71,78 @@
     </div>
   </header>
 
- <nav class="tabs" role="tablist" aria-label="Menü">
-  <!-- Prüfarten als Haupt-Tabs -->
-  <button class="tab is-active" data-test-tab="eignung" type="button">
-    Eignungsprüfung
-  </button>
-  <button class="tab" data-test-tab="auszieh" type="button">
-    Ausziehversuch
-  </button>
-  <button class="tab" data-test-tab="abnahme" type="button">
-    Abnahmeprüfung
-  </button>
+  <nav class="tabs" role="tablist" aria-label="Menü">
+    <!-- Prüfarten als Haupttabs -->
+    <button class="tab is-active" data-test-tab="eignung" type="button">
+      Eignungsprüfung
+    </button>
+    <button class="tab" data-test-tab="auszieh" type="button">
+      Ausziehversuch
+    </button>
+    <button class="tab" data-test-tab="abnahme" type="button">
+      Abnahmeprüfung
+    </button>
 
-  <!-- System-Tabs -->
-  <button class="tab" data-tab="auswertung" type="button">Auswertung</button>
-  <button class="tab" data-tab="verlauf" type="button">Verlauf</button>
-  <button class="tab tab--icon" data-tab="settings" type="button" aria-label="Einstellungen">
-    <!-- dein SVG bleibt unverändert -->
-    …
-  </button>
-</nav>
-  <!-- ========== FORMULAR ========== -->
-  <main id="tab-formular" class="pane is-active" role="tabpanel">
+    <!-- Systemtabs -->
+    <button class="tab" data-tab="auswertung" type="button">Auswertung</button>
+    <button class="tab" data-tab="verlauf" type="button">Verlauf</button>
+    <button class="tab tab--icon" data-tab="settings" type="button" aria-label="Einstellungen">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"
+          stroke="currentColor" stroke-width="2"/>
+      </svg>
+    </button>
+  </nav>
 
+  <!-- ========== EIGNUNGSPRÜFUNG ========== -->
+  <main id="tab-eignung" class="pane is-active" role="tabpanel">
     <section class="card">
-      <div class="card__title">Prüfart</div>
-
-      <div class="test-switcher" role="tablist" aria-label="Prüfarten">
-        <button class="btn btn--ghost btn--small is-active" data-set-active-test="eignung" type="button">
-          Eignungsprüfung
-        </button>
-        <button class="btn btn--ghost btn--small" data-set-active-test="auszieh" type="button">
-          Ausziehversuch
-        </button>
-        <button class="btn btn--ghost btn--small" data-set-active-test="abnahme" type="button">
-          Abnahmeprüfung
-        </button>
-      </div>
-
+      <div class="card__title">Eignungsprüfung</div>
       <div class="hint" style="text-align:left; margin-top:8px;">
-        Die aktive Prüfart wird als eigener Formular-Tab dargestellt.
+        Stammdaten, Presse, Vorgaben, Lastzyklen und Fotos werden direkt für diese Prüfart geladen.
       </div>
     </section>
 
-    <section id="test-pane-eignung" class="test-pane" data-test-pane="eignung">
+    <section class="test-pane">
       <div id="content-eignung"></div>
     </section>
+  </main>
 
-    <section id="test-pane-auszieh" class="test-pane" data-test-pane="auszieh" hidden>
+  <!-- ========== AUSZIEHVERSUCH ========== -->
+  <main id="tab-auszieh" class="pane" role="tabpanel" hidden>
+    <section class="card">
+      <div class="card__title">Ausziehversuch</div>
+      <div class="hint" style="text-align:left; margin-top:8px;">
+        Stammdaten, Presse, Vorgaben, Lastzyklen und Fotos werden direkt für diese Prüfart geladen.
+      </div>
+    </section>
+
+    <section class="test-pane">
       <div id="content-auszieh"></div>
     </section>
+  </main>
 
-    <section id="test-pane-abnahme" class="test-pane" data-test-pane="abnahme" hidden>
-      <div id="content-abnahme"></div>
+  <!-- ========== ABNAHMEPRÜFUNG ========== -->
+  <main id="tab-abnahme" class="pane" role="tabpanel" hidden>
+    <section class="card">
+      <div class="card__title">Abnahmeprüfung</div>
+      <div class="hint" style="text-align:left; margin-top:8px;">
+        Stammdaten, Presse, Vorgaben, Lastzyklen und Fotos werden direkt für diese Prüfart geladen.
+      </div>
     </section>
 
+    <section class="test-pane">
+      <div id="content-abnahme"></div>
+    </section>
   </main>
 
   <!-- ========== AUSWERTUNG ========== -->
   <main id="tab-auswertung" class="pane" role="tabpanel" hidden>
-
     <section class="card">
       <div class="card__title">Auswertung</div>
 
-      <div class="test-switcher" role="tablist" aria-label="Auswertungs-Prüfarten" style="margin-bottom:12px;">
+      <div class="action-row" style="justify-content:flex-start; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
         <button class="btn btn--ghost btn--small is-active" data-set-eval-test="eignung" type="button">
           Eignungsprüfung
         </button>
@@ -165,7 +156,6 @@
 
       <div id="auswertungContainer"></div>
     </section>
-
   </main>
 
   <!-- ========== VERLAUF ========== -->
@@ -184,72 +174,72 @@
   </main>
 
   <!-- ========== SETTINGS ========== -->
- <main id="tab-settings" class="pane" role="tabpanel" hidden>
-  <section class="card">
-    <div class="card__title">Einstellungen</div>
+  <main id="tab-settings" class="pane" role="tabpanel" hidden>
+    <section class="card">
+      <div class="card__title">Einstellungen</div>
 
-    <div class="settings-group">
-      <div class="settings-group__title">Darstellung</div>
+      <div class="settings-group">
+        <div class="settings-group__title">Darstellung</div>
 
-      <label class="field" style="margin-top:10px">
-        <span class="field__label">Layout-Modus</span>
-        <select id="settings-layoutMode" class="field__select">
-          <option value="auto">Automatisch</option>
-          <option value="tablet">Tablet</option>
-          <option value="desktop">Desktop</option>
-        </select>
-      </label>
+        <label class="field" style="margin-top:10px">
+          <span class="field__label">Layout-Modus</span>
+          <select id="settings-layoutMode" class="field__select">
+            <option value="auto">Automatisch</option>
+            <option value="tablet">Tablet</option>
+            <option value="desktop">Desktop</option>
+          </select>
+        </label>
 
-      <div class="hint" style="text-align:left; margin-top:8px;">
-        Automatisch richtet sich nach der Bildschirmbreite.
-      </div>
-    </div>
-
-    <div class="settings-group">
-      <div class="settings-group__title">Alarm</div>
-
-      <div class="action-row" style="justify-content:flex-start; margin-top:6px;">
-        <button id="btnAlarmSoundToggle" class="btn btn--ghost btn--small" type="button">Ton einschalten</button>
+        <div class="hint" style="text-align:left; margin-top:8px;">
+          Automatisch richtet sich nach der Bildschirmbreite.
+        </div>
       </div>
 
-      <label class="field" style="margin-top:10px">
-        <span class="field__label">Alarmdauer [Sekunden]</span>
-        <input id="settings-alarmDuration" class="field__input" type="number" min="1" max="30" step="1" value="4" />
-      </label>
+      <div class="settings-group">
+        <div class="settings-group__title">Alarm</div>
 
-      <div id="alarmSoundStatus" class="hint" style="text-align:left; margin-top:8px;">
-        Für iPhone: Ton einmal hier aktivieren oder vor dem Start testen.
-      </div>
-    </div>
+        <div class="action-row" style="justify-content:flex-start; margin-top:6px;">
+          <button id="btnAlarmSoundToggle" class="btn btn--ghost btn--small" type="button">Ton einschalten</button>
+        </div>
 
-    <div class="settings-group">
-      <div class="settings-group__title">Vorlage Export / Import</div>
-      <div class="action-row" style="justify-content:flex-start;gap:10px;flex-wrap:wrap">
-        <button id="btnExportTemplate" class="btn btn--ghost btn--small" type="button">📤 Vorlage exportieren</button>
-        <button id="btnImportTemplate" class="btn btn--ghost btn--small" type="button">📥 Vorlage importieren</button>
-        <input id="importTemplateGlobalInput" type="file" accept=".json,.htbanker.json,application/json" style="display:none" />
-      </div>
-      <div class="hint" style="text-align:left; margin-top:8px;">
-        Bezieht sich auf die aktuell gewählte Prüfart im Formular.
-      </div>
-    </div>
+        <label class="field" style="margin-top:10px">
+          <span class="field__label">Alarmdauer [Sekunden]</span>
+          <input id="settings-alarmDuration" class="field__input" type="number" min="1" max="30" step="1" value="4" />
+        </label>
 
-    <div class="settings-group">
-      <div class="settings-group__title">Vollständiger Export / Import</div>
-      <div class="action-row" style="justify-content:flex-start;gap:10px;flex-wrap:wrap">
-        <button id="btnExportFull" class="btn btn--ghost btn--small" type="button">📦 Export</button>
-        <button id="btnImportFull" class="btn btn--ghost btn--small" type="button">📦 Import</button>
-        <input id="importFullGlobalInput" type="file" accept=".json,application/json" style="display:none" />
+        <div id="alarmSoundStatus" class="hint" style="text-align:left; margin-top:8px;">
+          Für iPhone: Ton einmal hier aktivieren oder vor dem Start testen.
+        </div>
       </div>
-    </div>
-  </section>
 
-  <section class="card card--actions card--actions-bottom">
-    <div class="action-row">
-      <button id="btnSaveSettings" class="btn btn--save btn--small" type="button">Speichern</button>
-    </div>
-  </section>
-</main>
+      <div class="settings-group">
+        <div class="settings-group__title">Vorlage Export / Import</div>
+        <div class="action-row" style="justify-content:flex-start;gap:10px;flex-wrap:wrap">
+          <button id="btnExportTemplate" class="btn btn--ghost btn--small" type="button">📤 Vorlage exportieren</button>
+          <button id="btnImportTemplate" class="btn btn--ghost btn--small" type="button">📥 Vorlage importieren</button>
+          <input id="importTemplateGlobalInput" type="file" accept=".json,.htbanker.json,application/json" style="display:none" />
+        </div>
+        <div class="hint" style="text-align:left; margin-top:8px;">
+          Bezieht sich auf die aktuell geöffnete Prüfart.
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-group__title">Vollständiger Export / Import</div>
+        <div class="action-row" style="justify-content:flex-start;gap:10px;flex-wrap:wrap">
+          <button id="btnExportFull" class="btn btn--ghost btn--small" type="button">📦 Export</button>
+          <button id="btnImportFull" class="btn btn--ghost btn--small" type="button">📦 Import</button>
+          <input id="importFullGlobalInput" type="file" accept=".json,application/json" style="display:none" />
+        </div>
+      </div>
+    </section>
+
+    <section class="card card--actions card--actions-bottom">
+      <div class="action-row">
+        <button id="btnSaveSettings" class="btn btn--save btn--small" type="button">Speichern</button>
+      </div>
+    </section>
+  </main>
 
   <footer class="footer">
     &copy; <b>HTB Baugesellschaft m.b.H.</b> – Ankerprüfung PWA
