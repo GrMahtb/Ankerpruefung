@@ -1554,3 +1554,42 @@ body[data-theme="light"] .stuetz-bar,
 body[data-theme="light"] .historyItem__chevron{
   color:#111827 !important;
 }
+/* =========================================================
+   PATCH A – Pflicht / Berechnet / Kontrast
+========================================================= */
+
+.field__input--required,
+.field__select--required,
+.field__textarea--required{
+  background:rgba(239,68,68,.08) !important;
+  border:1px solid rgba(239,68,68,.55) !important;
+  color:inherit !important;
+}
+
+.field__input--computed{
+  background:rgba(34,197,94,.08) !important;
+  border:1px solid rgba(34,197,94,.55) !important;
+  color:#15803d !important;
+  font-weight:800 !important;
+}
+
+body[data-theme="dark"] .field__input--computed{
+  color:#4ade80 !important;
+}
+
+.select-card,
+.select-card span,
+.select-card b,
+.select-card small{
+  color:var(--app-text) !important;
+}
+
+body[data-theme="light"] .select-card{
+  background:#ffffff !important;
+  border-color:var(--app-border) !important;
+}
+
+body[data-theme="light"] .select-card:has(input:checked){
+  background:#eef2f6 !important;
+  border-color:#111827 !important;
+}
