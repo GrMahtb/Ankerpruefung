@@ -518,12 +518,12 @@ function ensureDynamicStyles(){
   style.textContent = `
     html{
       -webkit-text-size-adjust:100%;
-      background:var(--app-html-bg, #f3f4f6) !important;
+      background:var(--app-html-bg,#eef2f6) !important;
     }
 
     body{
-      background:var(--app-page-bg, #f3f4f6) !important;
-      color:var(--app-text, #111827) !important;
+      background:var(--app-page-bg,#eef2f6) !important;
+      color:var(--app-text,#111827) !important;
     }
 
     .brand,
@@ -531,7 +531,7 @@ function ensureDynamicStyles(){
     .tabs,
     .pane{
       background:transparent !important;
-      color:var(--app-text, #111827) !important;
+      color:var(--app-text,#111827) !important;
       box-shadow:none !important;
     }
 
@@ -545,10 +545,25 @@ function ensureDynamicStyles(){
     .table-wrap,
     .info-box,
     .kalib-preview{
-      background:var(--app-surface, #ffffff) !important;
-      color:var(--app-text, #111827) !important;
-      border-color:var(--app-border, #d4d9e1) !important;
+      background:var(--app-surface,#ffffff) !important;
+      color:var(--app-text,#111827) !important;
+      border-color:var(--app-border,#d6dde6) !important;
       box-shadow:0 1px 3px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.04) !important;
+    }
+
+    .brand__company,
+    .card__title,
+    .auswertung-block__title,
+    .settings-group__title,
+    .kalib-preview__title,
+    .kpi__value,
+    .auto-card__value,
+    .kalib-info__name,
+    .kalib-info__val,
+    .historyItem__title,
+    .modal-title,
+    .zyklus-title{
+      color:var(--app-heading,#111827) !important;
     }
 
     .brand__subtitle,
@@ -556,23 +571,25 @@ function ensureDynamicStyles(){
     .field__hint,
     .timer-edit-hint,
     .kalib-info__sub,
-    .field__label{
-      color:var(--app-muted, #6b7280) !important;
+    .field__label,
+    .kpi__label,
+    .auto-card__label{
+      color:var(--app-muted,#6b7280) !important;
     }
 
     .tab,
     .btn,
     .timer-btn,
     .btn-plus{
-      border-color:var(--app-border, #d4d9e1) !important;
+      border-color:var(--app-border,#d6dde6) !important;
     }
 
     .tab.is-active,
     .btn--save,
     .btn-plus{
-      background:var(--app-accent, #64748b) !important;
+      background:var(--app-accent,#334155) !important;
       color:#fff !important;
-      border-color:var(--app-accent, #64748b) !important;
+      border-color:var(--app-accent,#334155) !important;
     }
 
     .timer-btn--start{
@@ -590,9 +607,9 @@ function ensureDynamicStyles(){
     .btn--ghost,
     .timer-btn--ghost,
     .btn--danger{
-      background:var(--app-ghost-bg, #f8fafc) !important;
-      color:var(--app-text, #111827) !important;
-      border-color:var(--app-border, #d4d9e1) !important;
+      background:var(--app-ghost-bg,#f8fafc) !important;
+      color:var(--app-text,#111827) !important;
+      border-color:var(--app-border,#d6dde6) !important;
     }
 
     .field__input,
@@ -601,43 +618,43 @@ function ensureDynamicStyles(){
     .mess-input,
     .modal-input{
       font-size:16px !important;
-      background:var(--app-input-bg, #ffffff) !important;
-      color:var(--app-input-text, #111827) !important;
-      border-color:var(--app-border, #d4d9e1) !important;
+      background:var(--app-input-bg,#ffffff) !important;
+      color:var(--app-input-text,#111827) !important;
+      border-color:var(--app-border,#d6dde6) !important;
     }
 
     .field__select option{
-      background:var(--app-input-bg, #ffffff) !important;
-      color:var(--app-input-text, #111827) !important;
+      background:var(--app-input-bg,#ffffff) !important;
+      color:var(--app-input-text,#111827) !important;
     }
 
     .field__input::placeholder{
-      color:var(--app-muted, #9ca3af) !important;
+      color:var(--app-muted,#9ca3af) !important;
     }
 
     .field__input--computed{
-      color:var(--app-accent-strong, #0d2f4f) !important;
+      color:var(--app-accent-strong,#111827) !important;
       font-weight:800 !important;
     }
 
     .row-active td{
-      background:var(--app-row-active, rgba(15,23,42,.06)) !important;
+      background:var(--app-row-active,rgba(15,23,42,.05)) !important;
     }
 
     .row-active .mess-stage-pill{
-      background:var(--app-stage-pill, rgba(100,116,139,.12)) !important;
-      box-shadow: 0 0 0 1px var(--app-border, #d4d9e1) inset;
+      background:var(--app-stage-pill,rgba(100,116,139,.10)) !important;
+      box-shadow:0 0 0 1px var(--app-border,#d6dde6) inset;
     }
 
     .current-measurement{
-      border:2px solid var(--app-focus, #0d2f4f) !important;
-      box-shadow:0 0 0 3px var(--app-current-ring, rgba(13,47,79,.18)) !important;
-      background:var(--app-current-bg, rgba(13,47,79,.06)) !important;
+      border:2px solid var(--app-focus,#111827) !important;
+      box-shadow:0 0 0 3px var(--app-current-ring,rgba(17,24,39,.16)) !important;
+      background:var(--app-current-bg,rgba(17,24,39,.05)) !important;
       animation:currentFieldPulse 1.2s ease-in-out infinite;
     }
 
     @keyframes currentFieldPulse{
-      0%   { box-shadow:0 0 0 0 var(--app-current-ring, rgba(13,47,79,.20)); }
+      0%   { box-shadow:0 0 0 0 var(--app-current-ring, rgba(17,24,39,.16)); }
       70%  { box-shadow:0 0 0 6px rgba(0,0,0,0); }
       100% { box-shadow:0 0 0 0 rgba(0,0,0,0); }
     }
@@ -948,7 +965,8 @@ function getInitialState(){
    settings:{
 alarmDurationSec:4,
 alarmSoundEnabled:true,
-layoutMode:'auto'
+layoutMode:'auto',
+themeMode:'light'
 },
     meta: makeGlobalMeta(),
     tests:{
@@ -4286,6 +4304,20 @@ function applyLayoutMode(){
   document.body.dataset.layoutMode = resolved;
   document.documentElement.dataset.layoutMode = resolved;
 }
+function getResolvedThemeMode(){
+  const pref = state.settings?.themeMode || 'light';
+
+  if(pref === 'light') return 'light';
+  if(pref === 'dark') return 'dark';
+
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyThemeMode(){
+  const resolved = getResolvedThemeMode();
+  document.body.dataset.theme = resolved;
+  document.documentElement.dataset.theme = resolved;
+}
 /* ---------------- delegated ui without data-role ---------------- */
 document.addEventListener('click', async e => {
   const activeBtn = e.target.closest('[data-set-active-test]');
@@ -4393,14 +4425,21 @@ function bindStaticUi(){
     applyLayoutMode();
     saveDraftDebounced();
   });
+$('settings-themeMode')?.addEventListener('change', e => {
+  state.settings.themeMode = e.target.value || 'light';
+  applyThemeMode();
+  saveDraftDebounced();
+});
+ $('btnSaveSettings')?.addEventListener('click', () => {
+  state.settings.alarmDurationSec = clamp(Number($('settings-alarmDuration')?.value || 4), 1, 30);
+  state.settings.layoutMode = $('settings-layoutMode')?.value || state.settings.layoutMode || 'auto';
+  state.settings.themeMode = $('settings-themeMode')?.value || state.settings.themeMode || 'light';
 
-  $('btnSaveSettings')?.addEventListener('click', () => {
-    state.settings.alarmDurationSec = clamp(Number($('settings-alarmDuration')?.value || 4), 1, 30);
-    state.settings.layoutMode = $('settings-layoutMode')?.value || state.settings.layoutMode || 'auto';
-    applyLayoutMode();
-    saveDraftDebounced();
-    alert('Einstellungen gespeichert.');
-  });
+  applyLayoutMode();
+  applyThemeMode();
+  saveDraftDebounced();
+  alert('Einstellungen gespeichert.');
+});
 
   $('btnExportTemplate')?.addEventListener('click', () => {
     const testKey = getActiveTestKey();
@@ -4568,11 +4607,16 @@ function initApp(){
   updateRequiredFieldStates();
   updateAllTimerUis();
   syncTestChoiceUi();
-  if($('settings-layoutMode')){
+if($('settings-layoutMode')){
   $('settings-layoutMode').value = state.settings.layoutMode || 'auto';
 }
 
+if($('settings-themeMode')){
+  $('settings-themeMode').value = state.settings.themeMode || 'light';
+}
+
 applyLayoutMode();
+applyThemeMode();
   if($('settings-alarmDuration')){
     $('settings-alarmDuration').value = String(
       clamp(Number(state.settings.alarmDurationSec || 4), 1, 30)
