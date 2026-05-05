@@ -4338,6 +4338,11 @@ function switchMainTab(name){
 
   syncTestChoiceUi();
 
+  if(isTestTab){
+    renderTestPane(state.activeTest);
+    updateTimerUi(state.activeTest);
+  }
+
   if(name === 'auswertung') renderAuswertung();
   if(name === 'verlauf') renderHistoryList();
 
