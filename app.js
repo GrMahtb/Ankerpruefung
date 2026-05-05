@@ -2513,7 +2513,7 @@ async function loadPdfAssetsAnker(pdf){
 
   let coverPhoto = null;
   try{
-    const b = await fetch(`${BASE_PATH}cover-photo.jpg?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
+    const b = await fetch(`${BASE_PATH}cover-photo.png?v=1`).then(r => r.ok ? r.arrayBuffer() : Promise.reject());
     coverPhoto = await pdf.embedJpg(b);
   }catch{
     try{
@@ -2836,7 +2836,7 @@ async function drawCoverPageAnker(pdf, ctx, testKey, snap){
       borderWidth: 0.8
     });
 
-    drawTextSafeAnker(page, 'cover-photo.jpg nicht gefunden.', {
+    drawTextSafeAnker(page, 'cover-photo.png nicht gefunden.', {
       x: rightX + mm(8),
       y: footerH + mm(40),
       size: 10,
