@@ -1,7 +1,7 @@
 'use strict';
 
 const BASE  = '/Ankerpruefung/';
-const CACHE = 'htb-ankerpruefung-v13';
+const CACHE = 'htb-ankerpruefung-v15';
 
 // Alle Assets die offline verfügbar sein sollen
 const ASSETS = [
